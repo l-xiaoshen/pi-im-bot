@@ -4,19 +4,18 @@
 
 ## 文档导航
 
-| 主题 | 文档 |
-| --- | --- |
-| 包布局、manifest、配置与服务绑定 | [包与配置](package-and-config.md) |
-| 工具、指令和参数解析 | [触发与路由](triggers-and-routing.md) |
-| Bot RPC、授权与产物 | [Bot 能力](bot-capabilities.md) |
-| 核心 Hook、自定义 point 和插件协作 | [Hook 与编排](hooks-and-composition.md) |
-| 后台任务、恢复、数据与取消 | [异步与数据](async-and-data.md) |
-| 构建、安装和发布 | [开发与分发](development-and-distribution.md) |
-| AstrBot Python 插件迁移 | [迁移指南](migration.md) |
-| 异步媒体呈现 | [受管呈现](managed-presentation.md) |
-| GSVI 与入站媒体 | [具名语音与媒体](managed-media-and-speech.md) |
-| GSVI 配置字段 | [GSVI 配置](gsvi-native-configuration.md) |
-| ComfyUI 服务与恢复 | [ComfyUI](managed-comfy.md) |
+| 主题                               | 文档                                          |
+| ---------------------------------- | --------------------------------------------- |
+| 包布局、manifest、配置与服务绑定   | [包与配置](package-and-config.md)             |
+| 工具、指令和参数解析               | [触发与路由](triggers-and-routing.md)         |
+| Bot RPC、授权与产物                | [Bot 能力](bot-capabilities.md)               |
+| 核心 Hook、自定义 point 和插件协作 | [Hook 与编排](hooks-and-composition.md)       |
+| 后台任务、恢复、数据与取消         | [异步与数据](async-and-data.md)               |
+| 构建、安装和发布                   | [开发与分发](development-and-distribution.md) |
+| 异步媒体呈现                       | [受管呈现](managed-presentation.md)           |
+| GSVI 与入站媒体                    | [具名语音与媒体](managed-media-and-speech.md) |
+| GSVI 配置字段                      | [GSVI 配置](gsvi-native-configuration.md)     |
+| ComfyUI 服务与恢复                 | [ComfyUI](managed-comfy.md)                   |
 
 框架源码中的公共 SDK、manifest schema、Host RPC 和 hook point 定义是接口依据。插件摘要与文档快照由开发工作区维护。
 
@@ -27,8 +26,8 @@ Pi 负责模型循环和会话，Bot 负责可信身份、资源、权限、任�
 插件默认导出 `operations`、`hooks`、`parsers` 字典：
 
 ```ts
-import { definePlugin, textResult } from '@pi-im-bot/plugin-sdk'
-import { z } from 'zod'
+import { definePlugin, textResult } from "@pi-im-bot/plugin-sdk"
+import { z } from "zod"
 
 const InputSchema = z.object({ text: z.string() }).strict()
 

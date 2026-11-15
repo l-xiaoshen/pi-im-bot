@@ -1,5 +1,5 @@
 import { defineDoc, defineDocFamily } from "@earendil-works/pi-durable"
-import type { Job, JobSummary } from "./schema"
+import type { Job } from "./schema"
 
 export const Jobs = defineDocFamily<{ value: Job | null }, null>({
   kind: "bot.job",
@@ -7,17 +7,6 @@ export const Jobs = defineDocFamily<{ value: Job | null }, null>({
   scope: "session",
   family: true,
   initial: () => ({ value: null }),
-  checkpointWhen: () => false
-})
-export const JobIndex = defineDoc<{
-  jobs: Record<string, JobSummary>
-  requests: Record<string, string>
-  admissions: Record<string, number>
-}>({
-  kind: "bot.job-index",
-  version: 1,
-  scope: "session",
-  initial: () => ({ jobs: {}, requests: {}, admissions: {} }),
   checkpointWhen: () => false
 })
 export const JobFacts = defineDoc<{

@@ -22,8 +22,6 @@ import type { ManagePluginSchema } from "./contracts"
 import {
   gsviBusinessValues,
   gsviCoreFields,
-  migrateGsviFlat,
-  restoreGsviFlat,
   usesGsviConfiguration
 } from "@pi-im-bot/integrations/gsvi/plugin-config/definition"
 import { GsviConfigurationRefresh } from "@pi-im-bot/integrations/gsvi/plugin-config/refresh"
@@ -245,19 +243,7 @@ export class PluginEditor {
           instance.sourceDir = sourceDir
         }
         if (bundle.configuration) {
-          let values = instance.settings
-          if (usesGsviConfiguration(bundle)) {
-            values = migrateGsviFlat(values)
-          } else if (
-            previous &&
-            usesGsviConfiguration(previous) &&
-            bundle.configuration.voice &&
-            bundle.configuration.max_chars &&
-            bundle.configuration.probability
-          ) {
-            values = restoreGsviFlat(values)
-          }
-          instance.settings = gsviBusinessValues(bundle, fillConfigDefaults(bundle.configuration, values))
+          instance.settings = gsviBusinessValues(bundle, fillConfigDefaults(bundle.configuration, instance.settings))
           if (usesGsviConfiguration(bundle)) {
             saveGsviPage(config, instance, bundle, gsviPageValues(config, instance, bundle))
           }

@@ -1,7 +1,7 @@
 import { z } from "zod"
 
 export const TriggerIdentitySchema = z.object({
-  origin: z.enum(["platform", "local", "mock", "legacy"]),
+  origin: z.enum(["platform", "local", "mock"]),
   actorId: z.string(),
   actorName: z.string(),
   channel: z.string(),

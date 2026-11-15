@@ -96,7 +96,7 @@ export async function gsviRequest(
     }
     if ([301, 302, 303, 307, 308].includes(response.status)) {
       await response.body?.cancel()
-      // Legacy services retain their conservative protocol. Native projection follows
+      // Conservative services retain their protocol. Native projection follows
       // explicit HTTP redirects like the source, never retries an unknown response.
       if (currentPayload && !service.sourceCompatibleDownloads) {
         throw new GsviHttpError("remote_unknown")

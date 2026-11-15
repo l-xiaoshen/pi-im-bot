@@ -8,7 +8,6 @@ export const JobHistoryHead = defineDocFamily<
     page: number
     size: number
     latest?: number | null
-    linked?: boolean
   },
   null
 >({
@@ -16,7 +15,7 @@ export const JobHistoryHead = defineDocFamily<
   version: 1,
   scope: "session",
   family: true,
-  initial: () => ({ page: 0, size: 0, latest: null, linked: true }),
+  initial: () => ({ page: 0, size: 0, latest: null }),
   checkpointWhen: () => true
 })
 export const JobHistoryPage = defineDocFamily<
@@ -44,31 +43,6 @@ export function historyPageKey(scope: string, page: number) {
   return JSON.stringify([scope, page])
 }
 
-/** Old page projections gain links once; subsequent operations touch only a page and its neighbors. */
-export async function linkedHistory(tx: Tx, scope: string) {
-  const head = await tx.doc(JobHistoryHead, scope, null)
-  if (head.linked) {
-    return head
-  }
-  let previous: number | null = null
-  for (let number = 0; number <= head.page; number += 1) {
-    const page = await tx.doc(JobHistoryPage, historyPageKey(scope, number), null)
-    page.previous = previous
-    page.next = null
-    if (Object.keys(page.jobs).length === 0) {
-      continue
-    }
-    if (previous !== null) {
-      const prior = await tx.doc(JobHistoryPage, historyPageKey(scope, previous), null)
-      prior.next = number
-    }
-    previous = number
-  }
-  head.latest = previous
-  head.linked = true
-  return head
-}
-
 export async function updateHistory(
   tx: Tx,
   scope: string,
@@ -76,7 +50,7 @@ export async function updateHistory(
   summary: JobSummary,
   active: boolean
 ) {
-  const head = await linkedHistory(tx, scope)
+  const head = await tx.doc(JobHistoryHead, scope, null)
   if (number !== null) {
     const page = await tx.doc(JobHistoryPage, historyPageKey(scope, number), null)
     if (active || page.jobs[summary.id]?.revision !== summary.revision) {

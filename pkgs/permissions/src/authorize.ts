@@ -24,9 +24,6 @@ function subjectMatches(subject: PermissionPolicy["rules"][number]["subjects"][n
 }
 
 export function isAllowed(settings: Settings, identity: TriggerIdentity, capability: string) {
-  if (identity.origin === "legacy") {
-    return false
-  }
   const selection = settings.resources.tools
   if (
     !capability.startsWith("command:") &&

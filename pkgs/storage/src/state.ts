@@ -5,7 +5,6 @@ import { ChatMessageSchema, RoomSchema, type ChatMessage, type Room } from "@pi-
 import { RunSchema, TraceSchema, type Run, type Trace } from "@pi-im-bot/contracts/run"
 import { ScheduleSchema, type Schedule } from "@pi-im-bot/scheduler/definition"
 import { ConversationSchema, type Conversation } from "@pi-im-bot/conversations/schema"
-import { migrateRoom } from "@pi-im-bot/conversations/migration"
 import { OutboundSchema, type Outbound } from "@pi-im-bot/contracts/delivery"
 import { deliveryMessage, mergeDeliveryEchoes } from "./delivery-merge"
 import { MediaRecordSchema, type MediaRecord } from "@pi-im-bot/media/schema"
@@ -60,7 +59,6 @@ export class StateStore {
     this.db.exec(`CREATE INDEX IF NOT EXISTS runs_recovery ON runs(at)
       WHERE json_extract(value, '$.status') IN ('batching','queued','running','interrupted')`)
     this.db.exec("DROP INDEX IF EXISTS runs_coding_pending")
-    const rows = this.db.query<{ value: string }, []>("SELECT value FROM rooms").all()
     this.db.exec(`CREATE INDEX IF NOT EXISTS messages_pending_inbound ON messages(at)
       WHERE json_extract(value, '$.inbound.state') IN ('pending','dispatching')`)
     this.db.exec(`CREATE INDEX IF NOT EXISTS messages_pending_room ON messages(room_id, at)
@@ -68,12 +66,6 @@ export class StateStore {
     this.db.exec(`CREATE INDEX IF NOT EXISTS outbound_pending_presentations ON outbound(room_id, at)
       WHERE json_extract(value, '$.render') IS NOT NULL
       AND json_extract(value, '$.state') IN ('rendering','prepared','sending')`)
-    for (const row of rows) {
-      const migrated = migrateRoom(JSON.parse(row.value))
-      if (migrated.conversation) {
-        this.saveConversationSelection(migrated.room, migrated.conversation)
-      }
-    }
     const uncertain = this.db
       .query<{ value: string }, []>(
         "SELECT value FROM outbound WHERE json_extract(value, '$.state') IN ('sending','preparing')"

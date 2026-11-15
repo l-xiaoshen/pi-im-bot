@@ -3,7 +3,7 @@ import type { Tx } from "@earendil-works/pi-durable"
 import type { DurableAgentRuntime } from "@pi-im-bot/agent/durable/runtime"
 import { Jobs } from "./documents"
 import { JobActivity, initializeJobIndex, indexJob, jobOutstanding } from "./index"
-import { JobHistoryPage, historyScope, historyPageKey, linkedHistory } from "./history"
+import { JobHistoryHead, JobHistoryPage, historyScope, historyPageKey } from "./history"
 import { JobSchema, JobSummarySchema, jobSummary, type Job, type JobRevision, type JobSummary } from "./schema"
 
 interface JobHistoryResult {
@@ -79,7 +79,7 @@ export class JobRepository {
     await this.initialize()
     const scope = historyScope(roomId)
     const latest = await this.runtime.native.commit(async (tx) => {
-      const head = await linkedHistory(tx, scope)
+      const head = await tx.doc(JobHistoryHead, scope, null)
       return head.latest ?? null
     }, BACKGROUND_CONTEXT)
     if (latest === null) {

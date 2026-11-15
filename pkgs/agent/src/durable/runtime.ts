@@ -28,7 +28,6 @@ import { projectInput } from "@pi-im-bot/messages/projection"
 import { runProvider } from "./model"
 import { durableTool, withDeferred } from "./tool-bridge"
 import { ConversationBinding } from "./documents"
-import { migrateConversationIndex } from "./conversation-index"
 import type { DurableBinding } from "./binding"
 import { ModelLimits } from "@pi-im-bot/runtime/model-limits"
 import { JobFacts } from "@pi-im-bot/jobs/documents"
@@ -42,7 +41,6 @@ export class DurableAgentRuntime {
   private closing = false
   private readonly bindings = new Map<string, DurableBinding>()
   private readonly running = new Map<string, Promise<string>>()
-  private conversationIndexReady?: Promise<void>
   private readonly modelLimits: ModelLimits
 
   constructor(
@@ -387,11 +385,6 @@ export class DurableAgentRuntime {
 
   async ensureConversation(room: Room, input: PreparedRunInput): Promise<ConversationId> {
     const key = room.id + ":" + input.context.conversationId + ":" + room.mode
-    this.conversationIndexReady ??= this.native.commit(migrateConversationIndex, context).catch((error) => {
-      this.conversationIndexReady = undefined
-      throw error
-    })
-    await this.conversationIndexReady
     const binding = await this.native.snapshot(ConversationBinding, key, context)
     const existing = binding?.conversationId
     if (existing !== undefined && existing !== null) {

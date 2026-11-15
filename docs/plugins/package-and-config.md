@@ -61,7 +61,7 @@ assets/                     WASM、字体等声明资源
 `execution` 为 `foreground` 或 `background`，后台操作可配置 `poll`、`cancel`、`recover`。父任务或调用入口的更短期限始终优先。
 
 ```ts
-return { text: '已完成', artifactIds: [], value: { count: 3 } }
+return { text: "已完成", artifactIds: [], value: { count: 3 } }
 ```
 
 `result.value` 既不是 `null` 也不是 `undefined` 时，`outputSchema` 校验该值；否则校验整个 `result`。`false`、`0`、空字符串和空集合都属于有效的 value。`suppressText: true` 用于只交付图片、音频等产物；大型二进制和私有后台句柄不应放进 `value`。
@@ -115,6 +115,6 @@ return { text: '已完成', artifactIds: [], value: { count: 3 } }
 
 当 `backend` 使用 `_special: "select_mcp"` 时，框架从配置引用生成连接器映射。没有 `setting` 的依赖直接在实例配置中绑定。只有显式 `required` 的依赖阻止启用。
 
-代码快照、实例配置、范围绑定和私有数据分别管理。升级不会自动迁移业务数据；插件作者应提供兼容策略。
+代码快照、实例配置、范围绑定和私有数据分别管理。
 
 GSVI 插件可使用固定 `configurationProjection: "gsvi@1"` 在同一实例页编辑业务配置与托管连接字段，详见 [GSVI 配置](gsvi-native-configuration.md)。

@@ -1668,7 +1668,7 @@ export class Coordinator {
         return run.roomId === schedule.roomId && run.source === "schedule" && !run.context?.jobId
       })
     ) {
-      throw new ScheduleOverlap("此范围的旧版计划执行仍在恢复，暂不启动新计划工作")
+      throw new ScheduleOverlap("此范围的先前计划执行仍在恢复，暂不启动新计划工作")
     }
     const invocation = this.prepareJobInvocation(
       schedule.roomId,

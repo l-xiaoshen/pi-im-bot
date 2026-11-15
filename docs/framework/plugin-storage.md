@@ -24,12 +24,12 @@ Worker 只读访问代码和父数据视图，只有 `/data/files` 可写。创�
 插件通过 `artifact.publish` 发布 `context.dataDir` 中的普通文件：
 
 ```js
-const artifact = await context.host('artifact.publish', {
-  path: 'output/report.pdf',
-  name: 'report.pdf',
-  mimeType: 'application/pdf'
+const artifact = await context.host("artifact.publish", {
+  path: "output/report.pdf",
+  name: "report.pdf",
+  mimeType: "application/pdf"
 })
-return { text: '报告已生成', artifactIds: [artifact.id] }
+return { text: "报告已生成", artifactIds: [artifact.id] }
 ```
 
 operation/handler 与实例都需要 `artifact.write`。路径必须相对活动数据目录，不接受符号链接、特殊文件或越界路径。Core 流式复制并计算摘要，二进制不进入 RPC 帧或模型上下文；文件应在发布前写完并关闭。
@@ -46,4 +46,4 @@ Artifact 对所有生产者统一执行范围、单文件、数量和并发额�
 
 可信 Bot 控制面管理 Docker，插件 Worker 不取得 Docker socket。Bot 位于容器中时，需要配置 `hostPackageDir`、`hostDataDir`、`hostRuntimeDir` 的真实宿主映射；`plugin-data` bind 使用 `rshared`，Bot 容器还需要 `/dev/fuse` 和建立挂载所需的能力。
 
-备份应包含配置、Bot data、固定插件快照、插件卷镜像与账本。复制卷前停止 Worker 并卸载文件系统。删除实例配置不会自动删除数据；卷扩缩容和业务数据迁移需要作为独立维护操作处理。
+备份应包含配置、Bot data、固定插件快照、插件卷镜像与账本。复制卷前停止 Worker 并卸载文件系统。删除实例配置不会自动删除数据；卷扩缩容需要作为独立维护操作处理。
