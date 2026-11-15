@@ -1,5 +1,4 @@
 import { BACKGROUND_CONTEXT, withAbortSignal } from '@earendil-works/chord/context'
-import { z } from 'zod'
 import { createModels } from '@earendil-works/pi-ai/models'
 import {
   Harness,
@@ -15,7 +14,8 @@ import {
   type ConversationId,
   type ToolRegistration,
   type ConversationOwnership,
-  type TaskId
+  type TaskId,
+  type Report
 } from '@earendil-works/pi-durable'
 import { createToolSearchTool } from '@earendil-works/pi-durable/tool-search'
 import type { Configuration } from '@pi-im-bot/config/load'
@@ -27,15 +27,13 @@ import { createToolkit } from '../toolkit'
 import { projectInput } from '@pi-im-bot/messages/projection'
 import { runProvider } from './model'
 import { durableTool, withDeferred } from './tool-bridge'
-import { ConversationBinding, ToolExposure } from './documents'
+import { ConversationBinding } from './documents'
 import { migrateConversationIndex } from './conversation-index'
-import { legacyContext } from './migrate'
 import type { DurableBinding } from './binding'
 import { ModelLimits } from '@pi-im-bot/runtime/model-limits'
 import { JobFacts } from '@pi-im-bot/jobs/documents'
 
 const context = BACKGROUND_CONTEXT
-const SearchInputSchema = z.object({ query: z.string(), limit: z.number().optional() })
 
 export class DurableAgentRuntime {
   readonly models = createModels()
@@ -45,12 +43,14 @@ export class DurableAgentRuntime {
   private readonly bindings = new Map<string, DurableBinding>()
   private readonly running = new Map<string, Promise<string>>()
   private conversationIndexReady?: Promise<void>
-  private compactionModels: Record<string, { enabled: boolean }> = {}
   private readonly modelLimits: ModelLimits
 
   constructor(
     limit: () => number = () => {
       return 2
+    },
+    private readonly report: (report: Report) => void = (report) => {
+      console.error('[pi-durable]', report.kind, report.error)
     }
   ) {
     this.modelLimits = new ModelLimits(limit)
@@ -62,6 +62,9 @@ export class DurableAgentRuntime {
       {
         models: this.models,
         registry: this.registry,
+        onReport: (report) => {
+          this.report(report)
+        },
         settings: () => ({
           retry: { enabled: false },
           stream: { maxRetries: 0 },
@@ -69,8 +72,7 @@ export class DurableAgentRuntime {
             enabled: true,
             reserveTokens: 16384,
             keepRecentTokens: 8000,
-            backgroundTokens: 0,
-            modelOverrides: this.compactionModels
+            backgroundTokens: 0
           },
           toolExecution: 'sequential',
           followUpMode: 'all',
@@ -126,8 +128,6 @@ export class DurableAgentRuntime {
       spent
     )
     this.models.setProvider(provider)
-    const modelKey = provider.id + '/' + provider.getModels()[0].id
-    this.compactionModels[modelKey] = { enabled: room.mode === 'live' }
     const tools: ToolRegistration[] = toolkit.tools.map((tool) => {
       const definition = durableTool(tool, () => {
         services.authorize(toolkit.capabilityFor(tool.name))
@@ -135,21 +135,7 @@ export class DurableAgentRuntime {
       return withDeferred(definition, tool.exposure === 'deferred')
     })
     if (toolkit.searchAllowed) {
-      const search = createToolSearchTool()
-      tools.push({
-        ...search,
-        async execute(args, api, callContext) {
-          services.authorize('tool_search')
-          const result = await search.execute(SearchInputSchema.parse(args), api, callContext)
-          await api.commit(async (tx) => {
-            const state = await tx.doc(ToolExposure, api.conversationId)
-            for (const name of result.control?.addTools ?? []) {
-              state.lastUsed[name] = state.turn
-            }
-          }, callContext)
-          return result
-        }
-      })
+      tools.push(createToolSearchTool())
     }
     const extension = defineExtension({
       name: 'bot-run-' + id,
@@ -275,8 +261,7 @@ export class DurableAgentRuntime {
       callbacks,
       toolkit,
       provider,
-      extension,
-      modelKey
+      extension
     }
     this.bindings.set(id, binding)
     return binding
@@ -315,9 +300,9 @@ export class DurableAgentRuntime {
     callbacks: AgentCallbacks
   ) {
     const binding = this.prepare(id, config, room, input, signal, services, callbacks)
-    const { toolkit, provider, extension, modelKey } = binding
+    const { toolkit, provider, extension } = binding
     const tools = extension.tools ?? []
-    const nativeId = await this.ensureConversation(config, room, input).catch(async (error) => {
+    const nativeId = await this.ensureConversation(room, input).catch(async (error) => {
       if (!this.closing) {
         await this.release(binding)
       }
@@ -340,27 +325,14 @@ export class DurableAgentRuntime {
         if (previous) {
           return previous.id
         }
-        const exposure = await tx.doc(ToolExposure, nativeId)
-        exposure.turn += 1
-        const active = tools.filter((tool) => {
-          if (
-            !toolkit.deferred ||
-            tool.name === 'tool_search' ||
-            toolkit.exposure.permanentTools.includes(tool.name)
-          ) {
-            return true
-          }
-          const lastUsed = exposure.lastUsed[tool.name]
-          return lastUsed !== undefined && exposure.turn - lastUsed <= toolkit.exposure.idleToolTurns
-        })
         await configure(tx, nativeId, {
           extensions: [extension],
           tools,
-          modelTools: active,
           model: { provider: provider.id, modelId: provider.getModels()[0].id },
           thinkingLevel: 'off',
           cwd: '/workspace',
           maxTurns: toolkit.effective.settings.behavior.maxModelCalls,
+          compaction: { enabled: room.mode === 'live' },
           instructions: [toolkit.effective.persona.prompt, toolkit.effective.settings.preferences.replyStyle]
             .filter(Boolean)
             .join('\n\n')
@@ -413,11 +385,7 @@ export class DurableAgentRuntime {
     }
   }
 
-  async ensureConversation(
-    config: Configuration,
-    room: Room,
-    input: PreparedRunInput
-  ): Promise<ConversationId> {
+  async ensureConversation(room: Room, input: PreparedRunInput): Promise<ConversationId> {
     const key = room.id + ':' + input.context.conversationId + ':' + room.mode
     this.conversationIndexReady ??= this.native.commit(migrateConversationIndex, context).catch((error) => {
       this.conversationIndexReady = undefined
@@ -429,7 +397,6 @@ export class DurableAgentRuntime {
     if (existing !== undefined && existing !== null) {
       return existing
     }
-    const history = legacyContext(config, room, input)
     return this.native.commit(async (tx) => {
       const binding = await tx.doc(ConversationBinding, key, null)
       const existing = binding.conversationId
@@ -441,9 +408,6 @@ export class DurableAgentRuntime {
         ownership = { kind: 'task', taskId: input.context.nativeOwnerTask as TaskId }
       }
       const conversation = await tx.createConversation({ ownership })
-      for (const message of history) {
-        await tx.appendEntry(conversation.id, { kind: 'bot.imported-message', model: [message] })
-      }
       binding.conversationId = conversation.id
       return conversation.id
     }, context)
@@ -453,7 +417,6 @@ export class DurableAgentRuntime {
     await binding.toolkit.close()
     this.registry.uninstall(binding.extension)
     this.models.deleteProvider(binding.provider.id)
-    delete this.compactionModels[binding.modelKey]
     this.bindings.delete(binding.id)
   }
 

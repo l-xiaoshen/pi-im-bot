@@ -1,5 +1,5 @@
 import type { Message, ImageContent, TextContent } from '@earendil-works/pi-ai'
-import { formatDimensionNote } from '@earendil-works/pi-coding-agent'
+import { formatDimensionNote } from './image'
 import type { Room } from '@pi-im-bot/contracts/message'
 import type { PreparedRunInput } from '@pi-im-bot/contracts/run'
 import type { MediaService } from './service'

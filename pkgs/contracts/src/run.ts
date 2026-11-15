@@ -32,7 +32,6 @@ export const RunSchema = z.object({
   id: z.string(),
   roomId: z.string(),
   source: RunSourceSchema,
-  engine: z.enum(['coding', 'durable']).default('coding'),
   input: RunInputSchema.optional(),
   configSnapshot: z.string().optional(),
   mode: z.enum(['demo', 'live']),

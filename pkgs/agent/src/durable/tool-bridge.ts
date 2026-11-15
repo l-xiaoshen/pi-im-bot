@@ -1,7 +1,6 @@
 import { z } from 'zod'
 import { defineTool, type ToolRegistration } from '@earendil-works/pi-durable'
 import type { BotTool } from '@pi-im-bot/capabilities/tool'
-import { ToolExposure } from './documents'
 
 const SafeTools = new Set([
   'chat_history',
@@ -32,10 +31,6 @@ export function durableTool(tool: BotTool, authorize: () => void): ToolRegistrat
           }
         }
       })
-      await api.commit(async (tx) => {
-        const exposure = await tx.doc(ToolExposure, api.conversationId)
-        exposure.lastUsed[tool.name] = exposure.turn
-      }, context)
       let details
       if (result.details !== undefined) {
         details = z.json().parse(JSON.parse(JSON.stringify(result.details)))

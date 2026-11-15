@@ -83,8 +83,7 @@ export const ResourceSettingsSchema = z.object({
   skills: ResourceSelectionSchema.prefault({ mode: 'all' }),
   plugins: ResourceSelectionSchema.prefault({ mode: 'all' }),
   toolExposure: z.enum(['all', 'deferred']).default('all'),
-  permanentTools: z.array(z.string().min(1)).max(100).default(['chat_history', 'delegate_task', 'start_job']),
-  idleToolTurns: z.number().int().min(0).max(50).default(3)
+  permanentTools: z.array(z.string().min(1)).max(100).default(['chat_history', 'delegate_task', 'start_job'])
 })
 export const SettingsSchema = z.object({
   data: DataSettingsSchema.prefault({}),
@@ -146,8 +145,7 @@ export const SettingsPatchSchema = z
         skills: ResourceSettingsSchema.shape.skills.unwrap(),
         plugins: ResourceSettingsSchema.shape.plugins.unwrap(),
         toolExposure: ResourceSettingsSchema.shape.toolExposure.unwrap(),
-        permanentTools: ResourceSettingsSchema.shape.permanentTools.unwrap(),
-        idleToolTurns: ResourceSettingsSchema.shape.idleToolTurns.unwrap()
+        permanentTools: ResourceSettingsSchema.shape.permanentTools.unwrap()
       })
       .partial()
       .optional(),

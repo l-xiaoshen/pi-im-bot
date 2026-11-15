@@ -272,11 +272,7 @@ export class JobService {
     ) {
       throw new Error('任务只能关联当前输入中的消息')
     }
-    const nativeConversation = await this.runtime.ensureConversation(
-      invocation.config,
-      invocation.room,
-      invocation.input
-    )
+    const nativeConversation = await this.runtime.ensureConversation(invocation.room, invocation.input)
     let parentTask: TaskId | undefined
     let schedule = options.schedule
     let detached = false
@@ -592,11 +588,7 @@ export class JobService {
     if (prompt.length > 20000) {
       throw new Error('任务说明过长，请精简后重新委派')
     }
-    const nativeConversation = await this.runtime.ensureConversation(
-      invocation.config,
-      invocation.room,
-      invocation.input
-    )
+    const nativeConversation = await this.runtime.ensureConversation(invocation.room, invocation.input)
     const configSnapshot = this.coordinator.snapshotConfiguration(invocation.config)
     await this.runtime.native.commit(async (tx) => {
       const index = await initializeJobIndex(tx)
@@ -677,7 +669,6 @@ export class JobService {
 
   async recordReconciledFacts(job: Job) {
     const value = job.revisions[String(job.currentRevision)]
-    const config = await this.coordinator.loadConfigurationSnapshot(value.configSnapshot)
     const room = { ...this.coordinator.requireRoom(job.roomId), mode: value.mode }
     const actor = value.context.authority.identities[0]
     const input: PreparedRunInput = {
@@ -690,7 +681,7 @@ export class JobService {
       identities: value.context.authority.identities,
       context: value.context
     }
-    const conversation = await this.runtime.ensureConversation(config, room, input)
+    const conversation = await this.runtime.ensureConversation(room, input)
     await this.runtime.native.commit(async (tx) => {
       const facts = await tx.doc(JobFacts, conversation)
       facts.results = [

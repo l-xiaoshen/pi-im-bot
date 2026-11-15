@@ -69,7 +69,7 @@ export class ProviderEditor {
       }
       change(file.config)
       const next = ProvidersConfigSchema.parse(file.config)
-      const catalog = await ProviderCatalog.create(next, this.host.configuration().dataDir)
+      const catalog = await ProviderCatalog.create(next)
       if (digest(await Bun.file(file.path).text()) !== revision) {
         throw conflict()
       }

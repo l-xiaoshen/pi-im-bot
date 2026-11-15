@@ -22,7 +22,7 @@ export async function loadConfiguration(projectDir = process.cwd()) {
   }
   const bot = BotConfigSchema.parse(await readJson(join(configDir, 'bot.json')))
   const providers = ProvidersConfigSchema.parse(await readJson(join(configDir, 'providers.json')))
-  const catalog = await ProviderCatalog.create(providers, dataDir)
+  const catalog = await ProviderCatalog.create(providers)
   const frameworkFile = Bun.file(join(configDir, 'framework.json'))
   if (!(await frameworkFile.exists())) {
     await Bun.write(

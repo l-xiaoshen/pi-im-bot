@@ -383,14 +383,6 @@ export function settingsForm(
         .filter(Boolean)
     }
   )
-  const idle = number(
-    '工具闲置保留轮数',
-    'resources.idleToolTurns',
-    patch.resources?.idleToolTurns,
-    effective.resources.idleToolTurns,
-    0,
-    50
-  )
   section('能力与权限', [
     element(
       'p',
@@ -399,7 +391,6 @@ export function settingsForm(
     ),
     exposure.node,
     permanent.node,
-    idle.node,
     mcp.node,
     skills.node,
     element('p', 'muted', '插件范围、配置继承和执行顺序请在「插件中心」中管理。'),
@@ -461,8 +452,7 @@ export function settingsForm(
               skills: skills.read(),
               plugins: patch.resources?.plugins,
               toolExposure: exposure.read(),
-              permanentTools: permanent.read(),
-              idleToolTurns: idle.read()
+              permanentTools: permanent.read()
             },
             permissions: permissions.read(),
             extensions: {

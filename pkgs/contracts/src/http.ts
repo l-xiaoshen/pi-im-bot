@@ -47,7 +47,7 @@ export const ProviderStatusSchema = z.object({
 export const SnapshotSchema = z.object({
   version: z.string(),
   execution: ExecutionStatusSchema,
-  agentRuntime: z.string().default('pi-coding-agent'),
+  agentRuntime: z.string(),
   rooms: z.array(RoomSchema),
   runs: z.array(RunSchema),
   schedules: z.array(ScheduleSchema),

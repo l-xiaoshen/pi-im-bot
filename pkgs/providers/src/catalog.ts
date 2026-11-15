@@ -1,6 +1,4 @@
-import { ModelRuntime } from '@earendil-works/pi-coding-agent'
 import type { Model } from '@earendil-works/pi-ai'
-import { join } from 'node:path'
 import { mergeHeaders } from './body'
 import { secretValues } from './editor-secrets'
 import { ProviderPool, type Candidate } from './pool'
@@ -11,19 +9,10 @@ export class ProviderCatalog {
   readonly candidates = new Map<string, Candidate>()
   private readonly secrets: string[] = []
 
-  private constructor(
-    readonly config: ProvidersConfig,
-    readonly runtime: ModelRuntime
-  ) {}
+  private constructor(readonly config: ProvidersConfig) {}
 
-  static async create(config: ProvidersConfig, dataDir: string) {
-    const runtime = await ModelRuntime.create({
-      authPath: join(dataDir, 'provider-auth.json'),
-      modelsPath: null,
-      refreshOnCreate: false,
-      allowModelNetwork: false
-    })
-    const catalog = new ProviderCatalog(config, runtime)
+  static async create(config: ProvidersConfig) {
+    const catalog = new ProviderCatalog(config)
     for (const provider of config.providers) {
       if (
         !provider.enabled ||
@@ -57,36 +46,22 @@ export class ProviderCatalog {
           }
         }
       }
-      runtime.registerProvider(provider.id, {
-        api: 'openai-responses',
-        baseUrl: provider.baseUrl.replace(/\/$/, ''),
-        apiKey: key || 'unused',
-        models: provider.models
-          .filter((model) => {
-            return model.enabled
-          })
-          .map((model) => {
-            return {
-              id: model.id,
-              name: model.name ?? model.id,
-              api: 'openai-responses',
-              reasoning: model.reasoning,
-              input: ['text', ...imageInput(model.images)],
-              contextWindow: model.contextWindow,
-              maxTokens: model.maxOutputTokens,
-              cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }
-            }
-          })
-      })
       for (const modelConfig of provider.models) {
         if (!modelConfig.enabled) {
           continue
         }
-        const registered = runtime.getModel(provider.id, modelConfig.id)
-        if (!registered) {
-          throw new Error(`Cannot register ${provider.id}/${modelConfig.id}`)
+        const model: Model<'openai-responses'> = {
+          id: modelConfig.id,
+          name: modelConfig.name ?? modelConfig.id,
+          api: 'openai-responses',
+          provider: provider.id,
+          baseUrl: provider.baseUrl.replace(/\/$/, ''),
+          input: modelConfig.images ? ['text', 'image'] : ['text'],
+          reasoning: modelConfig.reasoning,
+          contextWindow: modelConfig.contextWindow,
+          maxTokens: modelConfig.maxOutputTokens,
+          cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }
         }
-        const model: Model<'openai-responses'> = { ...registered, api: 'openai-responses' }
         const candidate: Candidate = {
           key: `${provider.id}/${modelConfig.id}`,
           provider,
@@ -96,35 +71,6 @@ export class ProviderCatalog {
         }
         catalog.candidates.set(candidate.key, candidate)
       }
-    }
-    for (const group of config.groups) {
-      const candidates = catalog.forGroup(group.id)
-      if (candidates.length === 0) {
-        continue
-      }
-      runtime.registerVirtualModel({
-        provider: 'pi-im-groups',
-        id: group.id,
-        name: group.name ?? group.id,
-        contextWindow: Math.min(
-          ...candidates.map((candidate) => {
-            return candidate.config.contextWindow
-          })
-        ),
-        maxTokens: Math.min(
-          ...candidates.map((candidate) => {
-            return candidate.config.maxOutputTokens
-          })
-        ),
-        route(request) {
-          let preferred: string | undefined
-          if (request.reason !== 'user' && request.previous) {
-            preferred = `${request.previous.model.provider}/${request.previous.model.id}`
-          }
-          const [candidate] = catalog.pool.order(candidates, preferred)
-          return { model: candidate.model, thinkingLevel: 'off' }
-        }
-      })
     }
     return catalog
   }
@@ -195,11 +141,4 @@ export class ProviderCatalog {
       health: this.pool.snapshot()
     }
   }
-}
-
-function imageInput(enabled: boolean): 'image'[] {
-  if (enabled) {
-    return ['image']
-  }
-  return []
 }

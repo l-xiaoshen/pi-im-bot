@@ -23,13 +23,3 @@ export const ConversationBinding = defineDocFamily<{ conversationId: Conversatio
   initial: () => ({ conversationId: null }),
   checkpointWhen: () => true
 })
-
-export const ToolExposure = defineDoc<{ turn: number; lastUsed: Record<string, number> }>({
-  kind: 'bot.tool-exposure',
-  version: 1,
-  scope: 'conversation',
-  history: 'latest',
-  fork: 'current',
-  initial: () => ({ turn: 0, lastUsed: {} }),
-  checkpointWhen: () => false
-})

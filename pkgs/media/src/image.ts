@@ -1,4 +1,25 @@
-import { resizeImage, type ResizedImage } from '@earendil-works/pi-coding-agent'
+import { createNodePhotonImages } from '@earendil-works/pi-durable/images/node'
+import type { ImageProcessor } from '@earendil-works/pi-durable/tools'
+
+export interface ProjectedImage {
+  data: string
+  mimeType: string
+  originalWidth: number
+  originalHeight: number
+  width: number
+  height: number
+  wasResized: boolean
+}
+
+let processor: Promise<ImageProcessor> | undefined
+
+function images() {
+  processor ??= createNodePhotonImages().catch((error) => {
+    processor = undefined
+    throw error
+  })
+  return processor
+}
 
 function dimensions(data: Buffer) {
   if (data.length >= 24 && data.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))) {
@@ -82,11 +103,34 @@ export async function projectImage(
   bytes: Uint8Array,
   maxSide: number,
   maxBytes: number
-): Promise<ResizedImage> {
+): Promise<ProjectedImage> {
   const image = inspectImage(bytes)
-  const result = await resizeImage(bytes, image.mimeType, { maxWidth: maxSide, maxHeight: maxSide, maxBytes })
-  if (!result) {
+  const imageProcessor = await images()
+  const prepared = await imageProcessor.prepare(bytes, image.mimeType, {
+    maxWidth: maxSide,
+    maxHeight: maxSide,
+    maxBytes
+  })
+  if (!prepared) {
     throw new Error('图片无法在当前像素预算内解码')
   }
-  return result
+  const from = prepared.resized?.from ?? image
+  const to = prepared.resized?.to ?? image
+  return {
+    data: prepared.data,
+    mimeType: prepared.mimeType,
+    originalWidth: from.width,
+    originalHeight: from.height,
+    width: to.width,
+    height: to.height,
+    wasResized: prepared.resized !== undefined
+  }
+}
+
+export function formatDimensionNote(image: ProjectedImage) {
+  if (!image.wasResized) {
+    return undefined
+  }
+  const scale = image.originalWidth / image.width
+  return `[Image: original ${image.originalWidth}x${image.originalHeight}, displayed at ${image.width}x${image.height}. Multiply coordinates by ${scale.toFixed(2)} to map to original image.]`
 }

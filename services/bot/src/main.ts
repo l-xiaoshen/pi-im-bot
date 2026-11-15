@@ -52,7 +52,6 @@ await mkdir(dataDir, { recursive: true })
 const owner = new RuntimeOwner(dataDir)
 let configuration = await loadConfiguration(projectDir)
 configureArtifacts(configuration.dataDir, configuration.bot.artifacts)
-process.env.PI_CODING_AGENT_DIR = join(configuration.dataDir, 'pi-agent')
 const store = new StateStore(configuration.dataDir)
 const events = new EventHub()
 const channels = new ChannelRegistry()
@@ -107,9 +106,14 @@ const onebot = new OneBotAdapter(
 channels.register(onebot)
 coordinator.syncOneBotRooms()
 coordinator.ensureMockRoom()
-const durable = new DurableAgentRuntime(() => {
-  return configuration.bot.agent.maxConcurrentRuns
-})
+const durable = new DurableAgentRuntime(
+  () => {
+    return configuration.bot.agent.maxConcurrentRuns
+  },
+  (report) => {
+    console.error('[pi-durable]', report.kind, configuration.catalog.redact(String(report.error)))
+  }
+)
 coordinator.attachDurable(durable)
 const jobs = new JobService(durable, coordinator)
 coordinator.attachJobs(jobs)

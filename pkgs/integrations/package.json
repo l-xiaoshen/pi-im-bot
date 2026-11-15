@@ -8,8 +8,8 @@
     "./gsvi/unicode": "./src/gsvi/unicode/index.ts"
   },
   "dependencies": {
-    "@earendil-works/chord": "1.5.0",
-    "@earendil-works/pi-durable": "1.5.0",
+    "@earendil-works/chord": "1.5.2",
+    "@earendil-works/pi-durable": "1.5.2",
     "@pi-im-bot/agent": "workspace:*",
     "@pi-im-bot/artifacts": "workspace:*",
     "@pi-im-bot/config": "workspace:*",

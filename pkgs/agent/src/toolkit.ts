@@ -149,19 +149,19 @@ export function createToolkit(
       })
   }
   hostTools = exposedDefinitions(hostTools, exposure)
-  const selectedTools = hostTools.map((tool) => {
-    return tool.name
-  })
-  let context: Promise<string | undefined> | undefined
   const deferred = effective.settings.resources.toolExposure === 'deferred'
   const searchAllowed =
     deferred && hostTools.length > 0 && input.context.authority.capabilities.includes('tool_search')
+  const names = hostTools.map((tool) => {
+    return tool.name
+  })
   if (searchAllowed) {
-    selectedTools.push('tool_search')
+    names.push('tool_search')
   }
-  if (new Set(selectedTools).size !== selectedTools.length) {
+  if (new Set(names).size !== names.length) {
     throw new Error('能力目录包含重复的模型工具别名')
   }
+  let context: Promise<string | undefined> | undefined
 
   return {
     pluginContext() {
@@ -177,9 +177,6 @@ export function createToolkit(
     },
     tools: hostTools,
     effective,
-    exposure,
-    selectedTools,
-    deferred,
     searchAllowed,
     executionInfo,
     skillsPrompt: skills.prompt,

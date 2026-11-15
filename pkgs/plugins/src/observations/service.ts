@@ -167,9 +167,8 @@ export class PluginObservations {
         continue
       }
       try {
-        const config = await this.coordinator.loadConfigurationSnapshot(event.configSnapshot)
         const room = { ...this.coordinator.requireRoom(event.roomId), mode: event.mode }
-        const conversation = await this.runtime.ensureConversation(config, room, event.input)
+        const conversation = await this.runtime.ensureConversation(room, event.input)
         let complete = true
         for (const handler of event.handlers) {
           const accepted = await this.admit({ event, handler, key: event.id + ':' + handler }, conversation)

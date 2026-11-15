@@ -18,5 +18,4 @@ export interface DurableBinding {
   toolkit: ReturnType<typeof createToolkit>
   provider: ReturnType<typeof runProvider>
   extension: Extension
-  modelKey: string
 }

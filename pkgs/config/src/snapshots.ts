@@ -89,7 +89,7 @@ export class ConfigurationSnapshots {
       ...current,
       bot: snapshot.bot,
       framework: snapshot.framework,
-      catalog: await ProviderCatalog.create(snapshot.providers, current.dataDir),
+      catalog: await ProviderCatalog.create(snapshot.providers),
       resources: new ResourceLibrary(snapshot.resources, snapshot.mcp, snapshot.skills, snapshot.plugins)
     }
   }

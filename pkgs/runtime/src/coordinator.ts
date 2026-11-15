@@ -11,12 +11,10 @@ import {
 import type { Run, RunInput, PreparedRunInput, Trace, ExecutionContext } from '@pi-im-bot/contracts/run'
 import { BACKGROUND_CONTEXT, withAbortSignal, awaitWithContext } from '@earendil-works/chord/context'
 import { executeRun } from './execute-run'
-import { runPi } from '@pi-im-bot/agent/pi-runner'
 import type { HostToolServices } from '@pi-im-bot/agent/host-tools'
 import type { StateStore } from '@pi-im-bot/storage/state'
 import { DeliverySuppressed, DeliveryAdmissionUnknown, type DeliveryService } from './delivery'
 import type { EventHub } from '@pi-im-bot/contracts/events'
-import { RunLimiter } from '@pi-im-bot/support/limiter'
 import type { Scheduler } from '@pi-im-bot/scheduler/service'
 import type { ScheduleToolServices } from '@pi-im-bot/agent/schedule-tools'
 import { executionStatus } from '@pi-im-bot/execution/config'
@@ -36,7 +34,6 @@ import { ConfigurationSnapshots } from '@pi-im-bot/config/snapshots'
 import { runObserver } from './run-observer'
 import { ConversationInbox } from './inbox'
 import type { QueuedExecution } from './execution-request'
-import { revision } from '@pi-im-bot/settings/resolve'
 import type { JobService } from '@pi-im-bot/jobs/service'
 import type { JobInvocation } from '@pi-im-bot/jobs/service'
 import type { MediaService } from '@pi-im-bot/media/service'
@@ -75,10 +72,9 @@ export class Coordinator {
   plugins?: PluginService
   private readonly queues = new Map<string, Promise<void>>()
   private readonly active = new Map<string, ActiveRun>()
-  private readonly limiter: RunLimiter
   private scheduler?: Scheduler
-  private durable?: DurableAgentRuntime
-  private snapshots?: ConfigurationSnapshots
+  private durable!: DurableAgentRuntime
+  private snapshots!: ConfigurationSnapshots
   private readonly recovery: QueuedExecution[] = []
   private closing = false
   private jobs?: JobService
@@ -95,7 +91,6 @@ export class Coordinator {
     readonly events: EventHub,
     readonly delivery: DeliveryService
   ) {
-    this.limiter = new RunLimiter(configuration().bot.agent.maxConcurrentRuns)
     this.conversations = new ConversationService(store, events)
     this.inbox = new ConversationInbox({
       key: (input) => {
@@ -216,9 +211,6 @@ export class Coordinator {
   }
 
   async prepareRecovery() {
-    if (!this.durable || !this.snapshots) {
-      return
-    }
     for (const run of this.store.recoverableRuns()) {
       try {
         if (!run.input || !run.context || !run.configSnapshot) {
@@ -983,7 +975,6 @@ export class Coordinator {
       throw new Error('服务正在关闭，请稍后重试')
     }
     const config = this.configuration()
-    this.limiter.setLimit(config.bot.agent.maxConcurrentRuns)
     if (this.active.size >= config.bot.agent.maxQueuedRuns) {
       throw new Error('任务队列已满，请稍后重试。')
     }
@@ -1029,7 +1020,6 @@ export class Coordinator {
       id: crypto.randomUUID(),
       roomId: room.id,
       source: input.source,
-      engine: 'coding',
       input,
       mode: room.mode,
       status,
@@ -1040,10 +1030,7 @@ export class Coordinator {
       toolCalls: 0,
       usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }
     }
-    if (this.durable && this.snapshots) {
-      run.engine = 'durable'
-      run.configSnapshot = this.snapshots.save(config)
-    }
+    run.configSnapshot = this.snapshots.save(config)
     const controller = new AbortController()
     this.linkMessages(run)
     this.active.set(run.id, { roomId: room.id, controller, run, completion: Promise.withResolvers<Run>() })
@@ -1056,15 +1043,7 @@ export class Coordinator {
     const room = this.requireRoom(input.roomId)
     const config = this.configuration()
     const effective = this.effective(room.id)
-    let configuration = revision({
-      bot: config.bot,
-      providers: config.catalog.config,
-      resources: config.resources.config,
-      versions: config.resources.capabilityRevisions(effective.settings)
-    })
-    if (this.snapshots) {
-      configuration = this.snapshots.save(config)
-    }
+    const configuration = this.snapshots.save(config)
     return [
       room.id,
       room.currentConversationId,
@@ -1161,18 +1140,10 @@ export class Coordinator {
           this.update(run)
           return
         }
-        let release = () => {}
-        if (!this.durable) {
-          release = await this.limiter.acquire()
-        }
-        try {
-          await this.execute(config, room, input, run, controller)
-        } finally {
-          release()
-        }
+        await this.execute(config, room, input, run, controller)
       })
       .finally(async () => {
-        await this.durable?.abandon(run.id)
+        await this.durable.abandon(run.id)
         this.active.get(run.id)?.completion.resolve(run)
         this.active.delete(run.id)
         if (this.queues.get(key) === task) {
@@ -1420,20 +1391,8 @@ export class Coordinator {
       },
       tools,
       invoke: (callbacks: import('@pi-im-bot/agent/events').AgentCallbacks) => {
-        if (this.durable) {
-          this.durable.prepare(
-            run.id,
-            config,
-            room,
-            input,
-            controller.signal,
-            tools,
-            callbacks,
-            run.modelCalls
-          )
-          return this.durable.run(run.id, config, room, input, controller.signal, tools, callbacks)
-        }
-        return runPi(config, room, input, controller.signal, tools, callbacks)
+        this.durable.prepare(run.id, config, room, input, controller.signal, tools, callbacks, run.modelCalls)
+        return this.durable.run(run.id, config, room, input, controller.signal, tools, callbacks)
       }
     }
   }
@@ -1530,7 +1489,7 @@ export class Coordinator {
       }
     }
     await Promise.allSettled(this.jobCancellations)
-    await this.durable?.close()
+    await this.durable.close()
     await Promise.allSettled(this.queues.values())
   }
 
@@ -1759,16 +1718,10 @@ export class Coordinator {
   }
 
   snapshotConfiguration(config = this.configuration()) {
-    if (!this.snapshots) {
-      throw new Error('Durable 配置归档尚未启用')
-    }
     return this.snapshots.save(config)
   }
 
   loadConfigurationSnapshot(id: string) {
-    if (!this.snapshots) {
-      throw new Error('Durable 配置归档尚未启用')
-    }
     return this.snapshots.load(id)
   }
 
@@ -1895,7 +1848,6 @@ export class Coordinator {
     const run: Run = {
       id,
       roomId: room.id,
-      engine: 'durable',
       source: input.source,
       mode: room.mode,
       input: request,

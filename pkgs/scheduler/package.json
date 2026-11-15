@@ -7,12 +7,12 @@
     "./*": "./src/*.ts"
   },
   "dependencies": {
-    "@earendil-works/pi-durable": "1.5.0",
+    "@earendil-works/pi-durable": "1.5.2",
     "@pi-im-bot/jobs": "workspace:*",
     "@pi-im-bot/permissions": "workspace:*",
     "@pi-im-bot/runtime": "workspace:*",
     "@pi-im-bot/storage": "workspace:*",
-    "croner": "11.0.0",
+    "croner": "11.0.1",
     "zod": "4.6.7"
   }
 }

@@ -68,8 +68,7 @@ export class StateStore {
     }
     this.db.exec(`CREATE INDEX IF NOT EXISTS runs_recovery ON runs(at)
       WHERE json_extract(value, '$.status') IN ('batching','queued','running','interrupted')`)
-    this.db.exec(`CREATE INDEX IF NOT EXISTS runs_coding_pending ON runs(at)
-      WHERE json_extract(value, '$.engine')='coding' AND json_extract(value, '$.status') IN ('batching','queued','running')`)
+    this.db.exec('DROP INDEX IF EXISTS runs_coding_pending')
     const rows = this.db.query<{ value: string }, []>('SELECT value FROM rooms').all()
     this.db.exec(`CREATE INDEX IF NOT EXISTS messages_pending_inbound ON messages(at)
       WHERE json_extract(value, '$.inbound.state') IN ('pending','dispatching')`)
@@ -82,23 +81,6 @@ export class StateStore {
       const migrated = migrateRoom(JSON.parse(row.value))
       if (migrated.conversation) {
         this.saveConversationSelection(migrated.room, migrated.conversation)
-      }
-    }
-    const unfinished = this.db
-      .query<{ value: string }, []>(
-        `SELECT value FROM runs WHERE json_extract(value, '$.status') IN ('batching','queued','running')
-       AND json_extract(value, '$.engine')='coding'`
-      )
-      .all()
-    for (const row of unfinished) {
-      const run = RunSchema.parse(JSON.parse(row.value))
-      if (run.engine === 'coding' && ['batching', 'running', 'queued'].includes(run.status)) {
-        this.saveRun({
-          ...run,
-          status: 'interrupted',
-          finishedAt: Date.now(),
-          error: '服务重启，任务未自动重放。'
-        })
       }
     }
     const uncertain = this.db
@@ -380,7 +362,7 @@ export class StateStore {
       .query<
         { value: string },
         []
-      >("SELECT value FROM runs WHERE json_extract(value, '$.engine')='durable' AND json_extract(value, '$.status') IN ('batching','queued','running','interrupted') ORDER BY at, rowid")
+      >("SELECT value FROM runs WHERE json_extract(value, '$.status') IN ('batching','queued','running','interrupted') ORDER BY at, rowid")
       .all()
     return rows.map((row) => {
       return RunSchema.parse(JSON.parse(row.value))

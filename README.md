@@ -1,6 +1,6 @@
 # Pi IM Bot
 
-基于 Bun、TypeScript 和 Pi SDK 的 IM Agent 宿主，支持 Mock 调试、NapCat / OneBot v11、OpenAI Responses provider、HTTP MCP、Skill、插件和 Shipyard 沙盒。
+基于 Bun、TypeScript 和 Pi Durable 的 IM Agent 宿主，支持 Mock 调试、NapCat / OneBot v11、OpenAI Responses provider、HTTP MCP、Skill、插件和 Shipyard 沙盒。
 
 ## 快速开始
 

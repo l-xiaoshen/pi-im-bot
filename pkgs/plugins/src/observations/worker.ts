@@ -114,7 +114,7 @@ export class ObservationWorker {
                     key: task.input.key + ':recall:' + messageId,
                     recall: { messageId, dueAt }
                   }
-                  const native = await this.runtime.ensureConversation(config, room, event.input)
+                  const native = await this.runtime.ensureConversation(room, event.input)
                   const taskId = await this.admit(child, native)
                   if (!taskId) {
                     throw new Error('观察动作队列已满')

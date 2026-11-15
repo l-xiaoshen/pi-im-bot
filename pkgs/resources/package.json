@@ -7,9 +7,9 @@
     "./*": "./src/*.ts"
   },
   "dependencies": {
-    "@earendil-works/pi-coding-agent": "1.5.0",
-    "@earendil-works/pi-mcp": "1.5.0",
-    "@earendil-works/pi-schema": "1.5.0",
+    "@earendil-works/pi-coding-agent": "1.5.2",
+    "@earendil-works/pi-mcp": "1.5.2",
+    "@earendil-works/pi-schema": "1.5.2",
     "@pi-im-bot/artifacts": "workspace:*",
     "@pi-im-bot/capabilities": "workspace:*",
     "@pi-im-bot/config": "workspace:*",
