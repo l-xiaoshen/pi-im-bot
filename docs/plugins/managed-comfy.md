@@ -30,7 +30,7 @@ manifest 使用 `{alias:'render', kind:'service', service:'comfy@1'}`，然后�
 
 ## 提交、恢复与取消
 
-Core 根据实例、范围、Job、revision、item 和服务别名构造所有者。提交前保存服务快照、模板和参数摘要、请求 JSON 与输出约束；远端 prompt ID 在返回 Worker 前保存。相同所有者重复提交只读取原记录，不会生成第二次工作。
+Core 根据实例、范围、Job、revision、item 和服务别名构造所有者。提交前保存服务快照、模板和参数摘要、请求 JSON 与输出约束；远端 prompt ID 在返回 Worker 前保存。相同所有者重复提交时，只有服务 revision、workflow 摘要和参数摘要均匹配才返回原回执；任一不匹配都会拒绝，且不会再次 POST。
 
 后台 operation 可声明 `recover`。execute 回执丢失、任务未建立句柄或恢复时，Core 调用 `{input, handle, intent}`；普通 poll/cancel 使用 `{handle}`。只有 execute 阶段允许 `submit`，防止轮询或核对重复创建任务。
 

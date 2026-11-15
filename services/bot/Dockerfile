@@ -4,7 +4,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates e2fsprogs fuse2fs fuse3 \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
-COPY package.json bun.lock bunfig.toml ./
+COPY package.json bun.lock ./
 COPY pkgs ./pkgs
 COPY services/bot ./services/bot
 RUN bun install --frozen-lockfile --production --filter @pi-im-bot/bot

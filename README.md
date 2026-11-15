@@ -56,6 +56,8 @@ ws://bot.example:19335/onebot/v11/ws
 
 平台账号下包含群或私聊渠道，每个渠道可有多个会话上下文。群成员共享当前会话的人格和历史，但调用权限按触发身份分别计算；多人合批时权限取交集。详见 [会话范围与权限](docs/framework/conversation-scope.md)。
 
+框架职责和更多专题见 [Bot 框架文档](docs/framework/README.md)。
+
 ## 模型与 Provider
 
 在「模型与 Provider」中：
@@ -129,7 +131,6 @@ bun run pack:plugin examples/plugins/echo /tmp/echo.zip
 
 ```sh
 bun run check
-bun test tests
 bun run build
 bun run format:check
 ```

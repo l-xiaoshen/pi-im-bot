@@ -21,7 +21,6 @@
     "apps",
     "pkgs",
     "services",
-    "scripts",
-    "tests"
+    "scripts"
   ]
 }

@@ -11,7 +11,7 @@
 | 后台操作 | `execution=background` | Job 管理提交、轮询、取消和结果 |
 | 计划任务 | Bot Cron 选择相应能力 | 复用 Agent/Job 生命周期 |
 
-QQ 消息先按测试目标和 Agent 触发规则处理，再匹配核心控制指令与插件指令。Mock 使用相同的指令路由。插件自注册 Cron 不在 manifest 能力中。
+在已启用的 QQ 目标中，消息先记录；核心控制指令与已登记插件别名可直接匹配，无需 `!pi` 或 `@Bot`。其他 Agent 请求再按配置的前缀或 @ 触发。Mock 使用相同的指令路由。插件自注册 Cron 不在 manifest 能力中。
 
 核心保留 `/help`、`/status`、`/stop`、`/new`、`/skills`、`/skill`、`/jobs`、`/job`，插件不能占用。业务指令需要显式登记别名；实例停用、范围未选择或后端未就绪时，不会改为调用模型补救。
 

@@ -9,7 +9,6 @@ cd ../pi-im-bot-plugins
 bun install --frozen-lockfile
 bun run docs:sync
 bun run check
-bun test tests
 bun run build status
 bun run pack status /tmp/system-status.zip
 ```
@@ -18,16 +17,7 @@ bun run pack status /tmp/system-status.zip
 
 `@pi-im-bot/plugin-sdk` 是工作区别名，不是已发布的 npm 包。发布前必须构建，或确保原入口及依赖都能被 Worker 直接解析。build 校验公共 API 文档快照，变化时先运行 `docs:sync`。
 
-## 验证与安装
-
-建议分层验证：
-
-1. 纯解析、格式化和渲染测试。
-2. 使用 Bot fixture 验证指令、工具、RPC、权限和取消。
-3. 在临时配置和数据目录中验证安装、表单与 Mock 交付。
-4. 按实际部署条件验证容器、上游服务和平台能力。
-
-fixture 不能证明操作系统或容器隔离，也不应使用真实群消息或付费模型代替可控测试。测试直接指令时，可同时断言未发生模型请求。
+## 安装
 
 安装后实例保持停用。检查配置、服务依赖、grants、范围、触发人权限和执行环境，再按部署需求启用。包导入不会执行入口。
 

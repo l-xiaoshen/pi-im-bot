@@ -19,4 +19,3 @@ config/*.json
 .env*
 !.env.example
 *.log
-tests

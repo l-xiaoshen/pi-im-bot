@@ -64,7 +64,7 @@ assets/                     WASM、字体等声明资源
 return { text: '已完成', artifactIds: [], value: { count: 3 } }
 ```
 
-`outputSchema` 校验 `result.value`，未提供非空 value 时校验整个 result。`suppressText: true` 用于只交付图片、音频等产物；大型二进制和私有后台句柄不应放进 `value`。
+`result.value` 既不是 `null` 也不是 `undefined` 时，`outputSchema` 校验该值；否则校验整个 `result`。`false`、`0`、空字符串和空集合都属于有效的 value。`suppressText: true` 用于只交付图片、音频等产物；大型二进制和私有后台句柄不应放进 `value`。
 
 ## `_conf_schema.json`
 
