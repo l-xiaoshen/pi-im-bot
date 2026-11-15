@@ -217,6 +217,13 @@
         "zod": "4.6.7",
       },
     },
+    "pkgs/onebot": {
+      "name": "@pi-im-bot/onebot",
+      "version": "0.1.0",
+      "dependencies": {
+        "zod": "4.6.7",
+      },
+    },
     "pkgs/permissions": {
       "name": "@pi-im-bot/permissions",
       "version": "0.1.0",
@@ -545,6 +552,8 @@
     "@pi-im-bot/media": ["@pi-im-bot/media@workspace:pkgs/media"],
 
     "@pi-im-bot/messages": ["@pi-im-bot/messages@workspace:pkgs/messages"],
+
+    "@pi-im-bot/onebot": ["@pi-im-bot/onebot@workspace:pkgs/onebot"],
 
     "@pi-im-bot/permissions": ["@pi-im-bot/permissions@workspace:pkgs/permissions"],
 
