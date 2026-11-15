@@ -35,7 +35,10 @@ export function createToolkit(
   if (input.context.jobId) {
     artifactOwner = `job:${input.context.jobId}:${input.context.jobRevision}`
   }
-  const sources = (services.mediaSources ??= new Set<string>())
+  if (!services.mediaSources) {
+    services.mediaSources = new Set<string>()
+  }
+  const sources = services.mediaSources
   function access() {
     for (const id of sources) {
       signal.throwIfAborted()

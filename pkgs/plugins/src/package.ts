@@ -6,7 +6,7 @@ import { PluginManifestSchema, type PluginManifest } from "./manifest"
 import { PluginPackageSchema, type PluginInstance, type PluginPackage } from "./config"
 import { pluginSourceRevision } from "./identity"
 import { revision } from "@pi-im-bot/settings/resolve"
-import { parseConfigDefinition } from "./configuration/schema"
+import { parseConfigDefinition, type ConfigDefinition } from "./configuration/schema"
 import type { PluginOrigin } from "./install/origin"
 
 const maxPackageBytes = 64 * 1024 * 1024
@@ -106,7 +106,7 @@ export async function importPlugin(
     }
     contents.set(path, data)
   }
-  let configuration
+  let configuration: ConfigDefinition | undefined
   const schema = contents.get("_conf_schema.json")
   if (schema) {
     configuration = parseConfigDefinition(JSON.parse(schema.toString("utf8")))

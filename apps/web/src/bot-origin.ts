@@ -15,6 +15,10 @@ export function botApiUrl(path: string, origin = defaultOrigin) {
 
 export function botWebSocketUrl(path: string, origin = defaultOrigin) {
   const url = new URL(botApiUrl(path, origin))
-  url.protocol = url.protocol === "https:" ? "wss:" : "ws:"
+  if (url.protocol === "https:") {
+    url.protocol = "wss:"
+  } else {
+    url.protocol = "ws:"
+  }
   return url.toString()
 }

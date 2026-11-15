@@ -98,7 +98,7 @@ export async function connectMcp(
     return message
   }
   signal.addEventListener("abort", abort, { once: true })
-  let initialization
+  let initialization: ReturnType<typeof McpInitializationSchema.parse>
   try {
     initialization = McpInitializationSchema.parse(await client.connect(transport))
     signal.throwIfAborted()

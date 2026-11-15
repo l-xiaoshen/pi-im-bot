@@ -219,7 +219,7 @@ export class PluginInstaller {
       await this.save()
       const stored = pluginPackageRoot(paths.packageDir, bundle)
       bundle.updateSourceId = await saveUpdateSource(this.root, id, input)
-      let create
+      let create: typeof instance | undefined
       if (!previous) {
         create = instance
       }

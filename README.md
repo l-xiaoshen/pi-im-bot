@@ -131,6 +131,7 @@ bun run pack:plugin examples/plugins/echo /tmp/echo.zip
 
 ```sh
 bun run check
+bun run lint
 bun run build
 bun run format:check
 ```

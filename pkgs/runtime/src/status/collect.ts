@@ -148,7 +148,10 @@ export async function collectRuntimeStatus(config: Configuration): Promise<Runti
   } else {
     warnings.push("network-unavailable")
   }
-  const gpuValue = gpu.status === "fulfilled" ? gpu.value : undefined
+  let gpuValue: Awaited<ReturnType<typeof probeNvidiaGpu>>
+  if (gpu.status === "fulfilled") {
+    gpuValue = gpu.value
+  }
   if (!gpuValue) {
     warnings.push("gpu-unavailable")
   }

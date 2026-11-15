@@ -14,7 +14,10 @@ function numeric(value: string) {
     return null
   }
   const parsed = Number(trimmed)
-  return Number.isFinite(parsed) ? parsed : null
+  if (!Number.isFinite(parsed)) {
+    return null
+  }
+  return parsed
 }
 
 export function parseNvidiaSmiCsv(text: string): GpuStatus | undefined {

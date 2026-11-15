@@ -90,7 +90,12 @@ function renderSidebar() {
   for (const [key, rooms] of platforms) {
     const platform = element("section", "platform-group")
     const [channel, accountId] = key.split(":")
-    const platformName = channel === "onebot-v11" ? "QQ" : channel === "mock" ? "Mock" : channel
+    let platformName = channel
+    if (channel === "onebot-v11") {
+      platformName = "QQ"
+    } else if (channel === "mock") {
+      platformName = "Mock"
+    }
     platform.append(element("h3", "platform-heading", platformName + " · " + accountId))
     for (const room of rooms) {
       const item = button(
@@ -104,8 +109,12 @@ function renderSidebar() {
       if (room.id === activeRoom) {
         item.classList.add("active")
       }
-      const marker = room.address.kind === "direct" ? "↗" : "#"
-      const kind = room.address.kind === "direct" ? "私聊渠道" : "群渠道"
+      let marker = "#"
+      let kind = "群渠道"
+      if (room.address.kind === "direct") {
+        marker = "↗"
+        kind = "私聊渠道"
+      }
       const label = element("div")
       label.append(element("strong", "", room.name), element("small", "", kind + " · " + room.address.chatId))
       item.append(element("span", "room-marker", marker), label)

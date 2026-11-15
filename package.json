@@ -22,7 +22,9 @@
     "share:export": "bun scripts/export-source.ts",
     "check": "tsc --noEmit",
     "format": "biome format --write .",
-    "format:check": "biome format ."
+    "format:check": "biome format .",
+    "lint": "biome lint .",
+    "lint:fix": "biome lint --write ."
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.8",

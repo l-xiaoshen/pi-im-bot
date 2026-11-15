@@ -30,7 +30,14 @@
     }
   },
   "linter": {
-    "enabled": false
+    "enabled": true,
+    "rules": {
+      "preset": "recommended",
+      "style": {
+        "noTernary": "error",
+        "useBlockStatements": "error"
+      }
+    }
   },
   "assist": {
     "enabled": false

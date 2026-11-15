@@ -29,13 +29,16 @@ export function createChatView(
   const header = element("header", "page-header")
   const heading = element("div")
   const roomTitle = element("h1", "", detail.room.name)
-  const kindLabel = detail.room.address.kind === "direct" ? "私聊渠道" : "群渠道"
-  const platformLabel =
-    detail.room.address.channel === "onebot-v11"
-      ? "QQ"
-      : detail.room.address.channel === "mock"
-        ? "Mock"
-        : detail.room.address.channel
+  let kindLabel = "群渠道"
+  if (detail.room.address.kind === "direct") {
+    kindLabel = "私聊渠道"
+  }
+  let platformLabel = detail.room.address.channel
+  if (detail.room.address.channel === "onebot-v11") {
+    platformLabel = "QQ"
+  } else if (detail.room.address.channel === "mock") {
+    platformLabel = "Mock"
+  }
   const subtitle = element("p", "subtitle", platformLabel + " · " + kindLabel + " · 共享会话上下文")
   const isQQ = detail.room.address.channel === "onebot-v11"
   const roomEnabled = !isQQ || oneBotAllowed(snapshot.onebotSettings, detail.room.address)

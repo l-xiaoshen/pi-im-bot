@@ -50,13 +50,17 @@ export class ProviderCatalog {
         if (!modelConfig.enabled) {
           continue
         }
+        let input: Model<"openai-responses">["input"] = ["text"]
+        if (modelConfig.images) {
+          input = ["text", "image"]
+        }
         const model: Model<"openai-responses"> = {
           id: modelConfig.id,
           name: modelConfig.name ?? modelConfig.id,
           api: "openai-responses",
           provider: provider.id,
           baseUrl: provider.baseUrl.replace(/\/$/, ""),
-          input: modelConfig.images ? ["text", "image"] : ["text"],
+          input,
           reasoning: modelConfig.reasoning,
           contextWindow: modelConfig.contextWindow,
           maxTokens: modelConfig.maxOutputTokens,

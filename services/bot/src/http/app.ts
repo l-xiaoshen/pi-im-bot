@@ -65,7 +65,12 @@ export function createHttpApp(services: HttpServices) {
   app.use(
     "/api/*",
     cors({
-      origin: (origin) => (services.webOrigins.includes(origin) ? origin : ""),
+      origin: (origin) => {
+        if (services.webOrigins.includes(origin)) {
+          return origin
+        }
+        return ""
+      },
       allowMethods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
       allowHeaders: ["Content-Type"],
       maxAge: 600

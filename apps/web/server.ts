@@ -38,7 +38,10 @@ const server = Bun.serve({
     if (path === "/config.js") {
       return new Response(configuration, { headers: { "content-type": "text/javascript; charset=utf-8" } })
     }
-    const relative = path === "/" ? "index.html" : normalize(decodeURIComponent(path)).replace(/^[/\\]+/, "")
+    let relative = "index.html"
+    if (path !== "/") {
+      relative = normalize(decodeURIComponent(path)).replace(/^[/\\]+/, "")
+    }
     if (relative.split(/[/\\]/).includes("..")) {
       return new Response("Invalid path", { status: 400 })
     }

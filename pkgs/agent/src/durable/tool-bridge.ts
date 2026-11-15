@@ -31,7 +31,7 @@ export function durableTool(tool: BotTool, authorize: () => void): ToolRegistrat
           }
         }
       })
-      let details
+      let details: z.infer<ReturnType<typeof z.json>> | undefined
       if (result.details !== undefined) {
         details = z.json().parse(JSON.parse(JSON.stringify(result.details)))
       }
