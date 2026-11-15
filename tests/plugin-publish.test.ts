@@ -4,11 +4,11 @@ import { createHash } from 'node:crypto'
 import { pluginFixture } from './plugin-fixture'
 import { jobHarness } from './job-harness'
 import { responsesReply } from './responses-fixture'
-import { ResourceLibrary } from '../src/resources/library'
-import { ResourcesConfigSchema } from '../src/resources/schema'
-import { PluginService } from '../src/plugins/service'
-import { ArtifactStore } from '../src/artifacts/store'
-import { artifactBudget } from '../src/artifacts/quota'
+import { ResourceLibrary } from '@pi-im-bot/resources/library'
+import { ResourcesConfigSchema } from '@pi-im-bot/resources/schema'
+import { PluginService } from '@pi-im-bot/plugins/service'
+import { ArtifactStore } from '@pi-im-bot/artifacts/store'
+import { artifactBudget } from '@pi-im-bot/artifacts/quota'
 
 test('large plugin files publish without entering RPC frames and descriptor traversal rejects parent and leaf symlinks', async () => {
   const env = await pluginFixture()

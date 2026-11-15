@@ -2,10 +2,10 @@ import { expect, test } from 'bun:test'
 import { pluginFixture } from './plugin-fixture'
 import { jobHarness } from './job-harness'
 import { responsesReply } from './responses-fixture'
-import { PluginService } from '../src/plugins/service'
-import { ResourcesConfigSchema } from '../src/resources/schema'
-import { ResourceLibrary } from '../src/resources/library'
-import { RuntimeStatusSchema } from '../src/runtime/status/schema'
+import { PluginService } from '@pi-im-bot/plugins/service'
+import { ResourcesConfigSchema } from '@pi-im-bot/resources/schema'
+import { ResourceLibrary } from '@pi-im-bot/resources/library'
+import { RuntimeStatusSchema } from '@pi-im-bot/runtime/status/schema'
 
 test('system status is a scoped read-only RPC, not a selectable model tool or arbitrary host file reader', async () => {
   const env = await pluginFixture()

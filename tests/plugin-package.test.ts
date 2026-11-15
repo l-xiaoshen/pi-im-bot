@@ -2,9 +2,9 @@ import { expect, test } from 'bun:test'
 import { mkdir, symlink, rm } from 'node:fs/promises'
 import { join } from 'node:path'
 import { pluginFixture } from './plugin-fixture'
-import { importPlugin, verifyPlugin, pluginPackageRoot } from '../src/plugins/package'
-import { PluginManifestSchema } from '../src/plugins/manifest'
-import { PluginPackageSchema } from '../src/plugins/config'
+import { importPlugin, verifyPlugin, pluginPackageRoot } from '@pi-im-bot/plugins/package'
+import { PluginManifestSchema } from '@pi-im-bot/plugins/manifest'
+import { PluginPackageSchema } from '@pi-im-bot/plugins/config'
 
 test('plugin import executes neither entry nor installation scripts and preserves immutable versions', async () => {
   const env = await pluginFixture()

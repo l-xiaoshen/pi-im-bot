@@ -3,9 +3,9 @@ import { join } from 'node:path'
 import { createHash } from 'node:crypto'
 import { pluginConsoleFixture } from './plugin-console-fixture'
 import { untilJob } from './job-harness'
-import { PluginInstaller } from '../src/plugins/install/service'
-import { PluginMarket } from '../src/plugins/market/service'
-import { pluginArchive } from '../src/plugins/install/archive'
+import { PluginInstaller } from '@pi-im-bot/plugins/install/service'
+import { PluginMarket } from '@pi-im-bot/plugins/market/service'
+import { pluginArchive } from '@pi-im-bot/plugins/install/archive'
 
 test('force update follows the catalog across repeated same-version publications and preserves live settings after a rejected replacement', async () => {
   const fixture = await pluginConsoleFixture()

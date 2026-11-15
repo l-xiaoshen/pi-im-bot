@@ -109,12 +109,12 @@ Context provider 输出不可变片段，携带 source/trust/priority/maxTokens�
 建议按职责增加以下模块，而不是先改写全部现有实现：
 
 ~~~text
-src/execution/       后端协议、租约、Pi operation adapters
-src/artifacts/       元数据、授权、导入导出、引用与回收
-src/plugins/         manifest、包注册、worker RPC、权限与健康
+pkgs/execution/src/       后端协议、租约、Pi operation adapters
+pkgs/artifacts/src/       元数据、授权、导入导出、引用与回收
+pkgs/plugins/src/         manifest、包注册、worker RPC、权限与健康
 src/orchestration/   阶段定义、profile 编译、ReplyDraft/DeliveryPlan
-src/runtime/         现有入口协调，逐步引入 outbox 与持久事件
-src/channels/        QQ / TG / Mock 协议转换与 capability
+pkgs/runtime/src/         现有入口协调，逐步引入 outbox 与持久事件
+pkgs/channels/src/        QQ / TG / Mock 协议转换与 capability
 ~~~
 
 插件 SDK 只暴露上下文、数据、产物、任务、明确授权的外部能力；不暴露原始 DB handle、任意宿主 fs、Bot 对象、Provider 凭据或任意 URL 的 host fetch。

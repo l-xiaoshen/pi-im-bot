@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test'
 import { pluginFixture } from './plugin-fixture'
-import { importPlugin } from '../src/plugins/package'
+import { importPlugin } from '@pi-im-bot/plugins/package'
 import { join } from 'node:path'
 import { untilJob } from './job-harness'
 

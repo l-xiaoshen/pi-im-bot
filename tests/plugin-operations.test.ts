@@ -2,9 +2,9 @@ import { expect, test } from 'bun:test'
 import { pluginFixture } from './plugin-fixture'
 import { jobHarness } from './job-harness'
 import { responsesReply } from './responses-fixture'
-import { ResourceLibrary } from '../src/resources/library'
-import { ResourcesConfigSchema } from '../src/resources/schema'
-import { PluginService } from '../src/plugins/service'
+import { ResourceLibrary } from '@pi-im-bot/resources/library'
+import { ResourcesConfigSchema } from '@pi-im-bot/resources/schema'
+import { PluginService } from '@pi-im-bot/plugins/service'
 
 test('plugin operation RPC preserves the original authority and private settings, rejects target revocation and breaks reentry without waiting', async () => {
   const env = await pluginFixture({ maxWorkers: 2 })

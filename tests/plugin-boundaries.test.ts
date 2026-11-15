@@ -3,10 +3,10 @@ import { z } from 'zod'
 import { connect } from 'node:net'
 import { join } from 'node:path'
 import { pluginFixture } from './plugin-fixture'
-import { PluginHostServices } from '../src/plugins/rpc/services'
-import { workerScopeKey } from '../src/plugins/runtime/container-spec'
-import { PluginFrameReader, encodePluginFrame, maximumPluginFrameBytes } from '../src/plugins/rpc/codec'
-import { PluginPeer } from '../src/plugins/rpc/peer'
+import { PluginHostServices } from '@pi-im-bot/plugins/rpc/services'
+import { workerScopeKey } from '@pi-im-bot/plugins/runtime/container-spec'
+import { PluginFrameReader, encodePluginFrame, maximumPluginFrameBytes } from '@pi-im-bot/plugins/rpc/codec'
+import { PluginPeer } from '@pi-im-bot/plugins/rpc/peer'
 
 const action = { kind: 'operation', handler: 'echo', phase: 'execute' } as const
 const noHost = async () => {

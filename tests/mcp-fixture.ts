@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { McpServerSchema, type McpTool } from '../src/resources/mcp/schema'
+import { McpServerSchema, type McpTool } from '@pi-im-bot/resources/mcp/schema'
 import type { CallToolResult } from '@earendil-works/pi-mcp'
 
 const RequestSchema = z.object({

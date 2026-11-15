@@ -2,10 +2,10 @@ import { expect, test } from 'bun:test'
 import { BACKGROUND_CONTEXT } from '@earendil-works/chord/context'
 import { jobHarness, untilJob } from './job-harness'
 import { responsesReply } from './responses-fixture'
-import { JobIndex, Jobs } from '../src/jobs/documents'
-import { JobSchema, JobSummarySchema, jobSummary, type JobSummary } from '../src/jobs/schema'
-import { JobHistoryHead, JobHistoryPage, historyScope, historyPageKey } from '../src/jobs/history'
-import { localIdentity } from '../src/permissions/identity'
+import { JobIndex, Jobs } from '@pi-im-bot/jobs/documents'
+import { JobSchema, JobSummarySchema, jobSummary, type JobSummary } from '@pi-im-bot/jobs/schema'
+import { JobHistoryHead, JobHistoryPage, historyScope, historyPageKey } from '@pi-im-bot/jobs/history'
+import { localIdentity } from '@pi-im-bot/permissions/identity'
 
 test('a revised old Job returns to newest history without stale revisions, page gaps or active duplicates', async () => {
   const entered = Promise.withResolvers<void>()

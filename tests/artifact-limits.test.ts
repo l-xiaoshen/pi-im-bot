@@ -2,9 +2,9 @@ import { expect, test } from 'bun:test'
 import { mkdtemp, rm, open, mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import { createHash } from 'node:crypto'
-import { ArtifactBudget, artifactBudget, configureArtifacts } from '../src/artifacts/quota'
-import { ArtifactLimitsSchema } from '../src/artifacts/limits'
-import { ArtifactStore } from '../src/artifacts/store'
+import { ArtifactBudget, artifactBudget, configureArtifacts } from '@pi-im-bot/artifacts/quota'
+import { ArtifactLimitsSchema } from '@pi-im-bot/artifacts/limits'
+import { ArtifactStore } from '@pi-im-bot/artifacts/store'
 
 test('reservations limit concurrent and per-producer writes, survive reload, and cancelled file copies release their reservation', async () => {
   const root = await mkdtemp('/tmp/pi-artifact-budget-')

@@ -1,10 +1,10 @@
 import { expect, test } from 'bun:test'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { join } from 'node:path'
-import { resolvePluginSource } from '../src/plugins/install/source'
-import { PluginInstallUrlSchema } from '../src/plugins/install/url'
-import { PluginDownloadError, type PluginSourceReader } from '../src/plugins/install/download'
-import { pluginArchive, unpackPluginArchive } from '../src/plugins/install/archive'
+import { resolvePluginSource } from '@pi-im-bot/plugins/install/source'
+import { PluginInstallUrlSchema } from '@pi-im-bot/plugins/install/url'
+import { PluginDownloadError, type PluginSourceReader } from '@pi-im-bot/plugins/install/download'
+import { pluginArchive, unpackPluginArchive } from '@pi-im-bot/plugins/install/archive'
 
 const sha = 'a'.repeat(40)
 const api = 'https://api.github.com/repos/owner/plugin'

@@ -1,6 +1,6 @@
 import { Database } from 'bun:sqlite'
 import { performance } from 'node:perf_hooks'
-import { initializePlatformIndex, platformMessageQuery } from '../../src/storage/platform-index'
+import { initializePlatformIndex, platformMessageQuery } from '@pi-im-bot/storage/platform-index'
 const original = `SELECT value FROM messages WHERE room_id=? AND EXISTS (SELECT 1 FROM json_each(messages.value, '$.platformMessageIds') ids WHERE ids.value=?) LIMIT 1`
 function median(samples: number[]) {
   samples.sort((a, b) => {

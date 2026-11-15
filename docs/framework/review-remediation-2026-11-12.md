@@ -37,7 +37,7 @@ All commands used the respective project's `node_modules/.bin/bun` with that dir
 | --- | --- | --- | --- |
 | Core | `bun run check` | pass | `${VALIDATION_DIR}/core-check.log` |
 | Core | `bun test tests` | 129 pass, 0 fail, 961 assertions, 49 files, 26.95 s | `${VALIDATION_DIR}/core-test.log` |
-| Core | `bun run build` | pass; `BOT_WEB_DIR=${VALIDATION_DIR}/web-build` | `${VALIDATION_DIR}/core-build.log` |
+| Core | `bun run build` | pass; `WEB_DIST_DIR=${VALIDATION_DIR}/web-build` | `${VALIDATION_DIR}/core-build.log` |
 | Plugins | `bun run check` | pass | `${VALIDATION_DIR}/plugin-check.log` |
 | Plugins | `bun test tests` | 4 pass, 0 fail, 42 assertions, 2 files | `${VALIDATION_DIR}/plugin-test.log` |
 | Plugins | `bun run build` | pass | `${VALIDATION_DIR}/plugin-build.log` |
@@ -108,7 +108,7 @@ Proposed core commit: `perf: separate active jobs from durable history and index
 
 Pi 仍拥有对话、压缩、模型循环和工具循环。Bot 提供可信身份、权限、消息归档、受理、配置快照、Job、产物、发送账本和隔离执行。插件在 Worker 中实现业务，不取得 Bot/Pi 对象、宿主文件系统、正式凭据或网络权限。
 
-`src/plugins/host.ts` 实际注册 `system.status`、`history.read`、`artifact.read/write/publish`、`delivery.send`，在相应调用范围内提供 `delivery.recall`。`connectors.ts` 提供绑定 MCP RPC，`operations-rpc.ts` 和 `points.ts` 提供授权的跨插件 operation/自定义切入点。六个核心 Hook 有真实调用位置、模式、schema、可写路径与 before/after/requires 排序。指令与 Pi 工具复用 operation；后台 execute/pending/poll/cancel 已接入持久 Job。operation 的 execute 输入与可选 outputSchema 确实由 Worker 校验；不能误报为“尚未实现 schema”。
+`pkgs/plugins/src/host.ts` 实际注册 `system.status`、`history.read`、`artifact.read/write/publish`、`delivery.send`，在相应调用范围内提供 `delivery.recall`。`connectors.ts` 提供绑定 MCP RPC，`operations-rpc.ts` 和 `points.ts` 提供授权的跨插件 operation/自定义切入点。六个核心 Hook 有真实调用位置、模式、schema、可写路径与 before/after/requires 排序。指令与 Pi 工具复用 operation；后台 execute/pending/poll/cancel 已接入持久 Job。operation 的 execute 输入与可选 outputSchema 确实由 Worker 校验；不能误报为“尚未实现 schema”。
 
 以上是**当前存在**的能力。本轮修复的归档/受理丢失、取消/交付越界、历史索引增长和清理失败无法重试属于**已有实现缺陷**。下面列出的服务与声明是**尚未实现的能力**，没有在此次修复中偷偷增加权限或空 API。
 
@@ -123,7 +123,7 @@ Pi 仍拥有对话、压缩、模型循环和工具循环。Bot 提供可信身�
 | 结构化消息、显式多目标路由、平台事件/交互构造 | 合并转发、@/引用、跨范围提醒、批量撤回的完整原功能 | 当前发送是绑定范围内文字与 Artifact，撤回限定本次已确认回执。原始 adapter/任意目标群发送均未开放 |
 | 渲染/知识库等受管领域服务，以及必要的隔离页面/路由/配置文件资源上传 | HTML 卡片、RAG、扫码/确认页面、背景文件等 | 状态插件自带 WASM 渲染可用；没有 render.html、知识库 RPC、自定义插件页面/宿主 Web 路由或通用配置文件上传 |
 
-依据：`src/plugins/host.ts`、`connectors.ts`、`rpc/services.ts`、`sdk/index.ts`、`manifest.ts`、`hooks/points.ts`、`runtime/config.ts`，以及已维护的 `installed-plugin-map.md` 和状态插件 `MIGRATION.md`。目录功能盘点不是当前启用清单；这里没有重新读取其他系统的正式凭据或执行第三方插件。
+依据：`pkgs/plugins/src/host.ts`、`connectors.ts`、`rpc/services.ts`、`sdk/index.ts`、`manifest.ts`、`hooks/points.ts`、`runtime/config.ts`，以及已维护的 `installed-plugin-map.md` 和状态插件 `MIGRATION.md`。目录功能盘点不是当前启用清单；这里没有重新读取其他系统的正式凭据或执行第三方插件。
 
 ### Plugin 声明、生命周期与编排契约缺口
 
@@ -143,8 +143,8 @@ Pi 仍拥有对话、压缩、模型循环和工具循环。Bot 提供可信身�
 | --- | --- | --- |
 | Core | `bun run check` | pass |
 | Core | `bun test tests` | **144 pass, 0 fail**, 1029 assertions, 52 files, 28.07 s |
-| Core | `bun run build` | pass; output isolated via BOT_WEB_DIR to task /tmp |
-| Core | Prettier check over src/web/scripts/tests/example configs | pass |
+| Core | `bun run build` | pass; output isolated via WEB_DIST_DIR to task /tmp |
+| Core | Prettier check over src/apps/web/src/scripts/tests/example configs | pass |
 | Plugins | `bun run check`, `bun test tests` | pass; **4 pass, 0 fail**, 42 assertions |
 | Plugins | `bun run build`, `bun run format:check` | pass |
 | Plugins | build → pack → rebuild → pack | both pass, ZIP files byte-identical |
@@ -200,7 +200,7 @@ Review artifacts are incremental **after pass2**: apply original core `phase1.pa
 
 Review-round package SHA-256: `8bd4b0f0c29b17ad7c4f2ae478ab840c89a50deda0a3a742b41e8897fe8112dd` for both `review-round1/status-first.zip` and `status-second.zip`. Browser verification was not repeated because no previously verified page changed in this round. Command logs and the unchanged reviewer reproduction output are in that review-round directory. No database tests, dependency changes, formal configuration changes, real QQ sends or paid model calls were added.
 
-The core review patch includes the new `src/jobs/history.ts`, `tests/inbound-control.test.ts`, and `tests/job-history-revision.test.ts`. Nonempty-page links are a derived projection, lazily added to old page records; they do not expire receipts or remove old Job revision bodies. Revised history freshness is a behavioral correction, not a documentation-only redefinition. The original permission policy was neither requested to change nor changed.
+The core review patch includes the new `pkgs/jobs/src/history.ts`, `tests/inbound-control.test.ts`, and `tests/job-history-revision.test.ts`. Nonempty-page links are a derived projection, lazily added to old page records; they do not expire receipts or remove old Job revision bodies. Revised history freshness is a behavioral correction, not a documentation-only redefinition. The original permission policy was neither requested to change nor changed.
 
 Replay coverage is **15 core files (3 added) and 3 plugin files** relative to pass2; cumulative baseline-to-final changes are **54 core files and 6 plugin files**. The complete exported source trees compare byte-for-byte after applying the original patches and these increments. `review-round1/replay-verification.json` records the comparison and checksums; `review-fix-files.json` / `plugins-review-fix-files.json` list exact paths and add/modify status. The original five stages and original plugin patch retain their recorded SHA-256 values. No commit SHA is invented for these uncommitted source patches.
 

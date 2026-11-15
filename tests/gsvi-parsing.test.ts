@@ -1,5 +1,10 @@
 import { test, expect } from 'bun:test'
-import { pythonDecimal, pythonCasefold, pythonCompare, pythonStrip } from '../src/services/gsvi/unicode'
+import {
+  pythonDecimal,
+  pythonCasefold,
+  pythonCompare,
+  pythonStrip
+} from '@pi-im-bot/integrations/gsvi/unicode'
 test('source int accepts Unicode decimal, mixed scripts and interior underscores, rejects prefixes and malformed separators', () => {
   for (const [input, value] of [
     ['１２_٣', 123],

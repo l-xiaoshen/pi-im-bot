@@ -1,0 +1,20 @@
+{
+  "name": "@pi-im-bot/config",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "dependencies": {
+    "@pi-im-bot/artifacts": "workspace:*",
+    "@pi-im-bot/channels": "workspace:*",
+    "@pi-im-bot/execution": "workspace:*",
+    "@pi-im-bot/plugins": "workspace:*",
+    "@pi-im-bot/providers": "workspace:*",
+    "@pi-im-bot/resources": "workspace:*",
+    "@pi-im-bot/settings": "workspace:*",
+    "@pi-im-bot/support": "workspace:*",
+    "zod": "4.6.7"
+  }
+}

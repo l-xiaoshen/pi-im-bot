@@ -1,5 +1,5 @@
 import { expect, test } from 'bun:test'
-import { pluginArchive } from '../src/plugins/install/archive'
+import { pluginArchive } from '@pi-im-bot/plugins/install/archive'
 
 test('plugin export rejects internal agent files at every depth and retains ordinary documentation', () => {
   for (const path of [

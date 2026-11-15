@@ -27,7 +27,7 @@ GSVI source: read-only `gsvi-reference-1.4.1`, metadata v1.4.1, author wsure, re
 - [x] Scoped mediaId metadata/chunk RPC backed by MediaService, source/history discovery and real Worker processing/export artifact; source recall, cross-scope, errors/expiry, cancellation, MIME/size and concurrent download constraints.
 - [x] SDK helpers, configuration UI/diagnostics and docs distinguish installed/enabled/bound/callable; existing connectors/status remain functional.
 - [x] Authored local HTTP + managed Worker fixture exercise SDK/RPC/Job/Artifact/delivery and failure boundaries, including unknown outcomes, cancellation, revocation and text fallback; no new database tests.
-- [x] Core check/tests/build (`BOT_WEB_DIR=${VALIDATION_DIR}/web`); plugin check/tests/build/format and reproducible packs; shared-browser isolated UI verification.
+- [x] Core check/tests/build (`WEB_DIST_DIR=${VALIDATION_DIR}/web`); plugin check/tests/build/format and reproducible packs; shared-browser isolated UI verification.
 - [x] Stage patches include new files with SHA-256 manifests; final replay procedure and receipts are recorded in the handoff section below.
 
 ## Initial migration matrix
@@ -115,7 +115,7 @@ Tests are authored Worker/process fixtures and local Hono HTTP, existing JSONL d
 | --- | --- | --- |
 | Core check | pass | core-check.log |
 | Core tests | 160 pass, 0 fail, 1177 assertions, 57 files, 28.52s | core-test.log |
-| Core build | pass, BOT_WEB_DIR=${VALIDATION_DIR}/web | core-build.log |
+| Core build | pass, WEB_DIST_DIR=${VALIDATION_DIR}/web | core-build.log |
 | Plugins check / tests | pass; 16 pass, 0 fail, 141 assertions, 4 files, 3.98s | plugins-check.log / plugins-test.log |
 | Plugins build / format:check | pass | plugins-build.log / plugins-format.log |
 | Build → pack → rebuild → pack | status, gsvi-tts, media-inspect each byte-identical | packages.json, plugins-pack-*.log |
@@ -166,54 +166,54 @@ docs/plugins/async-and-data.md
 docs/plugins/bot-capabilities.md
 docs/plugins/managed-media-and-speech.md
 docs/plugins/package-and-config.md
-src/agent/host-tools.ts
-src/agent/toolkit.ts
-src/artifacts/access.ts
-src/artifacts/store.ts
-src/artifacts/tool.ts
-src/http/artifact-routes.ts
-src/http/resource-routes.ts
-src/jobs/worker.ts
-src/media/dependencies.ts
-src/media/service.ts
-src/media/tool.ts
-src/permissions/catalog.ts
-src/plugins/artifact-access.ts
-src/plugins/config.ts
-src/plugins/configuration/contracts.ts
-src/plugins/configuration/editor.ts
-src/plugins/contracts.ts
-src/plugins/host.ts
-src/plugins/invocation.ts
-src/plugins/jobs/context.ts
-src/plugins/management.ts
-src/plugins/manifest.ts
-src/plugins/media-rpc.ts
-src/plugins/rpc/services.ts
-src/plugins/sdk/index.ts
-src/plugins/sdk/services.ts
-src/plugins/service-rpc.ts
-src/plugins/service.ts
-src/resources/contracts.ts
-src/resources/editor.ts
-src/resources/schema.ts
-src/runtime/coordinator.ts
-src/runtime/delivery.ts
-src/services/gsvi/client.ts
-src/services/gsvi/configuration.ts
-src/services/gsvi/http.ts
-src/services/gsvi/identity.ts
-src/services/gsvi/schema.ts
-src/services/gsvi/wav.ts
+pkgs/agent/src/host-tools.ts
+pkgs/agent/src/toolkit.ts
+pkgs/artifacts/src/access.ts
+pkgs/artifacts/src/store.ts
+pkgs/artifacts/src/tool.ts
+services/bot/src/http/artifact-routes.ts
+services/bot/src/http/resource-routes.ts
+pkgs/jobs/src/worker.ts
+pkgs/media/src/dependencies.ts
+pkgs/media/src/service.ts
+pkgs/media/src/tool.ts
+pkgs/permissions/src/catalog.ts
+pkgs/plugins/src/artifact-access.ts
+pkgs/plugins/src/config.ts
+pkgs/plugins/src/configuration/contracts.ts
+pkgs/plugins/src/configuration/editor.ts
+pkgs/plugins/src/contracts.ts
+pkgs/plugins/src/host.ts
+pkgs/plugins/src/invocation.ts
+pkgs/plugins/src/jobs/context.ts
+pkgs/plugins/src/management.ts
+pkgs/plugins/src/manifest.ts
+pkgs/plugins/src/media-rpc.ts
+pkgs/plugins/src/rpc/services.ts
+pkgs/plugin-sdk/src/index.ts
+pkgs/plugin-sdk/src/services.ts
+pkgs/plugins/src/service-rpc.ts
+pkgs/plugins/src/service.ts
+pkgs/resources/src/contracts.ts
+pkgs/resources/src/editor.ts
+pkgs/resources/src/schema.ts
+pkgs/runtime/src/coordinator.ts
+pkgs/runtime/src/delivery.ts
+pkgs/integrations/src/gsvi/client.ts
+pkgs/integrations/src/gsvi/configuration.ts
+pkgs/integrations/src/gsvi/http.ts
+pkgs/integrations/src/gsvi/identity.ts
+pkgs/integrations/src/gsvi/schema.ts
+pkgs/integrations/src/gsvi/wav.ts
 tests/gsvi-service.test.ts
 tests/media-download-lifecycle.test.ts
 tests/plugin-foundation-boundaries.test.ts
 tests/wav-fixture.ts
-web/plugins/configuration.ts
-web/plugins/grants.ts
-web/plugins/usage.ts
-web/resources/gsvi-form.ts
-web/resources/page.ts
+apps/web/src/plugins/configuration.ts
+apps/web/src/plugins/grants.ts
+apps/web/src/plugins/usage.ts
+apps/web/src/resources/gsvi-form.ts
+apps/web/src/resources/page.ts
 ```
 
 ### plugins — 32 changed paths

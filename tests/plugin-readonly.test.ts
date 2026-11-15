@@ -3,12 +3,12 @@ import { pluginFixture } from './plugin-fixture'
 import { mcpFixture } from './mcp-fixture'
 import { jobHarness } from './job-harness'
 import { responsesReply } from './responses-fixture'
-import { ResourceLibrary } from '../src/resources/library'
-import { ResourcesConfigSchema } from '../src/resources/schema'
-import { inspectMcp } from '../src/resources/mcp/client'
-import { createMcpTools } from '../src/resources/mcp/tools'
-import { ArtifactStore } from '../src/artifacts/store'
-import { PluginService } from '../src/plugins/service'
+import { ResourceLibrary } from '@pi-im-bot/resources/library'
+import { ResourcesConfigSchema } from '@pi-im-bot/resources/schema'
+import { inspectMcp } from '@pi-im-bot/resources/mcp/client'
+import { createMcpTools } from '@pi-im-bot/resources/mcp/tools'
+import { ArtifactStore } from '@pi-im-bot/artifacts/store'
+import { PluginService } from '@pi-im-bot/plugins/service'
 
 test('context connectors recheck live read-only metadata while ordinary authorized MCP calls keep working with their pinned catalog', async () => {
   const env = await pluginFixture()

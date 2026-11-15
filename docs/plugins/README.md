@@ -14,7 +14,7 @@
 | 构建、验证、打包和 GitHub 发布     | [开发与分发](development-and-distribution.md) |
 | 如何迁移 AstrBot Python 插件       | [迁移指南](migration.md)                      |
 
-框架源码是接口依据：`src/plugins/manifest.ts`、`sdk/index.ts`、`sdk/worker.ts`、`rpc/protocol.ts`、`host.ts`、`commands.ts`、`service.ts`、`hooks/points.ts`、`runtime/config.ts`。迁移工作区会在 `docs/bot-api/snapshot.json` 中保存这些文件的摘要。
+框架源码是接口依据：`pkgs/plugins/src/manifest.ts`、`sdk/index.ts`、`sdk/worker.ts`、`rpc/protocol.ts`、`host.ts`、`commands.ts`、`service.ts`、`hooks/points.ts`、`runtime/config.ts`。迁移工作区会在 `docs/bot-api/snapshot.json` 中保存这些文件的摘要。
 
 ## 模型与插件分别负责什么
 

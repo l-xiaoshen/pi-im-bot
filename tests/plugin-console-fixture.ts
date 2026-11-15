@@ -2,11 +2,11 @@ import { join } from 'node:path'
 import { pluginFixture } from './plugin-fixture'
 import { jobHarness } from './job-harness'
 import { responsesReply } from './responses-fixture'
-import { PluginEditor } from '../src/plugins/editor'
-import { FrameworkEditor } from '../src/settings/editor'
-import { ConfigurationMutations } from '../src/config/mutations'
-import { PluginService } from '../src/plugins/service'
-import { PluginRuntimeSchema } from '../src/plugins/runtime/config'
+import { PluginEditor } from '@pi-im-bot/plugins/editor'
+import { FrameworkEditor } from '@pi-im-bot/settings/editor'
+import { ConfigurationMutations } from '@pi-im-bot/config/mutations'
+import { PluginService } from '@pi-im-bot/plugins/service'
+import { PluginRuntimeSchema } from '@pi-im-bot/plugins/runtime/config'
 
 export async function pluginConsoleFixture() {
   const env = await pluginFixture()

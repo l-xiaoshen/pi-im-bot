@@ -20,7 +20,7 @@
 | 第二批 | 结构化消息与受权目标、交互回调 | 当前发送文字和 Artifact，可限定范围发送及撤回 | @、引用、合并转发、群文件、按钮和跨范围提醒需要类型化消息元素、平台能力判断、目标授权及分部回执。不能仅向业务插件传一个 adapter 对象。 |
 | 按实际迁移补充 | 增量历史、渲染、知识库、配置资源上传及隔离页面 | history.read 提供最近有界投影；状态插件自带 WASM 渲染 | 分析群流水需要游标及完整性说明；背景图、HTML 卡片、RAG 或确认页面各需明确服务接口。按具体插件验收补齐，避免先做完整通用平台。 |
 
-依据：[宿主 RPC](../../src/plugins/host.ts)、[连接器](../../src/plugins/connectors.ts)、[观察执行](../../src/plugins/observations/worker.ts)、[公共 SDK](../../src/plugins/sdk/index.ts)、[操作与 Hook 声明](../../src/plugins/manifest.ts)。Bot 内部有同名工具不等于插件已经取得对应 RPC。
+依据：[宿主 RPC](../../pkgs/plugins/src/host.ts)、[连接器](../../pkgs/plugins/src/connectors.ts)、[观察执行](../../pkgs/plugins/src/observations/worker.ts)、[公共 SDK](../../pkgs/plugin-sdk/src/index.ts)、[操作与 Hook 声明](../../pkgs/plugins/src/manifest.ts)。Bot 内部有同名工具不等于插件已经取得对应 RPC。
 
 ## Plugin 层需要补齐的执行和组合声明
 
@@ -34,7 +34,7 @@
 | 入站仲裁与持久事件到任务的契约 | 六个核心 Hook 有真实位置、schema、可写路径和组合规则；自定义 point 已实现 | message.recorded 的观察不等于输入接管。需要接管、过滤或触发后台业务的插件，应有明确处理结果和仲裁规则。增加 priority 不能把 observe 变成阻断或任务提交能力。 |
 | 可解释的有效编排图与调用诊断 | 全局 UI 枚举内置节点；实例页能预览各 point 的处理器顺序 | 全局视图主要基于默认配置，尚不能完整解释当前范围、selector、权限和自定义 point 下真正生效的图。应展示被排除原因、必要依赖、服务绑定和实际调用结果。 |
 
-依据：[manifest](../../src/plugins/manifest.ts)、[注册表](../../src/plugins/registry.ts)、[实际切入点](../../src/plugins/hooks/points.ts)、[呈现选择](../../src/plugins/hooks/presentation.ts)、[插件 Job](../../src/plugins/jobs/runner.ts)、[全局编排视图](../../src/plugins/pipeline/editor.ts)、[实例编排视图](../../src/plugins/configuration/order.ts)。
+依据：[manifest](../../pkgs/plugins/src/manifest.ts)、[注册表](../../pkgs/plugins/src/registry.ts)、[实际切入点](../../pkgs/plugins/src/hooks/points.ts)、[呈现选择](../../pkgs/plugins/src/hooks/presentation.ts)、[插件 Job](../../pkgs/plugins/src/jobs/runner.ts)、[全局编排视图](../../pkgs/plugins/src/pipeline/editor.ts)、[实例编排视图](../../pkgs/plugins/src/configuration/order.ts)。
 
 ## 建议的下一轮实施顺序
 

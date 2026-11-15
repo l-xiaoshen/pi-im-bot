@@ -2,12 +2,12 @@ import { expect, test } from 'bun:test'
 import { pluginFixture } from './plugin-fixture'
 import { jobHarness, untilJob } from './job-harness'
 import { responsesReply } from './responses-fixture'
-import { PluginService } from '../src/plugins/service'
-import { localIdentity } from '../src/permissions/identity'
-import { ResourceLibrary } from '../src/resources/library'
-import { ResourcesConfigSchema } from '../src/resources/schema'
-import { ArtifactStore } from '../src/artifacts/store'
-import { DeliverySuppressed } from '../src/runtime/delivery'
+import { PluginService } from '@pi-im-bot/plugins/service'
+import { localIdentity } from '@pi-im-bot/permissions/identity'
+import { ResourceLibrary } from '@pi-im-bot/resources/library'
+import { ResourcesConfigSchema } from '@pi-im-bot/resources/schema'
+import { ArtifactStore } from '@pi-im-bot/artifacts/store'
+import { DeliverySuppressed } from '@pi-im-bot/runtime/delivery'
 
 test('plain delivery with 1500 unrelated capabilities captures no render admission or input clone', async () => {
   const worker = await pluginFixture()

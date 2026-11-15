@@ -1,13 +1,13 @@
 import { expect, test } from 'bun:test'
 import { MemoryState } from './memory-state'
-import { ChannelRegistry } from '../src/channels/registry'
-import { RoomSchema } from '../src/domain/message'
-import { DeliveryService, DeliveryUncertain, DeliveryAdmissionUnknown } from '../src/runtime/delivery'
-import { DeliveryDeferred } from '../src/domain/rendering'
-import { EventHub } from '../src/runtime/events'
+import { ChannelRegistry } from '@pi-im-bot/channels/registry'
+import { RoomSchema } from '@pi-im-bot/contracts/message'
+import { DeliveryService, DeliveryUncertain, DeliveryAdmissionUnknown } from '@pi-im-bot/runtime/delivery'
+import { DeliveryDeferred } from '@pi-im-bot/contracts/rendering'
+import { EventHub } from '@pi-im-bot/contracts/events'
 import { jobHarness } from './job-harness'
 import { responsesReply } from './responses-fixture'
-import { localIdentity } from '../src/permissions/identity'
+import { localIdentity } from '@pi-im-bot/permissions/identity'
 
 test('persisted rendering decision survives admission interruption, resumes original fallback once, and never fabricates an ACK', async () => {
   const fixture = await jobHarness(() => {

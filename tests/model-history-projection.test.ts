@@ -3,12 +3,12 @@ import type { AssistantMessage, UserMessage } from '@earendil-works/pi-ai'
 import { pluginFixture } from './plugin-fixture'
 import { jobHarness } from './job-harness'
 import { responsesReply } from './responses-fixture'
-import { PluginService } from '../src/plugins/service'
-import { ResourceLibrary } from '../src/resources/library'
-import { ResourcesConfigSchema } from '../src/resources/schema'
-import { projectPluginHistory } from '../src/plugins/hooks/model-history'
-import { localIdentity } from '../src/permissions/identity'
-import { pluginToolName } from '../src/plugins/identity'
+import { PluginService } from '@pi-im-bot/plugins/service'
+import { ResourceLibrary } from '@pi-im-bot/resources/library'
+import { ResourcesConfigSchema } from '@pi-im-bot/resources/schema'
+import { projectPluginHistory } from '@pi-im-bot/plugins/hooks/model-history'
+import { localIdentity } from '@pi-im-bot/permissions/identity'
+import { pluginToolName } from '@pi-im-bot/plugins/identity'
 
 test('history projection shares unrelated large histories and redacts only verified own tool arguments, including supported start_job', async () => {
   const worker = await pluginFixture()

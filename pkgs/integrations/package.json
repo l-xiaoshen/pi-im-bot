@@ -1,0 +1,24 @@
+{
+  "name": "@pi-im-bot/integrations",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./*": "./src/*.ts",
+    "./gsvi/unicode": "./src/gsvi/unicode/index.ts"
+  },
+  "dependencies": {
+    "@earendil-works/chord": "1.5.0",
+    "@earendil-works/pi-durable": "1.5.0",
+    "@pi-im-bot/agent": "workspace:*",
+    "@pi-im-bot/artifacts": "workspace:*",
+    "@pi-im-bot/config": "workspace:*",
+    "@pi-im-bot/jobs": "workspace:*",
+    "@pi-im-bot/permissions": "workspace:*",
+    "@pi-im-bot/plugins": "workspace:*",
+    "@pi-im-bot/resources": "workspace:*",
+    "@pi-im-bot/settings": "workspace:*",
+    "@pi-im-bot/support": "workspace:*",
+    "zod": "4.6.7"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "name": "@pi-im-bot/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "dependencies": {
+    "@pi-im-bot/channels": "workspace:*",
+    "@pi-im-bot/config": "workspace:*",
+    "@pi-im-bot/contracts": "workspace:*",
+    "@pi-im-bot/integrations": "workspace:*",
+    "@pi-im-bot/jobs": "workspace:*",
+    "@pi-im-bot/media": "workspace:*",
+    "@pi-im-bot/plugins": "workspace:*",
+    "@pi-im-bot/providers": "workspace:*",
+    "@pi-im-bot/resources": "workspace:*",
+    "@pi-im-bot/settings": "workspace:*",
+    "dompurify": "^3.4.17",
+    "marked": "^18.2.0",
+    "zod": "4.6.7"
+  },
+  "scripts": {
+    "dev": "bun --watch server.ts",
+    "start": "bun server.ts",
+    "build": "bun build.ts"
+  }
+}

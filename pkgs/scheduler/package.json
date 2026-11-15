@@ -1,0 +1,18 @@
+{
+  "name": "@pi-im-bot/scheduler",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "dependencies": {
+    "@earendil-works/pi-durable": "1.5.0",
+    "@pi-im-bot/jobs": "workspace:*",
+    "@pi-im-bot/permissions": "workspace:*",
+    "@pi-im-bot/runtime": "workspace:*",
+    "@pi-im-bot/storage": "workspace:*",
+    "croner": "11.0.0",
+    "zod": "4.6.7"
+  }
+}

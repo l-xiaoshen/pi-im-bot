@@ -6,20 +6,20 @@
 
 ```sh
 bun install --frozen-lockfile
-bun run start
+bun run dev
 ```
 
-默认监听 `0.0.0.0:19335`，本机访问示例为 `http://localhost:19335`。局域网使用部署主机的可达地址直接访问。配置入口和生效方式见 [部署配置](docs/configuration.md)。开发时运行 `bun run dev`；修改前端后运行 `bun run build` 更新静态文件。
+`dev` 先构建工作台，再启动 Bot API 与独立前端。API 默认监听 `0.0.0.0:19335`，工作台位于 `http://localhost:3000`。局域网部署时通过 `BOT_PUBLIC_ORIGIN` 设置浏览器可访问的 Bot 基址，用逗号分隔的 `BOT_WEB_ORIGINS` 设置允许访问 API 的前端来源。配置入口和生效方式见 [部署配置](docs/configuration.md)。修改前端后运行 `bun run build` 更新静态文件；分别启动与停止服务使用 `bun run dev:bot`、`bun run dev:web`、`bun run start:bot` 和 `bun run start:web`。
 
 当前主机也可直接使用项目内的 Bun：
 
 ```sh
-./node_modules/.bin/bun run start
+./node_modules/.bin/bun run dev
 ```
 
 首次启动从示例生成 `config/bot.json`、`config/providers.json`，并从已有默认设置生成 `config/framework.json`，之后不会覆盖已有配置。可用 `BOT_CONFIG_DIR`、`BOT_DATA_DIR` 指定配置与数据目录。默认数据位于项目 `data/`。
 
-提供 `Dockerfile` 和 `compose.yaml`，配置、Bot 数据、插件代码及插件数据分别持久保存。Compose 结构已经检查；此处不把源码或构建验证当作容器部署证明。新配置的插件执行默认关闭；已有部署以在线诊断为准。2026-11-12 部署记录已确认启用，2026-11-13 只读 `GET /api/plugins/observers` 再次返回 `enabled:true`。执行依赖与路径映射见 [部署与插件存储](docs/framework/plugin-storage.md)。本轮源码修复未部署、未变更开关。
+提供独立的 `services/bot/Dockerfile`、`apps/web/Dockerfile` 和双服务 `compose.yaml`，配置、Bot 数据、插件代码及插件数据分别持久保存。Compose 结构已经检查；此处不把源码或构建验证当作容器部署证明。新配置的插件执行默认关闭；已有部署以在线诊断为准。2026-11-12 部署记录已确认启用，2026-11-13 只读 `GET /api/plugins/observers` 再次返回 `enabled:true`。执行依赖与路径映射见 [部署与插件存储](docs/framework/plugin-storage.md)。本轮源码修复未部署、未变更开关。
 
 ## 先使用 Mock
 
@@ -287,24 +287,29 @@ UI 使用维护中的共享浏览器验证，详见上级工作区的浏览器�
 插件包、Worker RPC、工具/指令、Job、共享核心与插件自定义切入点、存储额度已接入，见 [阶段交付记录](docs/framework/implementation.md)。真实容器验收记录与当前部署状态分别保存；领域插件迁移、Telegram 和知识库继续按阶段完善。本轮可靠性、取消与历史性能修复及尚缺能力见 [审核修复报告](docs/framework/review-remediation-2026-11-12.md)。
 
 ```text
-src/channels/    渠道协议与回执
-src/providers/   配置、候选组、Responses 请求与故障转移
-src/agent/       Pi 会话装配与宿主能力
-src/jobs/        持久后台任务、修订、取消和结果回流
-src/conversations/ 稳定聊天范围与当前对话管理、历史映射迁移
-src/settings/    人格、配置继承、生效来源与版本编辑
-src/permissions/ 触发身份、授权上限与调用时校验
-src/messages/   模型输入、历史和平台输出投影
-src/media/      私有媒体引用、按需缓存、图片预算和本轮视觉投影
-src/capabilities/ Pi 原生工具搜索与单一收纳策略
-src/resources/  MCP、Skill 注册、固定版本、连接与装载
-src/plugins/    插件包、Web 编辑、Worker RPC、操作/指令、后台 Job 与变换执行器
-src/artifacts/  范围内工具产物存储和分页读取
-src/runtime/     统一任务入口、并发、事件和交付
-src/scheduler/   持久计划与时间触发
-src/storage/     宿主状态；Pi 对话仍由 Pi 管理
-src/http/        工作台 API
-web/            Mock 聊天与调试界面
+apps/web/             独立构建与部署的浏览器工作台
+services/bot/         Bot 组合入口、HTTP API 与 WebSocket 端点
+pkgs/contracts/src/  跨端共享的 schema、DTO 与事件
+pkgs/support/src/    通用异步与安全路径工具
+pkgs/channels/src/    渠道协议与回执
+pkgs/providers/src/   配置、候选组、Responses 请求与故障转移
+pkgs/agent/src/       Pi 会话装配与宿主能力
+pkgs/jobs/src/        持久后台任务、修订、取消和结果回流
+pkgs/conversations/src/ 稳定聊天范围与当前对话管理、历史映射迁移
+pkgs/settings/src/    人格、配置继承、生效来源与版本编辑
+pkgs/permissions/src/ 触发身份、授权上限与调用时校验
+pkgs/messages/src/   模型输入、历史和平台输出投影
+pkgs/media/src/      私有媒体引用、按需缓存、图片预算和本轮视觉投影
+pkgs/capabilities/src/ Pi 原生工具搜索与单一收纳策略
+pkgs/resources/src/  MCP、Skill 注册、固定版本、连接与装载
+pkgs/plugins/src/    插件包、Web 编辑、Worker RPC、操作/指令、后台 Job 与变换执行器
+pkgs/plugin-sdk/src/ 插件作者公开入口与受管 Worker 入口
+pkgs/artifacts/src/  范围内工具产物存储和分页读取
+pkgs/runtime/src/     统一任务入口、并发、事件和交付
+pkgs/scheduler/src/   持久计划与时间触发
+pkgs/storage/src/     宿主状态；Pi 对话仍由 Pi 管理
+services/bot/src/http/        工作台 API
+apps/web/src/            Mock 聊天与调试界面
 ```
 
 参考资料：

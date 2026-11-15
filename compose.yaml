@@ -1,6 +1,8 @@
 services:
   bot:
-    build: .
+    build:
+      context: .
+      dockerfile: services/bot/Dockerfile
     image: pi-im-bot:local
     container_name: pi-im-bot
     init: true
@@ -10,6 +12,7 @@ services:
     environment:
       BOT_CONFIG_DIR: /app/config
       BOT_DATA_DIR: /app/data
+      BOT_WEB_ORIGINS: ${BOT_WEB_ORIGINS:-http://localhost:3000}
     devices:
       - /dev/fuse:/dev/fuse
     cap_add:
@@ -24,3 +27,17 @@ services:
         bind:
           propagation: rshared
       - /var/run/docker.sock:/var/run/docker.sock:ro
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    image: pi-im-bot-web:local
+    container_name: pi-im-bot-web
+    init: true
+    restart: unless-stopped
+    depends_on:
+      - bot
+    ports:
+      - "3000:3000"
+    environment:
+      BOT_PUBLIC_ORIGIN: ${BOT_PUBLIC_ORIGIN:-http://localhost:19335}

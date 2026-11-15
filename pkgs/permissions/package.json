@@ -1,0 +1,14 @@
+{
+  "name": "@pi-im-bot/permissions",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "dependencies": {
+    "@pi-im-bot/capabilities": "workspace:*",
+    "@pi-im-bot/settings": "workspace:*",
+    "zod": "4.6.7"
+  }
+}

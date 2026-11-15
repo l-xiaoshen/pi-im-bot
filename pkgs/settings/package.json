@@ -1,0 +1,18 @@
+{
+  "name": "@pi-im-bot/settings",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "dependencies": {
+    "@pi-im-bot/config": "workspace:*",
+    "@pi-im-bot/contracts": "workspace:*",
+    "@pi-im-bot/conversations": "workspace:*",
+    "@pi-im-bot/permissions": "workspace:*",
+    "@pi-im-bot/plugins": "workspace:*",
+    "@pi-im-bot/storage": "workspace:*",
+    "zod": "4.6.7"
+  }
+}

@@ -18,7 +18,7 @@
 
 ## 代码节点与流转契约
 
-`src/plugins/hooks/points.ts` 声明节点标志、执行位置、模式、输入/输出 Zod schema 和可修改字段。上下文、呈现、消息/回执记录的实际调用引用这些标志和 schema；`GET /api/plugins/pipeline` 从同一声明生成节点及 JSON Schema，UI 没有另一份手写节点列表。
+`pkgs/plugins/src/hooks/points.ts` 声明节点标志、执行位置、模式、输入/输出 Zod schema 和可修改字段。上下文、呈现、消息/回执记录的实际调用引用这些标志和 schema；`GET /api/plugins/pipeline` 从同一声明生成节点及 JSON Schema，UI 没有另一份手写节点列表。
 
 | 切入点 | 执行位置 | 输入 → 输出 | 组合规则 |
 | --- | --- | --- | --- |

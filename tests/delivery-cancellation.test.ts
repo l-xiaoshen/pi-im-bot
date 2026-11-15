@@ -2,9 +2,9 @@ import { expect, test } from 'bun:test'
 import { jobHarness } from './job-harness'
 import { responsesReply } from './responses-fixture'
 import { pluginFixture } from './plugin-fixture'
-import { PluginService } from '../src/plugins/service'
-import { createMockAdapter } from '../src/channels/mock'
-import { PartialDelivery } from '../src/domain/channel-media'
+import { PluginService } from '@pi-im-bot/plugins/service'
+import { createMockAdapter } from '@pi-im-bot/channels/mock'
+import { PartialDelivery } from '@pi-im-bot/contracts/channel-media'
 
 for (const enabled of [false, true]) {
   test('stop before transport blocks final delivery with plugins enabled=' + enabled, async () => {

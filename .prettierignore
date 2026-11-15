@@ -1,6 +1,6 @@
 node_modules
 data
-dist
+**/dist
 config/bot.json
 config/providers.json
 bun.lock

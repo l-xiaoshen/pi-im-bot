@@ -70,7 +70,7 @@ C 不执行真实 POST、上传、delete、interrupt 或生产 GPU 任务验证�
 
 | 检查 | 结果 |
 | --- | --- |
-| Core `bun run check`、`bun test tests`、`BOT_WEB_DIR=${VALIDATION_DIR}/web bun run build` | 通过；161 tests / 1186 assertions / 0 fail |
+| Core `bun run check`、`bun test tests`、`WEB_DIST_DIR=${VALIDATION_DIR}/web bun run build` | 通过；161 tests / 1186 assertions / 0 fail |
 | 插件 `bun run check`、`bun test tests`、`bun run build`、`bun run format:check` | 通过；28 tests / 311 assertions / 0 fail |
 | T 新增真实链路 | 12 个插件行为组；另1个 Core 呈现账本回归，未新增数据库测试 |
 | 附加既有回归 | 原160 Core及16插件测试继续通过；含状态插件、显式语音、media-inspect、来源传播与控制受理边界 |
@@ -110,7 +110,7 @@ C 仍待 T 独立接受：资源/schema/LoRA编译、实例状态与可信管理
 
 ### 第二轮最终验证收据
 
-- Core check/tests/build（隔离 BOT_WEB_DIR）通过：162 tests，1210 assertions，0 fail。
+- Core check/tests/build（隔离 WEB_DIST_DIR）通过：162 tests，1210 assertions，0 fail。
 - 插件 check/tests/build/format 通过：37 tests，399 assertions，0 fail。首轮161/28回归全部保留；新增的1个Core计数/载荷基准、9个插件受理/容量行为组均使用自编本地fixture，无新增数据库测试。
 - max4明确两POST等待的实测 Worker峰值为4，三个范围off耗时约8.37/8.24/57.26 ms，均在1秒指令预算内；max2只一个stateless活动合成，第二Job等待；max1在POST之前持久拒绝并显示容量诊断。不是“同一配置两POST饥饿”的误报。
 - 共享浏览器实际聊天组件验证 accepted 与未知接纳均不显示已发送、pending期间停止可用、模拟真实ACK状态后显示已确认发送；任务page和临时HTTP进程已清理。ui-accepted/ui-unknown/ui-confirmed.png 与 ui-verification.json 留档。
@@ -137,7 +137,7 @@ T 再次交回独立审核，未自行宣称已接受。C 只读审计及原来�
 ### T2 最终验证
 
 - 六个有效独立脚本全部通过：review-stateless-foreground、review-stateless-file-boundary、review-render-capacity-one、review-capability-cost、review-render-admission（含无parent Run prepared恢复）、review-no-render-payload。逐脚本日志与机器断言见 round3-review-*.log、round3-review-verification.json。没有重跑无效旧2 Worker脚本。
-- Core check/tests/build（隔离BOT_WEB_DIR）通过：168 tests / 1259 assertions / 0 fail。新增4个执行预算/隔离行为组、2个非render载荷/真实Hook行为组；无数据库测试。
+- Core check/tests/build（隔离WEB_DIST_DIR）通过：168 tests / 1259 assertions / 0 fail。新增4个执行预算/隔离行为组、2个非render载荷/真实Hook行为组；无数据库测试。
 - 插件 check/tests/build/format 通过：37 tests / 399 assertions / 0 fail。gsvi-tts/status/media-inspect 各pack两次逐字节相等，包SHA见 package-verification.json。
 - managed-presentation、async-and-data 与 SDK快照已更新；插件 docs/migration/README.md 的旧自动TTS属于C backlog句子已更正：T实现待接受，C仅审计，后续仍需实做。C来源及workflow审计未改。
 - 新 core-final.patch / plugins-final.patch 含新文件，从两指定基线完整回放等于最终源码。round2-draft累计补丁 + core-round3.patch / plugins-round3.patch 连续回放同样相等；收据为 replay-verification.json、round3-sequential-verification.json，SHA在 SHA256SUMS。没有Git元数据写入。
@@ -170,7 +170,7 @@ C实际起点Core `b3e9097ca167693264c21abf1ee82b960bfe453b`、插件 `9995e8bb9
 
 | 检查 | 本次结果/证据（任务c目录） |
 | --- | --- |
-| Core check/tests/build | 通过；175 tests / 1310 assertions / 0 fail；BOT_WEB_DIR=c/web，正式dist未改；core-check/tests/build.log |
+| Core check/tests/build | 通过；175 tests / 1310 assertions / 0 fail；WEB_DIST_DIR=c/web，正式dist未改；core-check/tests/build.log |
 | 插件docs:sync/check/tests/build/format | 通过；63 tests / 645 assertions / 0 fail；docs-sync、plugins-check/tests/build/format-check.log |
 | T有效独立脚本 | 六个全部exit0；stateless foreground/file-boundary、render-capacity-one、capability-cost、render-admission、no-render-payload；t-review-verification.json。未重跑无效旧2worker脚本 |
 | 真实C链路 | 双图和count16全部ACK、部分未知手工核对、同进程丢RPC/无handle核对与取消/重启、原服务快照、queued/running/delete竞态、stop/new/撤权、未知提交不重提、恶意路径/MIME/体积、每key12并发只一份输出、CAS/冷却、ring20/pop与receipt分离、源LoraManager/steps及合法大目录分页，均由自编fixture实际执行 |

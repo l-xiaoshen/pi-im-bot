@@ -1,24 +1,24 @@
 import { expect, test } from 'bun:test'
 import { mkdtemp, mkdir, rm, symlink } from 'node:fs/promises'
 import { join } from 'node:path'
-import { runPi } from '../src/agent/pi-runner'
-import { BotConfigSchema } from '../src/config/schema'
-import { RoomSchema } from '../src/domain/message'
-import { ProviderCatalog } from '../src/providers/catalog'
-import { ProvidersConfigSchema } from '../src/providers/schema'
-import { ResourceLibrary } from '../src/resources/library'
-import { ResourcesConfigSchema } from '../src/resources/schema'
-import { SkillConfigSchema } from '../src/resources/skills/schema'
+import { runPi } from '@pi-im-bot/agent/pi-runner'
+import { BotConfigSchema } from '@pi-im-bot/config/schema'
+import { RoomSchema } from '@pi-im-bot/contracts/message'
+import { ProviderCatalog } from '@pi-im-bot/providers/catalog'
+import { ProvidersConfigSchema } from '@pi-im-bot/providers/schema'
+import { ResourceLibrary } from '@pi-im-bot/resources/library'
+import { ResourcesConfigSchema } from '@pi-im-bot/resources/schema'
+import { SkillConfigSchema } from '@pi-im-bot/resources/skills/schema'
 import {
   importSkill,
   readSkillFile,
   skillGuestRoot,
   skillToolName,
   skillPackageRoot
-} from '../src/resources/skills/package'
-import { createSkillTools } from '../src/resources/skills/tools'
-import { ArtifactStore } from '../src/artifacts/store'
-import { captureAuthority, assertCapability } from '../src/permissions/authorize'
+} from '@pi-im-bot/resources/skills/package'
+import { createSkillTools } from '@pi-im-bot/resources/skills/tools'
+import { ArtifactStore } from '@pi-im-bot/artifacts/store'
+import { captureAuthority, assertCapability } from '@pi-im-bot/permissions/authorize'
 import { agentInput, testFramework } from './agent-input'
 import { responsesReply } from './responses-fixture'
 import { createFakeShipyard } from './shipyard-fixture'

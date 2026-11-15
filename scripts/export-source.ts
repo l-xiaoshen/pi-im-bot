@@ -1,7 +1,7 @@
 import { copyFile, mkdir, lstat } from 'node:fs/promises'
 import { resolve, join, dirname, relative, isAbsolute } from 'node:path'
 import { z } from 'zod'
-import { assertSharePath } from '../src/distribution/share-path'
+import { assertSharePath } from '@pi-im-bot/support/share-path'
 
 const project = resolve(process.argv[2] ?? '.')
 const output = resolve(z.string().min(1).parse(process.argv[3]))

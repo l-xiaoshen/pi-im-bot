@@ -4,9 +4,9 @@ import { pluginFixture } from './plugin-fixture'
 import { jobHarness } from './job-harness'
 import { untilJob } from './job-harness'
 import { responsesReply } from './responses-fixture'
-import { PluginService } from '../src/plugins/service'
-import { ResourceLibrary } from '../src/resources/library'
-import { ResourcesConfigSchema } from '../src/resources/schema'
+import { PluginService } from '@pi-im-bot/plugins/service'
+import { ResourceLibrary } from '@pi-im-bot/resources/library'
+import { ResourcesConfigSchema } from '@pi-im-bot/resources/schema'
 
 test('real delivery hooks collect context once, suppress intermediate sends, compose validated text, select one renderer and preserve model originals', async () => {
   const env = await pluginFixture({ maxWorkers: 4 })

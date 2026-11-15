@@ -1,11 +1,11 @@
 import { pluginFixture } from './plugin-fixture'
 import { jobHarness } from './job-harness'
 import { responsesReply } from './responses-fixture'
-import { PluginService } from '../src/plugins/service'
-import { ResourceLibrary } from '../src/resources/library'
-import { ResourcesConfigSchema } from '../src/resources/schema'
-import { localIdentity } from '../src/permissions/identity'
-import type { PluginBinding } from '../src/plugins/registry'
+import { PluginService } from '@pi-im-bot/plugins/service'
+import { ResourceLibrary } from '@pi-im-bot/resources/library'
+import { ResourcesConfigSchema } from '@pi-im-bot/resources/schema'
+import { localIdentity } from '@pi-im-bot/permissions/identity'
+import type { PluginBinding } from '@pi-im-bot/plugins/registry'
 
 export const ObjectInput = { type: 'object' as const, properties: {} }
 

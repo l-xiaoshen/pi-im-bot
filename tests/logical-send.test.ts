@@ -1,10 +1,10 @@
 import { expect, test } from 'bun:test'
-import { ChatMessageSchema } from '../src/domain/message'
-import { LogicalMessageSchema } from '../src/domain/logical-message'
-import { DeliverySuppressed } from '../src/domain/presentation'
-import { DeliveryUncertain } from '../src/runtime/delivery'
-import { sendLogicalSequence } from '../src/runtime/logical-send'
-import { deadlineScope } from '../src/runtime/deadline'
+import { ChatMessageSchema } from '@pi-im-bot/contracts/message'
+import { LogicalMessageSchema } from '@pi-im-bot/contracts/logical-message'
+import { DeliverySuppressed } from '@pi-im-bot/contracts/presentation'
+import { DeliveryUncertain } from '@pi-im-bot/runtime/delivery'
+import { sendLogicalSequence } from '@pi-im-bot/runtime/logical-send'
+import { deadlineScope } from '@pi-im-bot/support/deadline'
 
 // Plain in-memory receipt handling only: no DeliveryService, plugin or service operation runs.
 function receipt(index: number) {

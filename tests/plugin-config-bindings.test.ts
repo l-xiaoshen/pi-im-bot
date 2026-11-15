@@ -1,9 +1,9 @@
 import { expect, test } from 'bun:test'
 import { join } from 'node:path'
 import { pluginConsoleFixture } from './plugin-console-fixture'
-import { ResourceLibrary } from '../src/resources/library'
-import { ResourcesConfigSchema } from '../src/resources/schema'
-import { PluginConfigurationEditor } from '../src/plugins/configuration/editor'
+import { ResourceLibrary } from '@pi-im-bot/resources/library'
+import { ResourcesConfigSchema } from '@pi-im-bot/resources/schema'
+import { PluginConfigurationEditor } from '@pi-im-bot/plugins/configuration/editor'
 
 test('required service bindings are editable with plugin configuration even without a schema and cannot write undeclared aliases', async () => {
   const fixture = await pluginConsoleFixture()

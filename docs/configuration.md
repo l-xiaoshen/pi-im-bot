@@ -2,9 +2,9 @@
 
 公开源码与示例不绑定特定主机。运行配置保存在被 Git 忽略的 `config/`；启动环境保存在各仓库被忽略的 `.env.local`。只把空值或无害示例放进 `.env.example`。
 
-## Bot
+## Bot 与工作台
 
-从 Bot 仓库根目录执行 `bun run start`。首次启动会从 `config/*.example.json` 创建实际配置，工作台默认可从 `http://localhost:19335` 访问。LAN 客户端使用其可达的部署地址。
+开发时从仓库根目录执行 `bun run dev`，分别启动 Bot API 和独立工作台。首次启动会从 `config/*.example.json` 创建实际配置。API 默认位于 `http://localhost:19335`，工作台默认位于 `http://localhost:3000`。生产模式先执行 `bun run build`，再分别执行 `bun run start:bot` 和 `bun run start:web`。LAN 客户端使用部署主机的可达地址。
 
 | 设置 | 唯一来源 | 修改后 |
 | --- | --- | --- |
@@ -13,8 +13,11 @@
 | OneBot 媒体来源、Token、测试渠道 | 工作台 → QQ 连接设置，保存到 `config/bot.json` | 按页面说明应用 |
 | Provider 与其他受管服务 | 现有 Provider、资源或插件配置页 | 按各自页面的保存/重载机制应用 |
 | 配置/数据根目录 | `BOT_CONFIG_DIR`、`BOT_DATA_DIR` | 启动时读取 |
+| 浏览器访问的 Bot 公开基址 | `BOT_PUBLIC_ORIGIN` | 重启 Web 服务 |
+| 允许访问 API 的工作台来源 | 逗号分隔的 `BOT_WEB_ORIGINS` | 重启 Bot 服务 |
+| 工作台监听地址 | `WEB_HOST`、`WEB_PORT` | 重启 Web 服务 |
 
-页面 API 使用当前访问 origin；QQ 页面按当前地址与 OneBot 路径生成 ws/wss 连接地址。通过对 NapCat 可达的地址打开工作台再复制连接地址，不另设一份 Bot 对外 IP。不要给可在工作台编辑的设置叠加同名环境覆盖。
+页面 API、`/api/events`、产物/媒体链接和 QQ 页面展示的 OneBot ws/wss 地址都使用 `BOT_PUBLIC_ORIGIN`。该地址必须是浏览器和 NapCat 各自部署环境实际可达的公开 Bot 基址，不能填写容器内部服务名作为面向浏览器的地址。API 只接受显式列出的跨域工作台来源；OneBot 握手继续使用自身鉴权，不受此项限制。不要给可在工作台编辑的设置叠加同名环境覆盖。
 
 ## 插件开发源
 

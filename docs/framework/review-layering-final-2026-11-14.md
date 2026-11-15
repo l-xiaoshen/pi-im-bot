@@ -19,7 +19,7 @@
 | 部分成功的未知余项不能继续核对；pending 核对又清空已有产物 | `businessStatus`、`factsComplete` 与平台 `delivery` 分开；外部结果按 item/Artifact 单调合并。独立复测为 1 图+未知 → pending 查询仍 1 图 → 最终 2 图，总 POST 仍为 2，未新增聊天消息 |
 | 同范围无数据后台操作与前台查询共用串行锁，抵消预留容量 | Core 可信前后台类别进入无数据 Worker 的 lane/key。前台查询可在后台 HTTP 等待时完成；总 Worker/内存预算不变，后台继承、重入、清理和无私有文件边界保持 |
 
-对应实现主要在 `src/runtime/delivery.ts`、`src/jobs/external/outcome.ts`、`src/plugins/jobs/runner.ts`、`src/plugins/runtime/`、`src/plugins/hooks/` 与 Comfy 插件业务模块。pending 呈现的部分索引与查询谓词已核对一致，避免控制/恢复依赖扫描全部房间历史；没有为此添加数据库测试。
+对应实现主要在 `pkgs/runtime/src/delivery.ts`、`pkgs/jobs/src/external/outcome.ts`、`pkgs/plugins/src/jobs/runner.ts`、`pkgs/plugins/pkgs/runtime/src/`、`pkgs/plugins/src/hooks/` 与 Comfy 插件业务模块。pending 呈现的部分索引与查询谓词已核对一致，避免控制/恢复依赖扫描全部房间历史；没有为此添加数据库测试。
 
 ## Bot 层现在提供了什么
 

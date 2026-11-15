@@ -1,10 +1,10 @@
-import type { PreparedRunInput } from '../src/domain/run'
-import type { Room } from '../src/domain/message'
-import { BotConfigSchema } from '../src/config/schema'
-import { initialFramework, resolveSettings } from '../src/settings/resolve'
-import { captureAuthority } from '../src/permissions/authorize'
-import { localIdentity } from '../src/permissions/identity'
-import { ResourceLibrary } from '../src/resources/library'
+import type { PreparedRunInput } from '@pi-im-bot/contracts/run'
+import type { Room } from '@pi-im-bot/contracts/message'
+import { BotConfigSchema } from '@pi-im-bot/config/schema'
+import { initialFramework, resolveSettings } from '@pi-im-bot/settings/resolve'
+import { captureAuthority } from '@pi-im-bot/permissions/authorize'
+import { localIdentity } from '@pi-im-bot/permissions/identity'
+import { ResourceLibrary } from '@pi-im-bot/resources/library'
 
 export function testResources() {
   return ResourceLibrary.empty()

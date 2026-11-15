@@ -1,9 +1,9 @@
 import { mkdtemp, readFile, mkdir } from 'node:fs/promises'
 import { resolve, join, dirname } from 'node:path'
-import { PluginInstanceSchema } from '../src/plugins/config'
-import { PluginManifestSchema } from '../src/plugins/manifest'
-import { importPlugin, pluginPackageRoot } from '../src/plugins/package'
-import { pluginArchive, maxArchiveBytes } from '../src/plugins/install/archive'
+import { PluginInstanceSchema } from '@pi-im-bot/plugins/config'
+import { PluginManifestSchema } from '@pi-im-bot/plugins/manifest'
+import { importPlugin, pluginPackageRoot } from '@pi-im-bot/plugins/package'
+import { pluginArchive, maxArchiveBytes } from '@pi-im-bot/plugins/install/archive'
 
 const source = process.argv[2]
 if (!source) {

@@ -1,23 +1,23 @@
 import { expect, test } from 'bun:test'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { join } from 'node:path'
-import { pluginArchive, unpackPluginArchive } from '../src/plugins/install/archive'
+import { pluginArchive, unpackPluginArchive } from '@pi-im-bot/plugins/install/archive'
 import { pluginFixture } from './plugin-fixture'
 import { jobHarness, untilJob } from './job-harness'
 import { responsesReply } from './responses-fixture'
-import { PluginEditor } from '../src/plugins/editor'
-import { PluginInstaller } from '../src/plugins/install/service'
-import { ConfigurationMutations } from '../src/config/mutations'
-import { ResourcesConfigSchema } from '../src/resources/schema'
-import { FrameworkEditor } from '../src/settings/editor'
-import { PluginService } from '../src/plugins/service'
-import { ResourceLibrary } from '../src/resources/library'
+import { PluginEditor } from '@pi-im-bot/plugins/editor'
+import { PluginInstaller } from '@pi-im-bot/plugins/install/service'
+import { ConfigurationMutations } from '@pi-im-bot/config/mutations'
+import { ResourcesConfigSchema } from '@pi-im-bot/resources/schema'
+import { FrameworkEditor } from '@pi-im-bot/settings/editor'
+import { PluginService } from '@pi-im-bot/plugins/service'
+import { ResourceLibrary } from '@pi-im-bot/resources/library'
 import { createHash } from 'node:crypto'
 import {
   downloadPluginFile,
   PluginDownloadError,
   type PluginSourceReader
-} from '../src/plugins/install/download'
+} from '@pi-im-bot/plugins/install/download'
 
 test('ZIP paths, link attributes, CRC and file budgets are checked before activation', async () => {
   const root = await mkdtemp('/tmp/pi-plugin-archive-test-')

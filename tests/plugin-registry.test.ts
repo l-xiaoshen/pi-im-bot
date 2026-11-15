@@ -1,13 +1,13 @@
 import { expect, test } from 'bun:test'
-import { PluginHookSchema } from '../src/plugins/manifest'
-import { orderHooks, type OrderedHook } from '../src/plugins/hooks/order'
-import { applyHookPatch } from '../src/plugins/hooks/patch'
-import { revision } from '../src/settings/resolve'
+import { PluginHookSchema } from '@pi-im-bot/plugins/manifest'
+import { orderHooks, type OrderedHook } from '@pi-im-bot/plugins/hooks/order'
+import { applyHookPatch } from '@pi-im-bot/plugins/hooks/patch'
+import { revision } from '@pi-im-bot/settings/resolve'
 import { z } from 'zod'
 import { pluginFixture } from './plugin-fixture'
-import { PluginRegistry } from '../src/plugins/registry'
-import { PluginOverridesSchema } from '../src/plugins/config'
-import { transformPluginPoint, type PluginHookTrace } from '../src/plugins/hooks/transform'
+import { PluginRegistry } from '@pi-im-bot/plugins/registry'
+import { PluginOverridesSchema } from '@pi-im-bot/plugins/config'
+import { transformPluginPoint, type PluginHookTrace } from '@pi-im-bot/plugins/hooks/transform'
 
 function hook(
   key: string,

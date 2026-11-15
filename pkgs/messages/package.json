@@ -1,0 +1,16 @@
+{
+  "name": "@pi-im-bot/messages",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "dependencies": {
+    "@pi-im-bot/contracts": "workspace:*",
+    "@pi-im-bot/media": "workspace:*",
+    "@pi-im-bot/permissions": "workspace:*",
+    "@pi-im-bot/settings": "workspace:*",
+    "zod": "4.6.7"
+  }
+}

@@ -4,10 +4,10 @@ import { BACKGROUND_CONTEXT } from '@earendil-works/chord/context'
 import { jobHarness } from './job-harness'
 import { responsesReply } from './responses-fixture'
 import { pngImage } from './image-fixture'
-import { ConversationBinding } from '../src/agent/durable/documents'
-import { inspectImage } from '../src/media/image'
+import { ConversationBinding } from '@pi-im-bot/agent/durable/documents'
+import { inspectImage } from '@pi-im-bot/media/image'
 import { createFakeShipyard } from './shipyard-fixture'
-import { ShipyardConfigSchema } from '../src/execution/config'
+import { ShipyardConfigSchema } from '@pi-im-bot/execution/config'
 
 const ContentSchema = z.union([
   z.string(),

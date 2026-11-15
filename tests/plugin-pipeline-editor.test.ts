@@ -1,11 +1,11 @@
 import { expect, test } from 'bun:test'
 import { join } from 'node:path'
 import { pluginConsoleFixture } from './plugin-console-fixture'
-import { ResourceLibrary } from '../src/resources/library'
-import { ResourcesConfigSchema } from '../src/resources/schema'
-import { PluginPipelineEditor } from '../src/plugins/pipeline/editor'
-import { PluginConfigurationEditor } from '../src/plugins/configuration/editor'
-import { PipelineViewSchema } from '../src/plugins/pipeline/contracts'
+import { ResourceLibrary } from '@pi-im-bot/resources/library'
+import { ResourcesConfigSchema } from '@pi-im-bot/resources/schema'
+import { PluginPipelineEditor } from '@pi-im-bot/plugins/pipeline/editor'
+import { PluginConfigurationEditor } from '@pi-im-bot/plugins/configuration/editor'
+import { PipelineViewSchema } from '@pi-im-bot/plugins/pipeline/contracts'
 
 test('the generated node catalog edits actual delivery order and rejects undeclared handlers and stale saves', async () => {
   const fixture = await pluginConsoleFixture()

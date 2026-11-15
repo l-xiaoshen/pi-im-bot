@@ -2,10 +2,10 @@ import { expect, test } from 'bun:test'
 import { pluginFixture } from './plugin-fixture'
 import { jobHarness, untilJob } from './job-harness'
 import { responsesReply } from './responses-fixture'
-import { ResourceLibrary } from '../src/resources/library'
-import { ResourcesConfigSchema } from '../src/resources/schema'
-import { PluginService } from '../src/plugins/service'
-import { PluginJsonSchema } from '../src/plugins/manifest'
+import { ResourceLibrary } from '@pi-im-bot/resources/library'
+import { ResourcesConfigSchema } from '@pi-im-bot/resources/schema'
+import { PluginService } from '@pi-im-bot/plugins/service'
+import { PluginJsonSchema } from '@pi-im-bot/plugins/manifest'
 
 test('a domain operation invokes its own schema-checked pipeline without executing its entry in validators or exposing owner settings to integrations', async () => {
   const env = await pluginFixture()

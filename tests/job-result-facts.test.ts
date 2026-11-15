@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test'
-import { mergeExternalOutcome } from '../src/jobs/external/outcome'
-import type { JobRevision } from '../src/jobs/schema'
+import { mergeExternalOutcome } from '@pi-im-bot/jobs/external/outcome'
+import type { JobRevision } from '@pi-im-bot/jobs/schema'
 
 test('external finish, cancellation and reconciliation preserve confirmed result evidence across missing or degraded updates', () => {
   const first = crypto.randomUUID()

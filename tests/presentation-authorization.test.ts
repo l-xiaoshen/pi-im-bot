@@ -2,12 +2,12 @@ import { expect, test } from 'bun:test'
 import { pluginFixture } from './plugin-fixture'
 import { jobHarness } from './job-harness'
 import { responsesReply } from './responses-fixture'
-import { localIdentity } from '../src/permissions/identity'
-import { PluginService } from '../src/plugins/service'
-import { pluginPresentation } from '../src/plugins/hooks/presentation'
-import { ResourceLibrary } from '../src/resources/library'
-import { ResourcesConfigSchema } from '../src/resources/schema'
-import { DeliveryViewSchema } from '../src/plugins/hooks/points'
+import { localIdentity } from '@pi-im-bot/permissions/identity'
+import { PluginService } from '@pi-im-bot/plugins/service'
+import { pluginPresentation } from '@pi-im-bot/plugins/hooks/presentation'
+import { ResourceLibrary } from '@pi-im-bot/resources/library'
+import { ResourcesConfigSchema } from '@pi-im-bot/resources/schema'
+import { DeliveryViewSchema } from '@pi-im-bot/plugins/hooks/points'
 
 test('presentation authorization cost depends on declared consumer needs, not the unrelated capability directory', async () => {
   const worker = await pluginFixture()

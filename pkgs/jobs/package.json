@@ -1,0 +1,30 @@
+{
+  "name": "@pi-im-bot/jobs",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts"
+  },
+  "dependencies": {
+    "@earendil-works/chord": "1.5.0",
+    "@earendil-works/pi-durable": "1.5.0",
+    "@earendil-works/pi-mcp": "1.5.0",
+    "@earendil-works/pi-schema": "1.5.0",
+    "@pi-im-bot/agent": "workspace:*",
+    "@pi-im-bot/artifacts": "workspace:*",
+    "@pi-im-bot/capabilities": "workspace:*",
+    "@pi-im-bot/config": "workspace:*",
+    "@pi-im-bot/contracts": "workspace:*",
+    "@pi-im-bot/integrations": "workspace:*",
+    "@pi-im-bot/messages": "workspace:*",
+    "@pi-im-bot/permissions": "workspace:*",
+    "@pi-im-bot/plugins": "workspace:*",
+    "@pi-im-bot/resources": "workspace:*",
+    "@pi-im-bot/runtime": "workspace:*",
+    "@pi-im-bot/scheduler": "workspace:*",
+    "@pi-im-bot/settings": "workspace:*",
+    "zod": "4.6.7"
+  }
+}

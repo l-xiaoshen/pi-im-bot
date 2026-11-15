@@ -1,14 +1,14 @@
 import { expect, test } from 'bun:test'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { z } from 'zod'
-import { RoomSchema } from '../src/domain/message'
-import { BotConfigSchema } from '../src/config/schema'
-import { ProvidersConfigSchema } from '../src/providers/schema'
-import { ProviderCatalog } from '../src/providers/catalog'
-import { runPi } from '../src/agent/pi-runner'
+import { RoomSchema } from '@pi-im-bot/contracts/message'
+import { BotConfigSchema } from '@pi-im-bot/config/schema'
+import { ProvidersConfigSchema } from '@pi-im-bot/providers/schema'
+import { ProviderCatalog } from '@pi-im-bot/providers/catalog'
+import { runPi } from '@pi-im-bot/agent/pi-runner'
 import { agentInput, testFramework, testResources } from './agent-input'
 import { responsesReply } from './responses-fixture'
-import { assertCapability } from '../src/permissions/authorize'
+import { assertCapability } from '@pi-im-bot/permissions/authorize'
 
 test('Pi native tool search loads only authorized tools and shared loadouts expire after idle user turns', async () => {
   const root = await mkdtemp('/tmp/pi-tool-exposure-')

@@ -1,12 +1,12 @@
 import { expect, test } from 'bun:test'
 import { mcpTaskFixture } from './mcp-task-fixture'
-import { inspectMcp } from '../src/resources/mcp/client'
-import { ResourceLibrary } from '../src/resources/library'
-import { ResourcesConfigSchema } from '../src/resources/schema'
-import { mcpToolName } from '../src/resources/mcp/identity'
+import { inspectMcp } from '@pi-im-bot/resources/mcp/client'
+import { ResourceLibrary } from '@pi-im-bot/resources/library'
+import { ResourcesConfigSchema } from '@pi-im-bot/resources/schema'
+import { mcpToolName } from '@pi-im-bot/resources/mcp/identity'
 import { jobHarness, latestUser, untilJob } from './job-harness'
 import { responsesReply } from './responses-fixture'
-import { localIdentity } from '../src/permissions/identity'
+import { localIdentity } from '@pi-im-bot/permissions/identity'
 
 async function resources(fixture: ReturnType<typeof mcpTaskFixture>) {
   const manifest = await inspectMcp(fixture.config, new AbortController().signal)

@@ -1,8 +1,8 @@
 import { z } from 'zod'
 import type { CallToolResult } from '@earendil-works/pi-mcp'
-import { McpServerSchema } from '../src/resources/mcp/schema'
-import type { McpRemoteTask } from '../src/resources/mcp/task-schema'
-import { McpTaskCapabilitiesSchema } from '../src/resources/mcp/task-schema'
+import { McpServerSchema } from '@pi-im-bot/resources/mcp/schema'
+import type { McpRemoteTask } from '@pi-im-bot/resources/mcp/task-schema'
+import { McpTaskCapabilitiesSchema } from '@pi-im-bot/resources/mcp/task-schema'
 
 const RpcSchema = z.object({
   id: z.union([z.string(), z.number()]).optional(),

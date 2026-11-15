@@ -1,15 +1,15 @@
 import { expect, test } from 'bun:test'
 import { MemoryState } from './memory-state'
-import { ChannelRegistry } from '../src/channels/registry'
-import { RoomSchema } from '../src/domain/message'
-import { EventHub } from '../src/runtime/events'
+import { ChannelRegistry } from '@pi-im-bot/channels/registry'
+import { RoomSchema } from '@pi-im-bot/contracts/message'
+import { EventHub } from '@pi-im-bot/contracts/events'
 import {
   DeliveryService,
   DeliverySuppressed,
   DeliveryUncertain,
   DeliveryCancelled
-} from '../src/runtime/delivery'
-import type { DeliveryPresentation } from '../src/domain/presentation'
+} from '@pi-im-bot/runtime/delivery'
+import type { DeliveryPresentation } from '@pi-im-bot/contracts/presentation'
 
 test('prepared media survives interrupted dispatch, completed presentation never repeats, and observer errors cannot turn a send into unknown', async () => {
   const store = new MemoryState()

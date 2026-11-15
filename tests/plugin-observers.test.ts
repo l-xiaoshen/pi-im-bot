@@ -3,12 +3,12 @@ import { join } from 'node:path'
 import { pluginFixture } from './plugin-fixture'
 import { jobHarness, untilJob } from './job-harness'
 import { responsesReply } from './responses-fixture'
-import { PluginService } from '../src/plugins/service'
-import { PluginWorkerManager } from '../src/plugins/runtime/manager'
-import { ResourceLibrary } from '../src/resources/library'
-import { ResourcesConfigSchema } from '../src/resources/schema'
-import { createMockAdapter } from '../src/channels/mock'
-import type { ChannelAdapter } from '../src/domain/channel'
+import { PluginService } from '@pi-im-bot/plugins/service'
+import { PluginWorkerManager } from '@pi-im-bot/plugins/runtime/manager'
+import { ResourceLibrary } from '@pi-im-bot/resources/library'
+import { ResourcesConfigSchema } from '@pi-im-bot/resources/schema'
+import { createMockAdapter } from '@pi-im-bot/channels/mock'
+import type { ChannelAdapter } from '@pi-im-bot/contracts/channel'
 
 test('a receipt observer schedules a persistent scoped recall, survives restart and never adds a model call or reruns its handler', async () => {
   const env = await pluginFixture()
@@ -77,9 +77,14 @@ test('a receipt observer schedules a persistent scoped recall, survives restart 
       await manager.start()
     })
     app.channels.register(adapter())
-    await untilJob(() => {
-      return app.store.getMessage(message.id)?.recalled === true
-    }, 'recall did not resume')
+    await untilJob(async () => {
+      if (app.store.getMessage(message.id)?.recalled !== true) {
+        return false
+      }
+      return (await app.coordinator.observations!.status()).recent.some((record) => {
+        return record.dueAt !== undefined && record.state === 'done'
+      })
+    }, 'recall did not resume with a completed observation')
     expect(recalled).toEqual(message.platformMessageIds)
     expect(app.requests).toHaveLength(1)
     const spec = [...env.backend.specifications.values()].find((spec) => {

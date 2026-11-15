@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test'
-import { GpuStatusSchema } from '../src/runtime/status/schema'
-import { parseNvidiaSmiCsv } from '../src/runtime/status/gpu'
+import { GpuStatusSchema } from '@pi-im-bot/runtime/status/schema'
+import { parseNvidiaSmiCsv } from '@pi-im-bot/runtime/status/gpu'
 
 test('NVIDIA probe parser normalizes fixed CSV output to bounded GPU and VRAM metrics', () => {
   const value = parseNvidiaSmiCsv(

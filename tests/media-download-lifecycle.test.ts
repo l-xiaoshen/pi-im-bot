@@ -1,7 +1,7 @@
 import { expect, test } from 'bun:test'
 import { jobHarness, untilJob } from './job-harness'
 import { responsesReply } from './responses-fixture'
-import { createMockAdapter } from '../src/channels/mock'
+import { createMockAdapter } from '@pi-im-bot/channels/mock'
 
 test('shared media downloads coalesce readers, isolate cancellation and stop the underlying request only after the last reader leaves', async () => {
   const app = await jobHarness(() => {

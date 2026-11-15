@@ -1,17 +1,17 @@
 import { expect, test } from 'bun:test'
-import { PluginInstanceSchema, PluginPackageSchema } from '../src/plugins/config'
-import { ResourcesConfigSchema } from '../src/resources/schema'
-import { parseConfigDefinition } from '../src/plugins/configuration/schema'
-import { fillConfigDefaults } from '../src/plugins/configuration/values'
-import { publicConfig, applyConfigSecrets } from '../src/plugins/configuration/secrets'
+import { PluginInstanceSchema, PluginPackageSchema } from '@pi-im-bot/plugins/config'
+import { ResourcesConfigSchema } from '@pi-im-bot/resources/schema'
+import { parseConfigDefinition } from '@pi-im-bot/plugins/configuration/schema'
+import { fillConfigDefaults } from '@pi-im-bot/plugins/configuration/values'
+import { publicConfig, applyConfigSecrets } from '@pi-im-bot/plugins/configuration/secrets'
 import {
   gsviBusinessValues,
   gsviWorkerDefinition,
   migrateGsviFlat,
   restoreGsviFlat
-} from '../src/services/gsvi/plugin-config/definition'
-import { gsviPageValues, saveGsviPage } from '../src/services/gsvi/plugin-config/values'
-import { gsviServiceHeaders } from '../src/services/gsvi/headers'
+} from '@pi-im-bot/integrations/gsvi/plugin-config/definition'
+import { gsviPageValues, saveGsviPage } from '@pi-im-bot/integrations/gsvi/plugin-config/values'
+import { gsviServiceHeaders } from '@pi-im-bot/integrations/gsvi/headers'
 
 // Configuration only. No service client, network fixture, Worker or operation is invoked.
 const definition = parseConfigDefinition({

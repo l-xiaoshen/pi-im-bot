@@ -1,0 +1,23 @@
+{
+  "name": "@pi-im-bot/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "dependencies": {
+    "@pi-im-bot/artifacts": "workspace:*",
+    "@pi-im-bot/channels": "workspace:*",
+    "@pi-im-bot/conversations": "workspace:*",
+    "@pi-im-bot/execution": "workspace:*",
+    "@pi-im-bot/jobs": "workspace:*",
+    "@pi-im-bot/media": "workspace:*",
+    "@pi-im-bot/messages": "workspace:*",
+    "@pi-im-bot/permissions": "workspace:*",
+    "@pi-im-bot/plugins": "workspace:*",
+    "@pi-im-bot/scheduler": "workspace:*",
+    "@pi-im-bot/settings": "workspace:*",
+    "zod": "4.6.7"
+  }
+}

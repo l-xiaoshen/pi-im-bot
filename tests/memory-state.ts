@@ -1,13 +1,13 @@
-import type { StateStore } from '../src/storage/state'
-import type { Room, ChatMessage } from '../src/domain/message'
-import type { Run, Trace } from '../src/domain/run'
-import type { Schedule } from '../src/scheduler/definition'
-import type { Conversation } from '../src/conversations/schema'
-import type { Outbound } from '../src/domain/delivery'
-import { mergeDeliveryEchoes } from '../src/storage/delivery-merge'
-import type { MediaRecord } from '../src/media/schema'
-import { recallKey, recalledMessage } from '../src/messages/recall'
-import type { Observation } from '../src/plugins/observations/schema'
+import type { StateStore } from '@pi-im-bot/storage/state'
+import type { Room, ChatMessage } from '@pi-im-bot/contracts/message'
+import type { Run, Trace } from '@pi-im-bot/contracts/run'
+import type { Schedule } from '@pi-im-bot/scheduler/definition'
+import type { Conversation } from '@pi-im-bot/conversations/schema'
+import type { Outbound } from '@pi-im-bot/contracts/delivery'
+import { mergeDeliveryEchoes } from '@pi-im-bot/storage/delivery-merge'
+import type { MediaRecord } from '@pi-im-bot/media/schema'
+import { recallKey, recalledMessage } from '@pi-im-bot/messages/recall'
+import type { Observation } from '@pi-im-bot/plugins/observations/schema'
 
 // Protocol/coordinator tests use memory only; no database behavior is tested.
 export class MemoryState implements Pick<StateStore, keyof StateStore> {

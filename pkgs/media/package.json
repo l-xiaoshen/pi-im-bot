@@ -1,0 +1,23 @@
+{
+  "name": "@pi-im-bot/media",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "dependencies": {
+    "@earendil-works/chord": "1.5.0",
+    "@earendil-works/pi-ai": "1.5.0",
+    "@earendil-works/pi-coding-agent": "1.5.0",
+    "@earendil-works/pi-schema": "1.5.0",
+    "@pi-im-bot/artifacts": "workspace:*",
+    "@pi-im-bot/capabilities": "workspace:*",
+    "@pi-im-bot/channels": "workspace:*",
+    "@pi-im-bot/contracts": "workspace:*",
+    "@pi-im-bot/settings": "workspace:*",
+    "@pi-im-bot/storage": "workspace:*",
+    "@pi-im-bot/support": "workspace:*",
+    "zod": "4.6.7"
+  }
+}

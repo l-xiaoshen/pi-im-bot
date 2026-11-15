@@ -16,7 +16,7 @@
 
 规定检查通过：Core check、178 tests / 1333 assertions、隔离web build、format；插件docs:sync/check、68 tests / 819 assertions、build/format。四包各两次build/pack逐字节相同，未更改第三方依赖。GSVI仍0.2.0、Comfy仍0.1.0；输入SHA与source revision独立记录，不把旧accepted-c SHA硬编码成未来复核条件。
 
-全新task子目录运行真实src/main.ts应用及其临时SQLite，经HTTP multipart安装两包，核对默认disabled、schema/默认值/manifest版本/release；真实资源/实例configuration路由保存假服务、模板、设置与绑定。随后每包21次只提交目标字段的管理PATCH验证，无完整payload绕过；仅重启此应用后除乐观锁revision外的全部字段、服务、release和schema保持。导出不含实例值/服务凭据；共享浏览器真实表单/disabled-backend提示通过。两个应用进程均正常退出，监听与task页面已清理，上游trap零请求，后端和两实例最终仍停用。
+全新task子目录运行真实services/bot/src/main.ts应用及其临时SQLite，经HTTP multipart安装两包，核对默认disabled、schema/默认值/manifest版本/release；真实资源/实例configuration路由保存假服务、模板、设置与绑定。随后每包21次只提交目标字段的管理PATCH验证，无完整payload绕过；仅重启此应用后除乐观锁revision外的全部字段、服务、release和schema保持。导出不含实例值/服务凭据；共享浏览器真实表单/disabled-backend提示通过。两个应用进程均正常退出，监听与task页面已清理，上游trap零请求，后端和两实例最终仍停用。
 
 上一阶段问题已在本轮实现和L3中关闭；历史失败报告/缺陷/收据保存在任务history/l3-before-fix，不作为当前未关闭项。原迁移已接受的结论保持。
 

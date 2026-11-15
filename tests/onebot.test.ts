@@ -1,11 +1,11 @@
 import { describe, expect, test } from 'bun:test'
-import { OneBotAdapter } from '../src/channels/onebot/adapter'
-import { extractPrompt } from '../src/runtime/trigger'
-import { OneBotConfigSchema } from '../src/channels/onebot/config'
-import { authorizeOneBot, tokenRevision } from '../src/channels/onebot/auth'
-import { EventHub } from '../src/runtime/events'
-import type { IncomingMessage } from '../src/domain/message'
-import { nextOccurrence } from '../src/scheduler/service'
+import { OneBotAdapter } from '@pi-im-bot/channels/onebot/adapter'
+import { extractPrompt } from '@pi-im-bot/runtime/trigger'
+import { OneBotConfigSchema } from '@pi-im-bot/channels/onebot/config'
+import { authorizeOneBot, tokenRevision } from '@pi-im-bot/channels/onebot/auth'
+import { EventHub } from '@pi-im-bot/contracts/events'
+import type { IncomingMessage } from '@pi-im-bot/contracts/message'
+import { nextOccurrence } from '@pi-im-bot/scheduler/service'
 
 describe('OneBot test-room routing', () => {
   test('discovers an unknown discussion group without invoking the agent', async () => {

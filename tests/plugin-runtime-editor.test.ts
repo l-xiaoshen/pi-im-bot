@@ -1,7 +1,7 @@
 import { expect, test } from 'bun:test'
 import { join } from 'node:path'
-import { PluginRuntimeEditor } from '../src/plugins/runtime/editor'
-import { PluginWorkerManager } from '../src/plugins/runtime/manager'
+import { PluginRuntimeEditor } from '@pi-im-bot/plugins/runtime/editor'
+import { PluginWorkerManager } from '@pi-im-bot/plugins/runtime/manager'
 import { pluginConsoleFixture } from './plugin-console-fixture'
 
 test('execution environment applies without restart, rejects stale and busy changes, and preserves configuration on failed preparation', async () => {

@@ -3,12 +3,12 @@ import { join } from 'node:path'
 import { pluginFixture } from './plugin-fixture'
 import { jobHarness } from './job-harness'
 import { responsesReply } from './responses-fixture'
-import { PluginEditor } from '../src/plugins/editor'
-import { PluginInstaller } from '../src/plugins/install/service'
-import { PluginMarket } from '../src/plugins/market/service'
-import { ResourceLibrary } from '../src/resources/library'
-import { ResourcesConfigSchema } from '../src/resources/schema'
-import { ConfigurationMutations } from '../src/config/mutations'
+import { PluginEditor } from '@pi-im-bot/plugins/editor'
+import { PluginInstaller } from '@pi-im-bot/plugins/install/service'
+import { PluginMarket } from '@pi-im-bot/plugins/market/service'
+import { ResourceLibrary } from '@pi-im-bot/resources/library'
+import { ResourcesConfigSchema } from '@pi-im-bot/resources/schema'
+import { ConfigurationMutations } from '@pi-im-bot/config/mutations'
 
 test('catalog updates compare source package hashes even when the plugin semantic version is unchanged', async () => {
   const env = await pluginFixture()

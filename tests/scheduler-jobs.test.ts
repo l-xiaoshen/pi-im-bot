@@ -1,11 +1,11 @@
 import { expect, test } from 'bun:test'
 import { jobHarness, latestUser, untilJob } from './job-harness'
 import { responsesReply } from './responses-fixture'
-import { captureAuthority } from '../src/permissions/authorize'
-import { localIdentity } from '../src/permissions/identity'
-import type { Schedule } from '../src/scheduler/definition'
+import { captureAuthority } from '@pi-im-bot/permissions/authorize'
+import { localIdentity } from '@pi-im-bot/permissions/identity'
+import type { Schedule } from '@pi-im-bot/scheduler/definition'
 import { createFakeShipyard } from './shipyard-fixture'
-import { ShipyardConfigSchema } from '../src/execution/config'
+import { ShipyardConfigSchema } from '@pi-im-bot/execution/config'
 
 function save(env: Awaited<ReturnType<typeof jobHarness>>, prompt: string, isolated = true): Schedule {
   const authority = captureAuthority(env.coordinator.effective(env.room.id), [

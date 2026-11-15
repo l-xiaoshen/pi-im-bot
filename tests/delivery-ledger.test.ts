@@ -1,9 +1,9 @@
 import { expect, test } from 'bun:test'
 import { MemoryState } from './memory-state'
-import { ChannelRegistry } from '../src/channels/registry'
-import { EventHub } from '../src/runtime/events'
-import { DeliveryService } from '../src/runtime/delivery'
-import { RoomSchema } from '../src/domain/message'
+import { ChannelRegistry } from '@pi-im-bot/channels/registry'
+import { EventHub } from '@pi-im-bot/contracts/events'
+import { DeliveryService } from '@pi-im-bot/runtime/delivery'
+import { RoomSchema } from '@pi-im-bot/contracts/message'
 
 test('delivery receipts deduplicate completed sends and uncertain outcomes are never automatically resent', async () => {
   const state = new MemoryState()

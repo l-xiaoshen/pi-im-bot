@@ -1,6 +1,6 @@
 import { performance } from 'node:perf_hooks'
-import { jobOutstanding } from '../../src/jobs/index'
-import type { JobSummary } from '../../src/jobs/schema'
+import { jobOutstanding } from '@pi-im-bot/jobs'
+import type { JobSummary } from '@pi-im-bot/jobs/schema'
 
 let sink = 0
 function measure(operation: () => number) {

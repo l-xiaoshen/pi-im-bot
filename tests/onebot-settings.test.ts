@@ -2,9 +2,9 @@ import { afterEach, expect, test } from 'bun:test'
 import { mkdtemp, writeFile, readFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { BotConfigSchema } from '../src/config/schema'
-import { OneBotSettings } from '../src/channels/onebot/settings'
-import { OneBotSettingsInputSchema } from '../src/channels/onebot/status'
+import { BotConfigSchema } from '@pi-im-bot/config/schema'
+import { OneBotSettings } from '@pi-im-bot/channels/onebot/settings'
+import { OneBotSettingsInputSchema } from '@pi-im-bot/channels/onebot/status'
 
 const roots: string[] = []
 afterEach(async () => {
