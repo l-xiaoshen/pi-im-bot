@@ -1,0 +1,17 @@
+{
+  "name": "onebot-sdk",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "module": "src/index.ts",
+  "scripts": {
+    "generate": "bun --filter onebot-spec compile && openapi-ts",
+    "generate:watch": "openapi-ts --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@hey-api/openapi-ts": "0.99.0",
+    "@types/bun": "1.4.4",
+    "typescript": "5.9.3"
+  }
+}

@@ -2,16 +2,15 @@ import { z } from "zod"
 import { OneBotMessageSchema } from "./message"
 
 /**
- * Message segment parameters are strings in the OneBot 11 array format, but
- * implementations commonly emit numbers for numeric values. Normalise both to
- * a string so segments can be converted to CQ codes without extra handling.
+ * 消息段参数在 OneBot 11 数组格式中为字符串，但实现通常会将数字值序列化为数字。
+ * 这里统一转换为字符串，以便与 CQ 码相互转换。
  */
 export const OneBotSegmentParamSchema = z.union([z.string(), z.number()]).transform(String)
 export type OneBotSegmentParam = z.infer<typeof OneBotSegmentParamSchema>
 
 /**
- * Parameters documented as `0`/`1` also accept `no`/`yes` and `false`/`true`.
- * The parsed value is always `"0"` or `"1"`.
+ * 值为 `0`/`1` 的参数，也可以使用 `no`/`yes` 和 `false`/`true`。
+ * 解析后的值始终为 `"0"` 或 `"1"`。
  */
 export const OneBotFlagSchema = z
   .union([z.boolean(), z.literal(0), z.literal(1), z.enum(["0", "1", "no", "yes", "false", "true"])])
@@ -29,16 +28,19 @@ export const OneBotFlagSchema = z
   })
 export type OneBotFlag = z.infer<typeof OneBotFlagSchema>
 
+/** 纯文本。 */
 export const OneBotTextSegmentSchema = z.object({
   type: z.literal("text"),
   data: z.object({ text: z.string() })
 })
 
+/** QQ 表情。 */
 export const OneBotFaceSegmentSchema = z.object({
   type: z.literal("face"),
   data: z.object({ id: OneBotSegmentParamSchema })
 })
 
+/** 图片。 */
 export const OneBotImageSegmentSchema = z.object({
   type: z.literal("image"),
   data: z.object({
@@ -51,6 +53,7 @@ export const OneBotImageSegmentSchema = z.object({
   })
 })
 
+/** 语音。 */
 export const OneBotRecordSegmentSchema = z.object({
   type: z.literal("record"),
   data: z.object({
@@ -63,6 +66,7 @@ export const OneBotRecordSegmentSchema = z.object({
   })
 })
 
+/** 短视频。 */
 export const OneBotVideoSegmentSchema = z.object({
   type: z.literal("video"),
   data: z.object({
@@ -74,26 +78,31 @@ export const OneBotVideoSegmentSchema = z.object({
   })
 })
 
+/** @某人。 */
 export const OneBotAtSegmentSchema = z.object({
   type: z.literal("at"),
   data: z.object({ qq: OneBotSegmentParamSchema })
 })
 
+/** 猜拳魔法表情。 */
 export const OneBotRpsSegmentSchema = z.object({
   type: z.literal("rps"),
   data: z.object({}).nullish()
 })
 
+/** 掷骰子魔法表情。 */
 export const OneBotDiceSegmentSchema = z.object({
   type: z.literal("dice"),
   data: z.object({}).nullish()
 })
 
+/** 窗口抖动（戳一戳）。 */
 export const OneBotShakeSegmentSchema = z.object({
   type: z.literal("shake"),
   data: z.object({}).nullish()
 })
 
+/** 戳一戳。 */
 export const OneBotPokeSegmentSchema = z.object({
   type: z.literal("poke"),
   data: z.object({
@@ -103,11 +112,13 @@ export const OneBotPokeSegmentSchema = z.object({
   })
 })
 
+/** 匿名发消息。 */
 export const OneBotAnonymousSegmentSchema = z.object({
   type: z.literal("anonymous"),
   data: z.object({ ignore: OneBotFlagSchema.optional() }).nullish()
 })
 
+/** 链接分享。 */
 export const OneBotShareSegmentSchema = z.object({
   type: z.literal("share"),
   data: z.object({
@@ -118,6 +129,7 @@ export const OneBotShareSegmentSchema = z.object({
   })
 })
 
+/** 推荐好友或推荐群。 */
 export const OneBotContactSegmentSchema = z.object({
   type: z.literal("contact"),
   data: z.object({
@@ -126,6 +138,7 @@ export const OneBotContactSegmentSchema = z.object({
   })
 })
 
+/** 位置。 */
 export const OneBotLocationSegmentSchema = z.object({
   type: z.literal("location"),
   data: z.object({
@@ -136,6 +149,7 @@ export const OneBotLocationSegmentSchema = z.object({
   })
 })
 
+/** 音乐分享。 */
 export const OneBotMusicSegmentSchema = z.object({
   type: z.literal("music"),
   data: z.union([
@@ -154,21 +168,25 @@ export const OneBotMusicSegmentSchema = z.object({
   ])
 })
 
+/** 回复。 */
 export const OneBotReplySegmentSchema = z.object({
   type: z.literal("reply"),
   data: z.object({ id: OneBotSegmentParamSchema })
 })
 
+/** 合并转发。 */
 export const OneBotForwardSegmentSchema = z.object({
   type: z.literal("forward"),
   data: z.object({ id: OneBotSegmentParamSchema })
 })
 
+/** 合并转发节点。 */
 export const OneBotNodeIdSegmentSchema = z.object({
   type: z.literal("node"),
   data: z.object({ id: OneBotSegmentParamSchema })
 })
 
+/** 合并转发自定义节点。 */
 export const OneBotNodeCustomSegmentSchema = z.object({
   type: z.literal("node"),
   data: z.object({
@@ -180,11 +198,13 @@ export const OneBotNodeCustomSegmentSchema = z.object({
 
 export const OneBotNodeSegmentSchema = z.union([OneBotNodeIdSegmentSchema, OneBotNodeCustomSegmentSchema])
 
+/** XML 消息。 */
 export const OneBotXmlSegmentSchema = z.object({
   type: z.literal("xml"),
   data: z.object({ data: z.string() })
 })
 
+/** JSON 消息。 */
 export const OneBotJsonSegmentSchema = z.object({
   type: z.literal("json"),
   data: z.object({ data: z.string() })
