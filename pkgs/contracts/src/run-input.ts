@@ -1,8 +1,8 @@
-import { z } from 'zod'
-import { AuthoritySchema, TriggerIdentitySchema } from '@pi-im-bot/permissions/identity'
-import { ImageReferenceSchema, QuoteContextSchema } from '@pi-im-bot/media/provenance'
+import { z } from "zod"
+import { AuthoritySchema, TriggerIdentitySchema } from "@pi-im-bot/permissions/identity"
+import { ImageReferenceSchema, QuoteContextSchema } from "@pi-im-bot/media/provenance"
 
-export const RunSourceSchema = z.enum(['im', 'command', 'schedule', 'job'])
+export const RunSourceSchema = z.enum(["im", "command", "schedule", "job"])
 export const BatchPartSchema = z.object({
   messageId: z.string(),
   text: z.string(),

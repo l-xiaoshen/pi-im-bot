@@ -1,18 +1,18 @@
-import { z } from 'zod'
-import type { ChannelAdapter } from '@pi-im-bot/contracts/channel'
-import { PartialDelivery, type ChannelMedia, type SendControl } from '@pi-im-bot/contracts/channel-media'
-import type { Address, IncomingMessage, InboundOutcome } from '@pi-im-bot/contracts/message'
-import type { EventHub } from '@pi-im-bot/contracts/events'
-import { OneBotMessageSchema, OneBotResponseSchema } from './protocol'
-import { parseOneBotContent } from './content'
-import { readOneBotMedia } from './media'
-import { fetchedMessage } from './history'
-import { parseRecall } from './recall'
-import type { IncomingMedia } from '@pi-im-bot/media/schema'
-import { BACKGROUND_CONTEXT, awaitWithContext, withAbortSignal } from '@earendil-works/chord/context'
-import { oneBotAllowed, type OneBotConfig } from './config'
-import { authorizeOneBot, tokenRevision } from './auth'
-import type { DiscoveredChat, OneBotStatus, RouteReason } from './status'
+import { z } from "zod"
+import type { ChannelAdapter } from "@pi-im-bot/contracts/channel"
+import { PartialDelivery, type ChannelMedia, type SendControl } from "@pi-im-bot/contracts/channel-media"
+import type { Address, IncomingMessage, InboundOutcome } from "@pi-im-bot/contracts/message"
+import type { EventHub } from "@pi-im-bot/contracts/events"
+import { OneBotMessageSchema, OneBotResponseSchema } from "./protocol"
+import { parseOneBotContent } from "./content"
+import { readOneBotMedia } from "./media"
+import { fetchedMessage } from "./history"
+import { parseRecall } from "./recall"
+import type { IncomingMedia } from "@pi-im-bot/media/schema"
+import { BACKGROUND_CONTEXT, awaitWithContext, withAbortSignal } from "@earendil-works/chord/context"
+import { oneBotAllowed, type OneBotConfig } from "./config"
+import { authorizeOneBot, tokenRevision } from "./auth"
+import type { DiscoveredChat, OneBotStatus, RouteReason } from "./status"
 
 export interface OneBotSocket {
   send(data: string): number
@@ -25,7 +25,7 @@ interface PendingAction {
   timeout: ReturnType<typeof setTimeout>
 }
 export class OneBotAdapter implements ChannelAdapter {
-  readonly id = 'onebot-v11'
+  readonly id = "onebot-v11"
   readonly capabilities = {
     forward: true,
     text: true,
@@ -43,8 +43,8 @@ export class OneBotAdapter implements ChannelAdapter {
   private received = 0
   private recorded = 0
   private lastReceivedAt: number | null = null
-  private lastAuthFailure: OneBotStatus['lastAuthFailure'] = null
-  private readonly recent: OneBotStatus['recent'] = []
+  private lastAuthFailure: OneBotStatus["lastAuthFailure"] = null
+  private readonly recent: OneBotStatus["recent"] = []
 
   constructor(
     private readonly config: () => OneBotConfig,
@@ -64,13 +64,13 @@ export class OneBotAdapter implements ChannelAdapter {
 
   connect(selfId: string, socket: OneBotSocket, revision: string) {
     if (!this.config().enabled || revision !== tokenRevision(this.config().accessToken)) {
-      socket.close(1008, 'Authentication configuration changed')
+      socket.close(1008, "Authentication configuration changed")
       return
     }
     const previous = this.sockets.get(selfId)
     if (previous) {
       this.disconnect(selfId, previous)
-      previous.close(1012, 'Replaced by a new connection')
+      previous.close(1012, "Replaced by a new connection")
     }
     this.sockets.set(selfId, socket)
     this.publish()
@@ -84,7 +84,7 @@ export class OneBotAdapter implements ChannelAdapter {
     for (const [echo, pending] of this.pending) {
       if (pending.selfId === selfId) {
         clearTimeout(pending.timeout)
-        pending.reject(new Error('OneBot connection closed; action outcome may be unknown'))
+        pending.reject(new Error("OneBot connection closed; action outcome may be unknown"))
         this.pending.delete(echo)
       }
     }
@@ -99,7 +99,7 @@ export class OneBotAdapter implements ChannelAdapter {
     try {
       value = JSON.parse(raw)
     } catch {
-      this.route(selfId, 'invalid')
+      this.route(selfId, "invalid")
       return
     }
     const response = OneBotResponseSchema.safeParse(value)
@@ -115,7 +115,7 @@ export class OneBotAdapter implements ChannelAdapter {
       } else {
         pending.reject(
           new Error(
-            `OneBot ${response.data.retcode}: ${response.data.message ?? response.data.wording ?? 'action failed'}`
+            `OneBot ${response.data.retcode}: ${response.data.message ?? response.data.wording ?? "action failed"}`
           )
         )
       }
@@ -130,26 +130,26 @@ export class OneBotAdapter implements ChannelAdapter {
     }
     const result = OneBotMessageSchema.safeParse(value)
     if (!result.success) {
-      const event = z.object({ post_type: z.enum(['meta_event', 'notice', 'request']) }).safeParse(value)
+      const event = z.object({ post_type: z.enum(["meta_event", "notice", "request"]) }).safeParse(value)
       if (!event.success) {
-        this.route(selfId, 'invalid')
+        this.route(selfId, "invalid")
       }
       return
     }
     if (result.data.self_id !== selfId) {
-      this.route(selfId, 'invalid')
+      this.route(selfId, "invalid")
       return
     }
     const event = result.data
     this.received += 1
     this.lastReceivedAt = Date.now()
-    let kind: Address['kind'] = 'direct'
+    let kind: Address["kind"] = "direct"
     let chatId = event.user_id
-    if (event.message_type === 'group') {
+    if (event.message_type === "group") {
       if (!event.group_id) {
         return
       }
-      kind = 'group'
+      kind = "group"
       chatId = event.group_id
     }
     const key = `${selfId}:${kind}:${chatId}`
@@ -162,21 +162,21 @@ export class OneBotAdapter implements ChannelAdapter {
     }
     this.chats.set(key, chat)
     if (this.chats.size > 200) {
-      this.chats.delete(this.chats.keys().next().value ?? '')
+      this.chats.delete(this.chats.keys().next().value ?? "")
     }
     const config = this.config()
     const address: Address = { channel: this.id, accountId: selfId, kind, chatId }
     if (!config.enabled) {
-      this.route(selfId, 'disabled', chatId)
+      this.route(selfId, "disabled", chatId)
       return
     }
     if (!oneBotAllowed(config, address)) {
-      this.route(selfId, 'not_selected', chatId)
+      this.route(selfId, "not_selected", chatId)
       return
     }
     const dedupeKey = `${key}:${event.message_id}`
     if (this.seenMessages.has(dedupeKey)) {
-      this.route(selfId, 'duplicate', chatId)
+      this.route(selfId, "duplicate", chatId)
       return
     }
     this.seenMessages.set(dedupeKey, Date.now())
@@ -186,7 +186,7 @@ export class OneBotAdapter implements ChannelAdapter {
       }
     }
     if (this.seenMessages.size > 10000) {
-      this.seenMessages.delete(this.seenMessages.keys().next().value ?? '')
+      this.seenMessages.delete(this.seenMessages.keys().next().value ?? "")
     }
     try {
       const outcome = await this.receive({
@@ -197,15 +197,15 @@ export class OneBotAdapter implements ChannelAdapter {
         actorName: event.sender.card || event.sender.nickname || event.user_id,
         ...parseOneBotContent(event.message),
         receivedAt: (event.time ?? Date.now() / 1000) * 1000,
-        isSelf: event.user_id === selfId || event.post_type === 'message_sent'
+        isSelf: event.user_id === selfId || event.post_type === "message_sent"
       })
-      if (['recorded', 'command', 'agent', 'self'].includes(outcome)) {
+      if (["recorded", "command", "agent", "self"].includes(outcome)) {
         this.recorded += 1
       }
       this.route(selfId, outcome, chatId)
     } catch (error) {
       this.seenMessages.delete(dedupeKey)
-      this.route(selfId, 'error', chatId)
+      this.route(selfId, "error", chatId)
       throw error
     }
   }
@@ -213,13 +213,13 @@ export class OneBotAdapter implements ChannelAdapter {
   private request(address: Address, action: string, params: Record<string, string | number | object>) {
     const socket = this.sockets.get(address.accountId)
     if (!socket) {
-      return Promise.reject(new Error('NapCat 尚未连接'))
+      return Promise.reject(new Error("NapCat 尚未连接"))
     }
     const echo = crypto.randomUUID()
     return new Promise<unknown>((resolve, reject) => {
       const timeout = setTimeout(() => {
         this.pending.delete(echo)
-        reject(new Error('OneBot action timed out; delivery may have happened and is not retried'))
+        reject(new Error("OneBot action timed out; delivery may have happened and is not retried"))
       }, 15000)
       this.pending.set(echo, { selfId: address.accountId, resolve, reject, timeout })
       try {
@@ -234,33 +234,31 @@ export class OneBotAdapter implements ChannelAdapter {
 
   async send(address: Address, text: string, media: readonly ChannelMedia[] = [], control?: SendControl) {
     if (!oneBotAllowed(this.config(), address)) {
-      throw new Error('该机器人账号下的 QQ 会话未启用测试')
+      throw new Error("该机器人账号下的 QQ 会话未启用测试")
     }
     if (
       media.some((item) => {
-        return item.kind !== 'image' && item.kind !== 'audio'
+        return item.kind !== "image" && item.kind !== "audio"
       })
     ) {
-      throw new Error('此 QQ 适配暂不直接发送这种媒体')
+      throw new Error("此 QQ 适配暂不直接发送这种媒体")
     }
     const packets: Array<Array<{ type: string; data: Record<string, string> }>> = []
     const first: Array<{ type: string; data: Record<string, string> }> = []
     if (text) {
-      first.push({ type: 'text', data: { text } })
+      first.push({ type: "text", data: { text } })
     }
     for (const item of media) {
-      if (item.kind === 'image') {
-        first.push({ type: 'image', data: { file: 'base64://' + Buffer.from(item.data).toString('base64') } })
+      if (item.kind === "image") {
+        first.push({ type: "image", data: { file: "base64://" + Buffer.from(item.data).toString("base64") } })
       }
     }
     if (first.length > 0) {
       packets.push(first)
     }
     for (const item of media) {
-      if (item.kind === 'audio') {
-        packets.push([
-          { type: 'record', data: { file: 'base64://' + Buffer.from(item.data).toString('base64') } }
-        ])
+      if (item.kind === "audio") {
+        packets.push([{ type: "record", data: { file: "base64://" + Buffer.from(item.data).toString("base64") } }])
       }
     }
     const messageIds: string[] = []
@@ -269,12 +267,12 @@ export class OneBotAdapter implements ChannelAdapter {
       for (const message of packets) {
         await control?.beforePart?.()
         if (!oneBotAllowed(this.config(), address)) {
-          throw new Error('该 QQ 会话已停用')
+          throw new Error("该 QQ 会话已停用")
         }
-        let action = 'send_private_msg'
+        let action = "send_private_msg"
         let params: Record<string, string | number | object> = { user_id: address.chatId, message }
-        if (address.kind === 'group') {
-          action = 'send_group_msg'
+        if (address.kind === "group") {
+          action = "send_group_msg"
           params = { group_id: address.chatId, message }
         }
         const result = z
@@ -297,14 +295,14 @@ export class OneBotAdapter implements ChannelAdapter {
 
   async sendForward(address: Address, text: string, media: readonly ChannelMedia[], control?: SendControl) {
     if (!oneBotAllowed(this.config(), address)) {
-      throw new Error('当前QQ目标已停用')
+      throw new Error("当前QQ目标已停用")
     }
     if (
       media.some((file) => {
-        return file.kind !== 'image'
+        return file.kind !== "image"
       })
     ) {
-      throw new Error('合并转发仅接受已校验图片')
+      throw new Error("合并转发仅接受已校验图片")
     }
     const messages: Array<{
       type: string
@@ -312,30 +310,28 @@ export class OneBotAdapter implements ChannelAdapter {
     }> = []
     if (text) {
       messages.push({
-        type: 'node',
-        data: { uin: address.accountId, name: 'Pi', content: [{ type: 'text', data: { text } }] }
+        type: "node",
+        data: { uin: address.accountId, name: "Pi", content: [{ type: "text", data: { text } }] }
       })
     }
     for (const file of media) {
       messages.push({
-        type: 'node',
+        type: "node",
         data: {
           uin: address.accountId,
-          name: 'Pi',
-          content: [
-            { type: 'image', data: { file: 'base64://' + Buffer.from(file.data).toString('base64') } }
-          ]
+          name: "Pi",
+          content: [{ type: "image", data: { file: "base64://" + Buffer.from(file.data).toString("base64") } }]
         }
       })
     }
     await control?.beforePart?.()
     if (!oneBotAllowed(this.config(), address)) {
-      throw new Error('当前QQ目标已停用')
+      throw new Error("当前QQ目标已停用")
     }
-    let action = 'send_private_forward_msg'
+    let action = "send_private_forward_msg"
     let params: Record<string, string | number | object> = { user_id: address.chatId, messages }
-    if (address.kind === 'group') {
-      action = 'send_group_forward_msg'
+    if (address.kind === "group") {
+      action = "send_group_forward_msg"
       params = { group_id: address.chatId, messages }
     }
     const result = z
@@ -347,33 +343,33 @@ export class OneBotAdapter implements ChannelAdapter {
   }
   async recall(address: Address, messageId: string) {
     if (!oneBotAllowed(this.config(), address)) {
-      throw new Error('该 QQ 会话已停用')
+      throw new Error("该 QQ 会话已停用")
     }
-    await this.request(address, 'delete_msg', { message_id: messageId })
+    await this.request(address, "delete_msg", { message_id: messageId })
   }
   async readMedia(address: Address, media: IncomingMedia, signal: AbortSignal) {
     if (!oneBotAllowed(this.config(), address)) {
-      throw new Error('此 QQ 会话已停用')
+      throw new Error("此 QQ 会话已停用")
     }
     return readOneBotMedia(media, this.config().mediaOrigins, signal, async (id) => {
       if (/[\\/\0]/u.test(id)) {
-        throw new Error('平台图片标识无效')
+        throw new Error("平台图片标识无效")
       }
       return awaitWithContext(
-        this.request(address, 'get_image', { file: id }),
+        this.request(address, "get_image", { file: id }),
         withAbortSignal(signal, BACKGROUND_CONTEXT)
       )
     })
   }
   async lookupMessage(address: Address, id: string, signal: AbortSignal) {
     if (!oneBotAllowed(this.config(), address)) {
-      throw new Error('此 QQ 会话已停用')
+      throw new Error("此 QQ 会话已停用")
     }
     if (!/^-?\d{1,20}$/u.test(id)) {
-      throw new Error('平台消息 ID 无效')
+      throw new Error("平台消息 ID 无效")
     }
     const result = await awaitWithContext(
-      this.request(address, 'get_msg', { message_id: id }),
+      this.request(address, "get_msg", { message_id: id }),
       withAbortSignal(signal, BACKGROUND_CONTEXT)
     )
     return fetchedMessage(address, id, result)
@@ -388,23 +384,19 @@ export class OneBotAdapter implements ChannelAdapter {
       )
       .max(2000)
       .parse(
-        await this.request(
-          { channel: this.id, accountId: selfId, kind: 'group', chatId: '' },
-          'get_group_list',
-          {}
-        )
+        await this.request({ channel: this.id, accountId: selfId, kind: "group", chatId: "" }, "get_group_list", {})
       )
     for (const group of groups) {
-      this.chats.set(selfId + ':group:' + group.group_id, {
+      this.chats.set(selfId + ":group:" + group.group_id, {
         selfId,
         chatId: group.group_id,
         name: group.group_name,
-        kind: 'group',
+        kind: "group",
         seenAt: Date.now()
       })
     }
     while (this.chats.size > 200) {
-      this.chats.delete(this.chats.keys().next().value ?? '')
+      this.chats.delete(this.chats.keys().next().value ?? "")
     }
     this.publish()
     return this.status()
@@ -415,7 +407,7 @@ export class OneBotAdapter implements ChannelAdapter {
     if (!next.enabled || previous.accessToken !== next.accessToken || previous.path !== next.path) {
       for (const [selfId, socket] of this.sockets) {
         this.disconnect(selfId, socket)
-        socket.close(1012, 'OneBot settings changed; reconnect')
+        socket.close(1012, "OneBot settings changed; reconnect")
       }
     }
     this.publish()
@@ -435,7 +427,7 @@ export class OneBotAdapter implements ChannelAdapter {
   }
   close() {
     for (const socket of this.sockets.values()) {
-      socket.close(1001, 'Server shutdown')
+      socket.close(1001, "Server shutdown")
     }
   }
   private route(selfId: string, reason: RouteReason, chatId?: string) {
@@ -444,6 +436,6 @@ export class OneBotAdapter implements ChannelAdapter {
     this.publish()
   }
   private publish() {
-    this.events.emit({ type: 'onebot_status', status: this.status() })
+    this.events.emit({ type: "onebot_status", status: this.status() })
   }
 }

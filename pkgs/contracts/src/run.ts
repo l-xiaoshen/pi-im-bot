@@ -1,8 +1,8 @@
-import { z } from 'zod'
-import { EffectiveSettingsSchema } from '@pi-im-bot/settings/schema'
-import { AuthoritySchema } from '@pi-im-bot/permissions/identity'
-import { RunInputSchema, RunSourceSchema, type RunInput } from './run-input'
-export type { RunInput } from './run-input'
+import { z } from "zod"
+import { EffectiveSettingsSchema } from "@pi-im-bot/settings/schema"
+import { AuthoritySchema } from "@pi-im-bot/permissions/identity"
+import { RunInputSchema, RunSourceSchema, type RunInput } from "./run-input"
+export type { RunInput } from "./run-input"
 
 export const ExecutionContextSchema = z.object({
   conversationId: z.string(),
@@ -34,14 +34,14 @@ export const RunSchema = z.object({
   source: RunSourceSchema,
   input: RunInputSchema.optional(),
   configSnapshot: z.string().optional(),
-  mode: z.enum(['demo', 'live']),
-  status: z.enum(['batching', 'queued', 'running', 'completed', 'failed', 'cancelled', 'interrupted']),
+  mode: z.enum(["demo", "live"]),
+  status: z.enum(["batching", "queued", "running", "completed", "failed", "cancelled", "interrupted"]),
   providerGroup: z.string(),
   context: ExecutionContextSchema.optional(),
   rawReply: z.string().optional(),
   presentation: z
     .object({
-      state: z.enum(['accepted', 'sent', 'unknown', 'partial', 'suppressed']),
+      state: z.enum(["accepted", "sent", "unknown", "partial", "suppressed"]),
       jobId: z.string().optional()
     })
     .optional(),
@@ -62,20 +62,20 @@ export const TraceSchema = z.object({
   runId: z.string(),
   at: z.number(),
   kind: z.enum([
-    'queued',
-    'started',
-    'provider',
-    'tool',
-    'delivery',
-    'compaction',
-    'media',
-    'plugin',
-    'cancelled',
-    'error',
-    'completed'
+    "queued",
+    "started",
+    "provider",
+    "tool",
+    "delivery",
+    "compaction",
+    "media",
+    "plugin",
+    "cancelled",
+    "error",
+    "completed"
   ]),
   title: z.string(),
-  detail: z.string().default(''),
+  detail: z.string().default(""),
   provider: z.string().optional(),
   model: z.string().optional(),
   attempt: z.number().optional(),

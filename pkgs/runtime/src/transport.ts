@@ -1,20 +1,20 @@
-import type { ChannelRegistry } from '@pi-im-bot/channels/registry'
-import type { Address } from '@pi-im-bot/contracts/message'
-import type { ChannelMedia, SendControl } from '@pi-im-bot/contracts/channel-media'
-import { PartialDelivery } from '@pi-im-bot/contracts/channel-media'
+import type { ChannelRegistry } from "@pi-im-bot/channels/registry"
+import type { Address } from "@pi-im-bot/contracts/message"
+import type { ChannelMedia, SendControl } from "@pi-im-bot/contracts/channel-media"
+import { PartialDelivery } from "@pi-im-bot/contracts/channel-media"
 
 export async function sendTransport(
   channels: ChannelRegistry,
   address: Address,
   text: string,
   media: readonly ChannelMedia[],
-  format: 'direct' | 'forward',
+  format: "direct" | "forward",
   itemized: boolean,
   control: SendControl,
   part: (artifactIds: string[], ids: string[]) => void
 ) {
   const adapter = channels.get(address.channel)
-  if (format === 'forward' && adapter.capabilities.forward && adapter.sendForward) {
+  if (format === "forward" && adapter.capabilities.forward && adapter.sendForward) {
     const receipt = await adapter.sendForward(address, text, media, control)
     part(
       media.map((file) => {
@@ -31,7 +31,7 @@ export async function sendTransport(
   let sentAt = Date.now()
   try {
     for (const [index, file] of media.entries()) {
-      let body = ''
+      let body = ""
       if (index === 0) {
         body = text
       }

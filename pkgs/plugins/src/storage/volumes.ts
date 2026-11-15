@@ -1,20 +1,15 @@
-import { mkdir, open, rename, unlink, lstat, readdir, statfs } from 'node:fs/promises'
-import { join } from 'node:path'
-import { createHash } from 'node:crypto'
-import { RunLimiter } from '@pi-im-bot/support/limiter'
-import { PluginStorageSchema, type PluginStorageConfig } from './config'
-import {
-  VolumeCatalogSchema,
-  type PluginVolume,
-  type PluginVolumes,
-  type PluginVolumeLease
-} from './contracts'
-import { FuseFilesystem, filesystemMount, storageDependencies, runStorageCommand } from './filesystem'
-import { PluginIdSchema } from '../manifest'
+import { mkdir, open, rename, unlink, lstat, readdir, statfs } from "node:fs/promises"
+import { join } from "node:path"
+import { createHash } from "node:crypto"
+import { RunLimiter } from "@pi-im-bot/support/limiter"
+import { PluginStorageSchema, type PluginStorageConfig } from "./config"
+import { VolumeCatalogSchema, type PluginVolume, type PluginVolumes, type PluginVolumeLease } from "./contracts"
+import { FuseFilesystem, filesystemMount, storageDependencies, runStorageCommand } from "./filesystem"
+import { PluginIdSchema } from "../manifest"
 
 const MiB = 1024 * 1024
 function hash(value: string) {
-  return createHash('sha256').update(value).digest('hex').slice(0, 20)
+  return createHash("sha256").update(value).digest("hex").slice(0, 20)
 }
 interface MountedVolume {
   volume: PluginVolume
@@ -33,13 +28,13 @@ export class ManagedPluginVolumes implements PluginVolumes {
     this.root = join(dataDir, owner)
     this.filesystem = new FuseFilesystem(this.config)
   }
-  private paths(volume: Pick<PluginVolume, 'instanceId' | 'scopeKey'>) {
+  private paths(volume: Pick<PluginVolume, "instanceId" | "scopeKey">) {
     const directory = join(this.root, volume.instanceId, volume.scopeKey)
-    const view = join(this.root, 'views', volume.instanceId, volume.scopeKey)
-    return { directory, image: join(directory, 'volume.img'), view, mount: join(view, 'files') }
+    const view = join(this.root, "views", volume.instanceId, volume.scopeKey)
+    return { directory, image: join(directory, "volume.img"), view, mount: join(view, "files") }
   }
   private async catalog() {
-    const file = Bun.file(join(this.root, 'volumes.json'))
+    const file = Bun.file(join(this.root, "volumes.json"))
     if (!(await file.exists())) {
       return VolumeCatalogSchema.parse({ version: 1, volumes: [] })
     }
@@ -47,9 +42,9 @@ export class ManagedPluginVolumes implements PluginVolumes {
   }
   private async save(catalog: ReturnType<typeof VolumeCatalogSchema.parse>) {
     await mkdir(this.root, { recursive: true, mode: 0o700 })
-    const target = join(this.root, 'volumes.json')
-    const temporary = target + '.' + crypto.randomUUID() + '.tmp'
-    const file = await open(temporary, 'wx', 0o600)
+    const target = join(this.root, "volumes.json")
+    const temporary = target + "." + crypto.randomUUID() + ".tmp"
+    const file = await open(temporary, "wx", 0o600)
     try {
       await file.writeFile(JSON.stringify(catalog))
       await file.sync()
@@ -61,7 +56,7 @@ export class ManagedPluginVolumes implements PluginVolumes {
     } finally {
       await unlink(temporary).catch(() => {})
     }
-    const directory = await open(this.root, 'r')
+    const directory = await open(this.root, "r")
     try {
       await directory.sync()
     } finally {
@@ -70,9 +65,7 @@ export class ManagedPluginVolumes implements PluginVolumes {
   }
   async prepare() {
     if (!(await storageDependencies(this.config))) {
-      throw new Error(
-        '插件持久数据需要 Linux、/dev/fuse、fuse2fs、mke2fs、e2fsck 和 fusermount3；未回退普通目录'
-      )
+      throw new Error("插件持久数据需要 Linux、/dev/fuse、fuse2fs、mke2fs、e2fsck 和 fusermount3；未回退普通目录")
     }
     for (const volume of (await this.catalog()).volumes) {
       const paths = this.paths(volume)
@@ -85,7 +78,7 @@ export class ManagedPluginVolumes implements PluginVolumes {
   async acquire(instance: string, scope: string, signal: AbortSignal): Promise<PluginVolumeLease> {
     instance = PluginIdSchema.parse(instance)
     const release = await this.lock.acquire(signal)
-    const id = hash(instance + ':' + scope)
+    const id = hash(instance + ":" + scope)
     try {
       const active = this.mounted.get(id)
       if (active) {
@@ -113,7 +106,7 @@ export class ManagedPluginVolumes implements PluginVolumes {
           plugin + bytes > this.config.pluginMiB * MiB ||
           catalog.volumes.length >= this.config.maxVolumes
         ) {
-          throw new Error('插件持久数据预留额度已满，未创建新卷')
+          throw new Error("插件持久数据预留额度已满，未创建新卷")
         }
         volume = {
           id,
@@ -121,7 +114,7 @@ export class ManagedPluginVolumes implements PluginVolumes {
           scopeKey: hash(scope),
           uuid: crypto.randomUUID(),
           bytes,
-          state: 'creating',
+          state: "creating",
           createdAt: Date.now(),
           lastUsedAt: Date.now()
         }
@@ -131,9 +124,9 @@ export class ManagedPluginVolumes implements PluginVolumes {
         try {
           await mkdir(paths.directory, { recursive: true, mode: 0o700 })
           if ((await readdir(paths.directory)).length > 0) {
-            throw new Error('存在未登记的插件数据，拒绝覆盖或隐式迁移')
+            throw new Error("存在未登记的插件数据，拒绝覆盖或隐式迁移")
           }
-          const image = await open(paths.image, 'wx', 0o600)
+          const image = await open(paths.image, "wx", 0o600)
           try {
             await image.truncate(bytes)
             await image.sync()
@@ -143,46 +136,46 @@ export class ManagedPluginVolumes implements PluginVolumes {
           await runStorageCommand(
             this.config.formatCommand,
             [
-              '-q',
-              '-t',
-              'ext4',
-              '-O',
-              '^has_journal',
-              '-F',
-              '-m',
-              '0',
-              '-U',
+              "-q",
+              "-t",
+              "ext4",
+              "-O",
+              "^has_journal",
+              "-F",
+              "-m",
+              "0",
+              "-U",
               volume.uuid,
-              '-E',
-              'root_owner=' + (process.getuid?.() ?? 1000) + ':' + (process.getgid?.() ?? 1000),
+              "-E",
+              "root_owner=" + (process.getuid?.() ?? 1000) + ":" + (process.getgid?.() ?? 1000),
               paths.image
             ],
             AbortSignal.any([signal, AbortSignal.timeout(this.config.timeoutMs)])
           )
-          volume.state = 'ready'
+          volume.state = "ready"
           await this.save(catalog)
         } catch (error) {
-          volume.state = 'quarantined'
+          volume.state = "quarantined"
           volume.error = String(error).slice(0, 500)
           await this.save(catalog)
           throw error
         }
       }
-      if (volume.state !== 'ready') {
-        throw new Error('插件数据卷未完成创建或已隔离，需核对原数据；未自动重建')
+      if (volume.state !== "ready") {
+        throw new Error("插件数据卷未完成创建或已隔离，需核对原数据；未自动重建")
       }
       const paths = this.paths(volume)
       const info = await lstat(paths.image)
       if (!info.isFile() || info.isSymbolicLink() || info.size !== volume.bytes) {
-        throw new Error('插件镜像类型或容量与登记不一致')
+        throw new Error("插件镜像类型或容量与登记不一致")
       }
       const deadline = AbortSignal.any([signal, AbortSignal.timeout(this.config.timeoutMs)])
       deadline.throwIfAborted()
       try {
-        await runStorageCommand(this.config.checkCommand, ['-p', paths.image], deadline, [0, 1])
+        await runStorageCommand(this.config.checkCommand, ["-p", paths.image], deadline, [0, 1])
       } catch (error) {
-        volume.state = 'quarantined'
-        volume.error = '数据卷检查未完成，未自动重建'
+        volume.state = "quarantined"
+        volume.error = "数据卷检查未完成，未自动重建"
         await this.save(catalog)
         throw error
       }
@@ -253,7 +246,7 @@ export class ManagedPluginVolumes implements PluginVolumes {
   }
   async close() {
     if (this.mounted.size > 0) {
-      throw new Error('仍有插件数据卷租约，未强制卸载')
+      throw new Error("仍有插件数据卷租约，未强制卸载")
     }
     await this.filesystem.close()
   }

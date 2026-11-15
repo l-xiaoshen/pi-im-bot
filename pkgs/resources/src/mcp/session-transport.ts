@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from "zod"
 import {
   StreamableHttpTransport,
   isJsonRpcRequest,
@@ -9,9 +9,9 @@ import {
   type JsonRpcMessage,
   type JsonRpcId,
   type McpFetch
-} from '@earendil-works/pi-mcp'
-import type { McpSessionSnapshot } from './task-schema'
-import { boundedMcpFetch } from './fetch'
+} from "@earendil-works/pi-mcp"
+import type { McpSessionSnapshot } from "./task-schema"
+import { boundedMcpFetch } from "./fetch"
 
 const RpcSchema = z.object({ id: z.union([z.string(), z.number()]).optional(), method: z.string() })
 
@@ -20,7 +20,7 @@ export class PersistentMcpTransport implements McpTransport {
   readonly transport: StreamableHttpTransport
   private readonly wireIds = new Map<JsonRpcId, JsonRpcId>()
   private readonly localIds = new Map<JsonRpcId, JsonRpcId>()
-  private readonly prefix = crypto.randomUUID() + ':'
+  private readonly prefix = crypto.randomUUID() + ":"
   private preserve = true
 
   constructor(
@@ -29,22 +29,22 @@ export class PersistentMcpTransport implements McpTransport {
     private readonly saved?: McpSessionSnapshot
   ) {
     const fetchSession: McpFetch = async (input, init) => {
-      if (init?.method === 'DELETE' && this.preserve) {
+      if (init?.method === "DELETE" && this.preserve) {
         return new Response(null, { status: 204 })
       }
-      if (this.saved && typeof init?.body === 'string') {
+      if (this.saved && typeof init?.body === "string") {
         const message = RpcSchema.safeParse(JSON.parse(init.body))
-        if (message.success && message.data.method === 'initialize') {
+        if (message.success && message.data.method === "initialize") {
           const responseHeaders = new Headers()
           if (this.saved.sessionId) {
-            responseHeaders.set('mcp-session-id', this.saved.sessionId)
+            responseHeaders.set("mcp-session-id", this.saved.sessionId)
           }
           return Response.json(
-            { jsonrpc: '2.0', id: message.data.id, result: this.saved.initialization },
+            { jsonrpc: "2.0", id: message.data.id, result: this.saved.initialization },
             { headers: responseHeaders }
           )
         }
-        if (message.success && message.data.method === 'notifications/initialized') {
+        if (message.success && message.data.method === "notifications/initialized") {
           return new Response(null, { status: 202 })
         }
       }
@@ -72,10 +72,10 @@ export class PersistentMcpTransport implements McpTransport {
   close() {
     return this.transport.close()
   }
-  onError: McpTransport['onError'] = (listener) => {
+  onError: McpTransport["onError"] = (listener) => {
     return this.transport.onError(listener)
   }
-  onClose: McpTransport['onClose'] = (listener) => {
+  onClose: McpTransport["onClose"] = (listener) => {
     return this.transport.onClose(listener)
   }
   onMessage(listener: McpTransportMessageListener) {
@@ -97,7 +97,7 @@ export class PersistentMcpTransport implements McpTransport {
       this.localIds.set(id, message.id)
       return this.transport.send({ ...message, id }, options)
     }
-    if ('method' in message && message.method === 'notifications/cancelled') {
+    if ("method" in message && message.method === "notifications/cancelled") {
       const input = z
         .object({ requestId: z.union([z.string(), z.number()]) })
         .passthrough()

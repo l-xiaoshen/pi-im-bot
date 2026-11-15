@@ -1,6 +1,6 @@
-import type { BotTool } from '@pi-im-bot/capabilities/tool'
-import { z } from 'zod'
-import { createHash } from 'node:crypto'
+import type { BotTool } from "@pi-im-bot/capabilities/tool"
+import { z } from "zod"
+import { createHash } from "node:crypto"
 import {
   createReadToolDefinition,
   createWriteToolDefinition,
@@ -10,14 +10,14 @@ import {
   createWriteTool,
   createEditTool,
   createLsTool
-} from '@earendil-works/pi-coding-agent'
-import type { ShipyardConfig } from './config'
-import { GUEST_WORKSPACE, displayContainerPaths, virtualPath } from './path'
-import { RemoteFiles } from './remote-files'
-import type { Sandbox } from './shipyard-client'
-import { SandboxSession } from './session'
-import { createRemoteBash } from './bash-tool'
-import { guestDisplay, guestErrors, toolDeclaration } from './tool-definition'
+} from "@earendil-works/pi-coding-agent"
+import type { ShipyardConfig } from "./config"
+import { GUEST_WORKSPACE, displayContainerPaths, virtualPath } from "./path"
+import { RemoteFiles } from "./remote-files"
+import type { Sandbox } from "./shipyard-client"
+import { SandboxSession } from "./session"
+import { createRemoteBash } from "./bash-tool"
+import { guestDisplay, guestErrors, toolDeclaration } from "./tool-definition"
 
 const ReadInputSchema = z.object({
   path: z.string(),
@@ -40,7 +40,7 @@ export function createWorkspaceTools(
 ) {
   const session = new SandboxSession(config, dataDir, scope, signal, connected)
   // Pi serializes edits by resolved path. Different containers must not share that queue.
-  const namespace = createHash('sha256').update(scope).digest('hex')
+  const namespace = createHash("sha256").update(scope).digest("hex")
   const virtualCwd = virtualPath(GUEST_WORKSPACE, namespace)
   function inContainer(path: string) {
     return virtualPath(path, namespace)
@@ -62,7 +62,7 @@ export function createWorkspaceTools(
           }).execute(id, { ...input, path }, toolSignal, update)
           // Preserve file contents exactly; only fix Pi's generated long-line hint.
           for (const part of result.content) {
-            if (part.type === 'text' && result.details?.truncation?.firstLineExceedsLimit) {
+            if (part.type === "text" && result.details?.truncation?.firstLineExceedsLimit) {
               part.text = displayContainerPaths(part.text)
             }
           }
@@ -113,7 +113,7 @@ export function createWorkspaceTools(
         const input = LsInputSchema.parse(args)
         const remote = new RemoteFiles(session, toolSignal)
         return guestErrors(async () => {
-          const path = inContainer(await remote.resolve(input.path ?? '.'))
+          const path = inContainer(await remote.resolve(input.path ?? "."))
           return createLsTool(virtualCwd, {
             operations: {
               exists: remote.exists.bind(remote),
@@ -127,7 +127,7 @@ export function createWorkspaceTools(
     createRemoteBash(session)
   ]
   for (const tool of tools) {
-    tool.description += ' Paths refer to the remote container, never the Bot host. /workspace is persistent.'
+    tool.description += " Paths refer to the remote container, never the Bot host. /workspace is persistent."
   }
   return {
     tools,

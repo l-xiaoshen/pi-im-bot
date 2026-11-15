@@ -1,9 +1,9 @@
-import { Cron } from 'croner'
-import type { StateStore } from '@pi-im-bot/storage/state'
-import type { Coordinator } from '@pi-im-bot/runtime/coordinator'
-import { ScheduleSchema, ScheduleInputSchema, type ScheduleInput } from './definition'
-import type { Authority } from '@pi-im-bot/permissions/identity'
-import { ScheduleOverlap } from './occurrences'
+import { Cron } from "croner"
+import type { StateStore } from "@pi-im-bot/storage/state"
+import type { Coordinator } from "@pi-im-bot/runtime/coordinator"
+import { ScheduleSchema, ScheduleInputSchema, type ScheduleInput } from "./definition"
+import type { Authority } from "@pi-im-bot/permissions/identity"
+import { ScheduleOverlap } from "./occurrences"
 
 export function nextOccurrence(expression: string, timezone: string, after = new Date()) {
   const cron = new Cron(expression, { timezone, paused: true })
@@ -30,7 +30,7 @@ export class Scheduler {
     }
     this.timer = setInterval(() => {
       void this.tick().catch((error) => {
-        console.warn('Schedule tick:', this.coordinator.publicError(error))
+        console.warn("Schedule tick:", this.coordinator.publicError(error))
       })
     }, 1000)
   }
@@ -39,7 +39,7 @@ export class Scheduler {
     const parsed = ScheduleInputSchema.parse(input)
     this.coordinator.requireRoom(parsed.roomId)
     if (this.store.listSchedules().length >= 200) {
-      throw new Error('计划任务总数已达上限 200')
+      throw new Error("计划任务总数已达上限 200")
     }
     const schedule = ScheduleSchema.parse({
       ...parsed,
@@ -58,15 +58,15 @@ export class Scheduler {
       return item.id === id
     })
     if (!schedule) {
-      throw new Error('计划任务不存在')
+      throw new Error("计划任务不存在")
     }
     return schedule
   }
 
-  async run(id: string, occurrence = 'manual:' + crypto.randomUUID(), scheduledAt = Date.now()) {
+  async run(id: string, occurrence = "manual:" + crypto.randomUUID(), scheduledAt = Date.now()) {
     const schedule = this.require(id)
     if (!schedule.authority) {
-      throw new Error('旧计划缺少触发来源，请在网页重新授权后运行')
+      throw new Error("旧计划缺少触发来源，请在网页重新授权后运行")
     }
     try {
       const job = await this.coordinator.startSchedule(schedule, occurrence, scheduledAt)
@@ -79,7 +79,7 @@ export class Scheduler {
           lastRunAt: Date.now(),
           lastTriggerAt: scheduledAt,
           lastJobId: job.id,
-          lastOutcome: 'accepted',
+          lastOutcome: "accepted",
           lastError: undefined
         })
         this.changed()
@@ -90,9 +90,9 @@ export class Scheduler {
         return item.id === id
       })
       if (current) {
-        let lastOutcome: 'skipped' | 'failed' = 'failed'
+        let lastOutcome: "skipped" | "failed" = "failed"
         if (error instanceof ScheduleOverlap) {
-          lastOutcome = 'skipped'
+          lastOutcome = "skipped"
         }
         this.store.saveSchedule({
           ...current,
@@ -109,7 +109,7 @@ export class Scheduler {
   setEnabled(id: string, enabled: boolean, revision: number) {
     const current = this.require(id)
     if (current.revision !== revision) {
-      throw new Error('计划配置已变化，请刷新后重试')
+      throw new Error("计划配置已变化，请刷新后重试")
     }
     let nextRunAt: number | null = null
     if (enabled) {
@@ -145,7 +145,7 @@ export class Scheduler {
   }
 
   private changed() {
-    this.coordinator.events.emit({ type: 'schedules', schedules: this.store.listSchedules() })
+    this.coordinator.events.emit({ type: "schedules", schedules: this.store.listSchedules() })
   }
 
   tick(now = Date.now()) {
@@ -165,10 +165,10 @@ export class Scheduler {
         continue
       }
       try {
-        await this.run(schedule.id, 'cron:' + due, due)
+        await this.run(schedule.id, "cron:" + due, due)
       } catch (error) {
         if (!(error instanceof ScheduleOverlap)) {
-          console.warn('Schedule admission:', this.coordinator.publicError(error))
+          console.warn("Schedule admission:", this.coordinator.publicError(error))
         }
       }
       const current = this.store.listSchedules().find((item) => {

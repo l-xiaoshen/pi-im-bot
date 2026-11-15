@@ -1,6 +1,6 @@
-import type { RunInput } from '@pi-im-bot/contracts/run'
-import type { QueuedExecution } from './execution-request'
-import type { Settings } from '@pi-im-bot/settings/schema'
+import type { RunInput } from "@pi-im-bot/contracts/run"
+import type { QueuedExecution } from "./execution-request"
+import type { Settings } from "@pi-im-bot/settings/schema"
 
 interface PendingBatch {
   key: string
@@ -8,7 +8,7 @@ interface PendingBatch {
   firstAt: number
   lastAt: number
   timer?: ReturnType<typeof setTimeout>
-  policy: Settings['behavior']
+  policy: Settings["behavior"]
 }
 interface InboxHost {
   key(input: RunInput): string
@@ -22,13 +22,10 @@ export class ConversationInbox {
   private readonly pending = new Map<string, PendingBatch>()
   constructor(private readonly host: InboxHost) {}
 
-  accept(input: RunInput, policy: Settings['behavior']) {
+  accept(input: RunInput, policy: Settings["behavior"]) {
     const key = this.host.key(input)
     let batch = this.pending.get(input.roomId)
-    if (
-      batch &&
-      (batch.key !== key || batch.execution.input.text.length + input.text.length > policy.batchMaxChars)
-    ) {
+    if (batch && (batch.key !== key || batch.execution.input.text.length + input.text.length > policy.batchMaxChars)) {
       this.flush(input.roomId)
       batch = undefined
     }

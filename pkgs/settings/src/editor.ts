@@ -1,14 +1,14 @@
-import { readFile, rename, unlink, writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
-import type { Configuration } from '@pi-im-bot/config/load'
-import type { StateStore } from '@pi-im-bot/storage/state'
-import type { Room } from '@pi-im-bot/contracts/message'
-import type { Conversation } from '@pi-im-bot/conversations/schema'
-import { FrameworkConfigSchema, type FrameworkConfig, type SettingsPatch } from './schema'
-import { revision, resolveSettings } from './resolve'
-import { capabilityIds, isActionCapability } from '@pi-im-bot/permissions/catalog'
-import { ConfigurationMutations } from '@pi-im-bot/config/mutations'
-import { validateConfigOverride } from '@pi-im-bot/plugins/configuration/values'
+import { readFile, rename, unlink, writeFile } from "node:fs/promises"
+import { join } from "node:path"
+import type { Configuration } from "@pi-im-bot/config/load"
+import type { StateStore } from "@pi-im-bot/storage/state"
+import type { Room } from "@pi-im-bot/contracts/message"
+import type { Conversation } from "@pi-im-bot/conversations/schema"
+import { FrameworkConfigSchema, type FrameworkConfig, type SettingsPatch } from "./schema"
+import { revision, resolveSettings } from "./resolve"
+import { capabilityIds, isActionCapability } from "@pi-im-bot/permissions/catalog"
+import { ConfigurationMutations } from "@pi-im-bot/config/mutations"
+import { validateConfigOverride } from "@pi-im-bot/plugins/configuration/values"
 
 export class SettingsEditError extends Error {
   constructor(
@@ -28,7 +28,7 @@ export class FrameworkEditor {
   ) {}
 
   async read() {
-    const content = await readFile(join(this.configuration().configDir, 'framework.json'), 'utf8')
+    const content = await readFile(join(this.configuration().configDir, "framework.json"), "utf8")
     return { version: revision(content), config: FrameworkConfigSchema.parse(JSON.parse(content)) }
   }
 
@@ -61,27 +61,24 @@ export class FrameworkEditor {
     ]
     resources.pluginRegistry(config.defaults)
     const definitions = resources.pluginConfigurations()
-    function validateOverrides(
-      patch: SettingsPatch,
-      level: 'instance' | 'account' | 'room' | 'conversation'
-    ) {
+    function validateOverrides(patch: SettingsPatch, level: "instance" | "account" | "room" | "conversation") {
       for (const [id, values] of Object.entries(patch.extensions?.settings ?? {})) {
         if (definitions[id]) {
           validateConfigOverride(definitions[id], values, level)
         }
       }
     }
-    validateOverrides(config.defaults, 'instance')
+    validateOverrides(config.defaults, "instance")
     for (const account of config.accounts) {
-      validateOverrides(account.settings, 'account')
+      validateOverrides(account.settings, "account")
       resources.pluginRegistry(
         resolveSettings(
           config,
           {
             channel: account.channel,
             accountId: account.accountId,
-            kind: 'group',
-            chatId: 'configuration-preview'
+            kind: "group",
+            chatId: "configuration-preview"
           },
           {},
           {},
@@ -96,23 +93,16 @@ export class FrameworkEditor {
         current = changedRoom
       }
       patches.push(current.settings)
-      validateOverrides(current.settings, 'room')
+      validateOverrides(current.settings, "room")
       for (const conversation of this.store.listConversations(room.id)) {
         let selected = conversation
         if (changedConversation?.id === conversation.id) {
           selected = changedConversation
         }
         patches.push(selected.settings)
-        validateOverrides(selected.settings, 'conversation')
+        validateOverrides(selected.settings, "conversation")
         resources.pluginRegistry(
-          resolveSettings(
-            config,
-            current.address,
-            current.settings,
-            selected.settings,
-            undefined,
-            definitions
-          ).settings
+          resolveSettings(config, current.address, current.settings, selected.settings, undefined, definitions).settings
         )
       }
     }
@@ -130,22 +120,22 @@ export class FrameworkEditor {
       for (const id of patch.resources?.permanentTools ?? []) {
         if (
           !recognizes(id) ||
-          id.startsWith('command:') ||
-          id.startsWith('hook:') ||
+          id.startsWith("command:") ||
+          id.startsWith("hook:") ||
           isActionCapability(id) ||
-          id.endsWith('/*')
+          id.endsWith("/*")
         ) {
           throw new SettingsEditError(`常驻工具尚未注册：${id}`)
         }
       }
-      if (selection?.mode === 'selected') {
+      if (selection?.mode === "selected") {
         for (const id of selection.ids) {
           if (
             !recognizes(id) ||
-            id.startsWith('command:') ||
-            id.startsWith('hook:') ||
+            id.startsWith("command:") ||
+            id.startsWith("hook:") ||
             isActionCapability(id) ||
-            id.endsWith('/*')
+            id.endsWith("/*")
           ) {
             throw new SettingsEditError(`工具尚未注册：${id}`)
           }
@@ -155,11 +145,11 @@ export class FrameworkEditor {
         ids.push(...rule.capabilities)
       }
       for (const id of ids) {
-        if (id !== '*' && !recognizes(id)) {
+        if (id !== "*" && !recognizes(id)) {
           throw new SettingsEditError(`能力尚未注册：${id}`)
         }
       }
-      if (patch.resources?.mcp?.mode === 'selected') {
+      if (patch.resources?.mcp?.mode === "selected") {
         for (const id of patch.resources.mcp.ids) {
           if (
             !resources.config.mcp.some((server) => {
@@ -170,7 +160,7 @@ export class FrameworkEditor {
           }
         }
       }
-      if (patch.resources?.skills?.mode === 'selected') {
+      if (patch.resources?.skills?.mode === "selected") {
         for (const id of patch.resources.skills.ids) {
           if (
             !resources.config.skills.some((skill) => {
@@ -181,14 +171,14 @@ export class FrameworkEditor {
           }
         }
       }
-      if (patch.resources?.plugins?.mode === 'selected') {
+      if (patch.resources?.plugins?.mode === "selected") {
         for (const id of patch.resources.plugins.ids) {
           if (
             !resources.config.plugins.some((instance) => {
               return instance.id === id
             })
           ) {
-            throw new SettingsEditError('插件实例未登记：' + id)
+            throw new SettingsEditError("插件实例未登记：" + id)
           }
         }
       }
@@ -201,15 +191,15 @@ export class FrameworkEditor {
       await before?.()
       const current = await this.read()
       if (current.version !== version) {
-        throw new SettingsEditError('Bot 设置已变化，请刷新后重试，未覆盖当前文件。', 409)
+        throw new SettingsEditError("Bot 设置已变化，请刷新后重试，未覆盖当前文件。", 409)
       }
       this.validate(config)
-      const path = join(this.configuration().configDir, 'framework.json')
+      const path = join(this.configuration().configDir, "framework.json")
       const temporary = `${path}.${crypto.randomUUID()}.tmp`
       try {
-        await writeFile(temporary, JSON.stringify(config, null, 2) + '\n', { mode: 0o600 })
+        await writeFile(temporary, JSON.stringify(config, null, 2) + "\n", { mode: 0o600 })
         if ((await this.read()).version !== version) {
-          throw new SettingsEditError('配置文件已变化，请刷新后重试。', 409)
+          throw new SettingsEditError("配置文件已变化，请刷新后重试。", 409)
         }
         // Scope edits may have occurred while the file was written.
         this.validate(config)
@@ -236,7 +226,7 @@ export function providerReferences(config: FrameworkConfig, rooms: Room[], conve
       result[group].push(label)
     }
   }
-  record(config.defaults, 'Bot 默认配置')
+  record(config.defaults, "Bot 默认配置")
   for (const account of config.accounts) {
     record(account.settings, `${account.channel}/${account.accountId}`)
   }

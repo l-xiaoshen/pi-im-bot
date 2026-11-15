@@ -4,7 +4,7 @@ export function reserveMediaSources(sources: Set<string>, ids: readonly string[]
     return !sources.has(id)
   })
   if (sources.size + additions.length > 16) {
-    throw new Error('本次媒体来源数量超过 16 项上限')
+    throw new Error("本次媒体来源数量超过 16 项上限")
   }
   for (const id of additions) {
     sources.add(id)

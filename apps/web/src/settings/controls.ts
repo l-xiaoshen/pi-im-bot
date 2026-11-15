@@ -1,9 +1,9 @@
-import { element, field } from '../dom'
+import { element, field } from "../dom"
 
 export function selectOptions(items: Array<{ id: string; name: string }>, value: string) {
-  const select = element('select')
+  const select = element("select")
   for (const item of items) {
-    const option = element('option', '', item.name)
+    const option = element("option", "", item.name)
     option.value = item.id
     select.append(option)
   }
@@ -19,20 +19,20 @@ export function overrideControl<T>(
   source: string,
   read: () => T
 ) {
-  input.setAttribute('aria-label', label)
-  const wrapper = element('div', 'setting-field')
-  const override = element('input')
-  override.type = 'checkbox'
+  input.setAttribute("aria-label", label)
+  const wrapper = element("div", "setting-field")
+  const override = element("input")
+  override.type = "checkbox"
   override.checked = defaults || value !== undefined
-  override.setAttribute('aria-label', `覆盖${label}`)
-  const toggle = element('label', 'setting-override')
-  toggle.append(override, document.createTextNode('在此设置'))
+  override.setAttribute("aria-label", `覆盖${label}`)
+  const toggle = element("label", "setting-override")
+  toggle.append(override, document.createTextNode("在此设置"))
   if (defaults) {
     toggle.hidden = true
   }
-  const hint = element('small', 'muted', `生效来源：${source}`)
+  const hint = element("small", "muted", `生效来源：${source}`)
   input.disabled = !override.checked
-  override.addEventListener('change', () => {
+  override.addEventListener("change", () => {
     input.disabled = !override.checked
   })
   wrapper.append(field(label, input), toggle, hint)
@@ -50,8 +50,8 @@ export function overrideControl<T>(
 export function booleanInput(value: boolean) {
   return selectOptions(
     [
-      { id: 'true', name: '开启' },
-      { id: 'false', name: '关闭' }
+      { id: "true", name: "开启" },
+      { id: "false", name: "关闭" }
     ],
     String(value)
   )

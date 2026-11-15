@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from "zod"
 
 export const SkillFilePathSchema = z
   .string()
@@ -6,14 +6,14 @@ export const SkillFilePathSchema = z
   .max(500)
   .refine((path) => {
     return (
-      !path.includes('\\') &&
-      !path.includes('\0') &&
+      !path.includes("\\") &&
+      !path.includes("\0") &&
       !/^[A-Za-z]:/.test(path) &&
-      path.split('/').every((part) => {
-        return part !== '' && part !== '.' && part !== '..'
+      path.split("/").every((part) => {
+        return part !== "" && part !== "." && part !== ".."
       })
     )
-  }, '文件必须是技能包内的相对路径')
+  }, "文件必须是技能包内的相对路径")
 
 export const SkillConfigSchema = z
   .object({

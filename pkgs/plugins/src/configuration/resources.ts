@@ -1,7 +1,7 @@
-import type { Configuration } from '@pi-im-bot/config/load'
-import type { ConfigDefinition, ConfigValues } from './schema'
-import { ConfigValuesSchema } from './schema'
-import { z } from 'zod'
+import type { Configuration } from "@pi-im-bot/config/load"
+import type { ConfigDefinition, ConfigValues } from "./schema"
+import { ConfigValuesSchema } from "./schema"
+import { z } from "zod"
 
 export function configResourceChoices(config: Configuration) {
   return {
@@ -11,8 +11,8 @@ export function configResourceChoices(config: Configuration) {
     select_provider: config.catalog.config.providers.flatMap((provider) => {
       return provider.models.map((model) => {
         return {
-          id: provider.id + '/' + model.id,
-          name: provider.name + ' / ' + model.name,
+          id: provider.id + "/" + model.id,
+          name: provider.name + " / " + model.name,
           enabled: provider.enabled && model.enabled
         }
       })
@@ -25,11 +25,7 @@ export function configResourceChoices(config: Configuration) {
     })
   }
 }
-export function validateConfigResources(
-  definition: ConfigDefinition,
-  values: ConfigValues,
-  config: Configuration
-) {
+export function validateConfigResources(definition: ConfigDefinition, values: ConfigValues, config: Configuration) {
   const choices = configResourceChoices(config)
   function visit(fields: ConfigDefinition, input: ConfigValues) {
     for (const [key, field] of Object.entries(fields)) {
@@ -37,7 +33,7 @@ export function validateConfigResources(
         continue
       }
       const value = input[key]
-      if (field._special && value !== '') {
+      if (field._special && value !== "") {
         const candidates = choices[field._special]
         const ids = [value].flat()
         if (
@@ -47,13 +43,13 @@ export function validateConfigResources(
             })
           })
         ) {
-          throw new Error('配置引用的资源不存在：' + key)
+          throw new Error("配置引用的资源不存在：" + key)
         }
       }
-      if (field.type === 'object') {
+      if (field.type === "object") {
         visit(field.items ?? {}, ConfigValuesSchema.parse(value))
       }
-      if (field.type === 'template_list') {
+      if (field.type === "template_list") {
         for (const entry of z.array(ConfigValuesSchema).parse(value)) {
           visit(field.templates![z.string().parse(entry.__template_key)].items, entry)
         }

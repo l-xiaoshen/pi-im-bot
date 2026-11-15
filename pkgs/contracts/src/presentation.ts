@@ -1,7 +1,7 @@
-import { z } from 'zod'
-import type { Outbound } from './delivery'
-import type { Observation } from '@pi-im-bot/plugins/observations/schema'
-import { RenderPlanSchema, type RenderAdmission } from './rendering'
+import { z } from "zod"
+import type { Outbound } from "./delivery"
+import type { Observation } from "@pi-im-bot/plugins/observations/schema"
+import { RenderPlanSchema, type RenderAdmission } from "./rendering"
 
 export const PresentationResultSchema = z
   .object({

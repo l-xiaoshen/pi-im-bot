@@ -1,5 +1,5 @@
-import { defineDocFamily } from '@earendil-works/pi-durable'
-import { z } from 'zod'
+import { defineDocFamily } from "@earendil-works/pi-durable"
+import { z } from "zod"
 
 export const PluginExecutionSchema = z.object({
   instanceId: z.string(),
@@ -11,9 +11,9 @@ export const PluginExecutionSchema = z.object({
 export type PluginExecution = z.infer<typeof PluginExecutionSchema>
 // Opaque service handles may carry credentials. Only the receipt flag is public.
 export const PluginExecutions = defineDocFamily<{ value: PluginExecution | null }, null>({
-  kind: 'bot.plugin-execution',
+  kind: "bot.plugin-execution",
   version: 1,
-  scope: 'session',
+  scope: "session",
   family: true,
   initial: () => ({ value: null }),
   checkpointWhen: () => false

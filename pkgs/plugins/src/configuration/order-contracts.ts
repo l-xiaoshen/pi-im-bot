@@ -1,5 +1,5 @@
-import { z } from 'zod'
-import { PluginConfigTargetSchema } from './contracts'
+import { z } from "zod"
+import { PluginConfigTargetSchema } from "./contracts"
 
 export const SavePluginOrderSchema = z
   .object({

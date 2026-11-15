@@ -1,9 +1,9 @@
-import type { PluginEditor } from '../editor'
-import type { FrameworkEditor } from '@pi-im-bot/settings/editor'
-import { SettingsEditError } from '@pi-im-bot/settings/editor'
-import type { Coordinator } from '@pi-im-bot/runtime/coordinator'
-import type { SettingsPatch } from '@pi-im-bot/settings/schema'
-import { revision } from '@pi-im-bot/settings/resolve'
+import type { PluginEditor } from "../editor"
+import type { FrameworkEditor } from "@pi-im-bot/settings/editor"
+import { SettingsEditError } from "@pi-im-bot/settings/editor"
+import type { Coordinator } from "@pi-im-bot/runtime/coordinator"
+import type { SettingsPatch } from "@pi-im-bot/settings/schema"
+import { revision } from "@pi-im-bot/settings/resolve"
 import {
   fillConfigDefaults,
   mergeConfig,
@@ -12,23 +12,16 @@ import {
   configIssues,
   validateConfigReadonly,
   pruneConfigOverride
-} from './values'
-import { publicConfig, applyConfigSecrets } from './secrets'
-import { ConfigValuesSchema, type ConfigValues } from './schema'
-import { configResourceChoices, validateConfigResources } from './resources'
-import { resolvePluginConnections, pluginConnections } from '../management'
-import type { PluginConfigTarget, PluginConfigView, SavePluginConfigSchema } from './contracts'
-import type { z } from 'zod'
-import {
-  usesGsviConfiguration,
-  gsviWorkerDefinition
-} from '@pi-im-bot/integrations/gsvi/plugin-config/definition'
-import {
-  gsviPageValues,
-  saveGsviPage,
-  GsviPageSchema
-} from '@pi-im-bot/integrations/gsvi/plugin-config/values'
-import { gsviChoiceState } from '@pi-im-bot/integrations/gsvi/plugin-config/cache'
+} from "./values"
+import { publicConfig, applyConfigSecrets } from "./secrets"
+import { ConfigValuesSchema, type ConfigValues } from "./schema"
+import { configResourceChoices, validateConfigResources } from "./resources"
+import { resolvePluginConnections, pluginConnections } from "../management"
+import type { PluginConfigTarget, PluginConfigView, SavePluginConfigSchema } from "./contracts"
+import type { z } from "zod"
+import { usesGsviConfiguration, gsviWorkerDefinition } from "@pi-im-bot/integrations/gsvi/plugin-config/definition"
+import { gsviPageValues, saveGsviPage, GsviPageSchema } from "@pi-im-bot/integrations/gsvi/plugin-config/values"
+import { gsviChoiceState } from "@pi-im-bot/integrations/gsvi/plugin-config/cache"
 
 export class PluginConfigurationEditor {
   constructor(
@@ -44,28 +37,28 @@ export class PluginConfigurationEditor {
     })
     const bundle = config.resources.pluginPackage(id)
     if (!instance || !bundle) {
-      throw new Error('请先安装插件的固定版本')
+      throw new Error("请先安装插件的固定版本")
     }
     let definition = bundle.configuration
-    if (usesGsviConfiguration(bundle) && target.level !== 'instance') {
+    if (usesGsviConfiguration(bundle) && target.level !== "instance") {
       definition = gsviWorkerDefinition(bundle)
     }
     const resourceView = await this.plugins.read()
     const frameworkView = await this.framework.read()
     let current: ConfigValues = instance.settings
-    if (usesGsviConfiguration(bundle) && target.level === 'instance') {
+    if (usesGsviConfiguration(bundle) && target.level === "instance") {
       current = gsviPageValues(config.resources.config, instance, bundle)
     }
     let inherited: ConfigValues = {}
     let version: string | number = resourceView.revision
     let patch: SettingsPatch = {}
     const framework = frameworkView.config
-    if (target.level !== 'instance') {
+    if (target.level !== "instance") {
       inherited = structuredClone(instance.settings)
       inherited = mergeConfig(inherited, framework.defaults.extensions.settings[id] ?? {}, definition)
-      let channel = ''
-      let accountId = ''
-      if (target.level === 'account') {
+      let channel = ""
+      let accountId = ""
+      if (target.level === "account") {
         channel = target.channel
         accountId = target.accountId
       } else {
@@ -78,12 +71,12 @@ export class PluginConfigurationEditor {
       })
       patch = account?.settings ?? {}
       version = frameworkView.version
-      if (target.level !== 'account') {
+      if (target.level !== "account") {
         inherited = mergeConfig(inherited, patch.extensions?.settings?.[id] ?? {}, definition)
         const room = this.coordinator.requireRoom(target.roomId)
         patch = room.settings
         version = room.revision
-        if (target.level === 'conversation') {
+        if (target.level === "conversation") {
           inherited = mergeConfig(inherited, patch.extensions?.settings?.[id] ?? {}, definition)
           const conversation = this.coordinator.conversations.require(target.conversationId, target.roomId)
           patch = conversation.settings
@@ -92,7 +85,7 @@ export class PluginConfigurationEditor {
       }
       current = patch.extensions?.settings?.[id] ?? {}
     }
-    const targets: PluginConfigView['targets'] = [{ name: '实例默认配置', target: { level: 'instance' } }]
+    const targets: PluginConfigView["targets"] = [{ name: "实例默认配置", target: { level: "instance" } }]
     const accounts = new Map(
       framework.accounts.map((entry) => {
         return [
@@ -106,20 +99,20 @@ export class PluginConfigurationEditor {
         channel: room.address.channel,
         accountId: room.address.accountId
       })
-      targets.push({ name: room.name, target: { level: 'room', roomId: room.id } })
+      targets.push({ name: room.name, target: { level: "room", roomId: room.id } })
       for (const conversation of this.coordinator.store.listConversations(room.id)) {
         if (!conversation.parentId) {
           targets.push({
-            name: room.name + ' / ' + conversation.title,
-            target: { level: 'conversation', roomId: room.id, conversationId: conversation.id }
+            name: room.name + " / " + conversation.title,
+            target: { level: "conversation", roomId: room.id, conversationId: conversation.id }
           })
         }
       }
     }
     for (const account of accounts.values()) {
       targets.push({
-        name: account.channel + ' · ' + account.accountId,
-        target: { level: 'account', ...account }
+        name: account.channel + " · " + account.accountId,
+        target: { level: "account", ...account }
       })
     }
     const token = revision({
@@ -147,24 +140,24 @@ export class PluginConfigurationEditor {
   async read(id: string, target: PluginConfigTarget): Promise<PluginConfigView> {
     const state = await this.prepare(id, target)
     const { definition, current, inherited } = state
-    let projected = { values: {} as ConfigValues, secrets: [] as PluginConfigView['secrets'] }
+    let projected = { values: {} as ConfigValues, secrets: [] as PluginConfigView["secrets"] }
     let lower: ConfigValues = {}
-    let issues: PluginConfigView['issues'] = []
+    let issues: PluginConfigView["issues"] = []
     if (definition) {
       projected = publicConfig(definition, current)
       lower = publicConfig(definition, inherited).values
       issues = configIssues(definition, mergeConfig(inherited, current, definition))
     }
-    let gsviConfiguration: PluginConfigView['gsviConfiguration']
+    let gsviConfiguration: PluginConfigView["gsviConfiguration"]
     if (
       state.bundle.manifest.connections.some(
-        (connection) => connection.kind === 'service' && connection.service === 'gsvi@1'
+        (connection) => connection.kind === "service" && connection.service === "gsvi@1"
       )
     ) {
       gsviConfiguration = {
         projectionSupported: true,
-        inlinePresentationContract: 'tool-send@1',
-        runtimeContract: 'gsvi-plugin@1',
+        inlinePresentationContract: "tool-send@1",
+        runtimeContract: "gsvi-plugin@1",
         projectionActive: usesGsviConfiguration(state.bundle),
         refreshDisabled: !state.instance.enabled || !state.config.bot.plugins.enabled,
         ...(await gsviChoiceState(state.config, id))
@@ -187,14 +180,14 @@ export class PluginConfigurationEditor {
           return !usesGsviConfiguration(state.bundle)
         })
         .filter((connection) => {
-          return target.level === 'instance' && !connection.setting
+          return target.level === "instance" && !connection.setting
         })
         .map((connection) => {
           let choices = state.config.resources.config.mcp.map((entry) => {
             return { id: entry.id, name: entry.name, enabled: entry.enabled }
           })
           let mapping = state.instance.connectors
-          if (connection.kind === 'plugin') {
+          if (connection.kind === "plugin") {
             choices = state.config.resources.config.plugins
               .filter((entry) => {
                 return entry.id !== id
@@ -204,12 +197,11 @@ export class PluginConfigurationEditor {
               })
             mapping = state.instance.dependencies
           }
-          if (connection.kind === 'service') {
-            let services: Array<{ id: string; name: string; enabled: boolean }> =
-              state.config.resources.config.services
-            if (connection.service === 'comfy@1') {
+          if (connection.kind === "service") {
+            let services: Array<{ id: string; name: string; enabled: boolean }> = state.config.resources.config.services
+            if (connection.service === "comfy@1") {
               services = state.config.resources.config.comfyServices.map((entry) => {
-                return { id: entry.id, name: entry.name, enabled: entry.enabled, contract: 'comfy@1' }
+                return { id: entry.id, name: entry.name, enabled: entry.enabled, contract: "comfy@1" }
               })
             }
             choices = services.map((entry) => {
@@ -222,7 +214,7 @@ export class PluginConfigurationEditor {
             title: connection.title,
             kind: connection.kind,
             required: connection.required,
-            value: mapping[connection.alias] ?? '',
+            value: mapping[connection.alias] ?? "",
             choices
           }
         })
@@ -234,15 +226,15 @@ export class PluginConfigurationEditor {
     const assertCurrent = async () => {
       const current = await this.prepare(id, input.target)
       if (current.token !== input.revision || current.bundle.revision !== input.release) {
-        throw new SettingsEditError('插件版本或配置已变化，请刷新后重试', 409)
+        throw new SettingsEditError("插件版本或配置已变化，请刷新后重试", 409)
       }
       return current
     }
-    if (input.target.level === 'instance') {
+    if (input.target.level === "instance") {
       await this.plugins.mutate(initial.resourceView.revision, async (config) => {
         const state = await assertCurrent()
         if (usesGsviConfiguration(state.bundle) && Object.keys(input.services ?? {}).length) {
-          throw new Error('GSVI连接通过本页原生字段保存，不另改服务映射')
+          throw new Error("GSVI连接通过本页原生字段保存，不另改服务映射")
         }
         const instance = config.plugins.find((entry) => {
           return entry.id === id
@@ -262,21 +254,21 @@ export class PluginConfigurationEditor {
             instance.settings = values
           }
         } else if (Object.keys(input.values).length || input.secrets.length) {
-          throw new Error('插件没有声明可视化配置字段')
+          throw new Error("插件没有声明可视化配置字段")
         }
         for (const [kind, values] of [
-          ['service', input.services],
-          ['mcp', input.connectors],
-          ['plugin', input.dependencies]
+          ["service", input.services],
+          ["mcp", input.connectors],
+          ["plugin", input.dependencies]
         ] as const) {
           if (!values) {
             continue
           }
           let mapping = instance.connectors
-          if (kind === 'plugin') {
+          if (kind === "plugin") {
             mapping = instance.dependencies
           }
-          if (kind === 'service') {
+          if (kind === "service") {
             mapping = instance.services
           }
           for (const [alias, value] of Object.entries(values)) {
@@ -285,7 +277,7 @@ export class PluginConfigurationEditor {
                 return entry.kind === kind && entry.alias === alias && !entry.setting
               })
             ) {
-              throw new Error('不能修改未声明的服务绑定：' + alias)
+              throw new Error("不能修改未声明的服务绑定：" + alias)
             }
             if (value) {
               mapping[alias] = value
@@ -299,10 +291,10 @@ export class PluginConfigurationEditor {
     } else {
       const state = await assertCurrent()
       if (!state.definition) {
-        throw new Error('插件没有声明可视化配置')
+        throw new Error("插件没有声明可视化配置")
       }
       if (input.secrets.length) {
-        throw new Error('秘密字段只能在实例配置中修改')
+        throw new Error("秘密字段只能在实例配置中修改")
       }
       validateConfigOverride(state.definition, input.values, input.target.level)
       validateConfig(state.definition, mergeConfig(state.inherited, input.values, state.definition))
@@ -317,7 +309,7 @@ export class PluginConfigurationEditor {
         delete patch.extensions.settings[id]
       }
       const target = input.target
-      if (target.level === 'account') {
+      if (target.level === "account") {
         const value = structuredClone(state.frameworkView.config)
         let account = value.accounts.find((entry) => {
           return entry.channel === target.channel && entry.accountId === target.accountId
@@ -333,7 +325,7 @@ export class PluginConfigurationEditor {
       } else {
         await this.framework.exclusive(async () => {
           await assertCurrent()
-          if (target.level === 'room') {
+          if (target.level === "room") {
             const room = this.coordinator.requireRoom(target.roomId)
             const next = { ...room, settings: patch, revision: room.revision + 1, updatedAt: Date.now() }
             this.framework.validate(state.frameworkView.config, next)
@@ -352,7 +344,7 @@ export class PluginConfigurationEditor {
         })
       }
     }
-    if (usesGsviConfiguration(initial.bundle) && input.target.level === 'instance') {
+    if (usesGsviConfiguration(initial.bundle) && input.target.level === "instance") {
       this.plugins.gsviRefresh.request(id)
     }
     return this.read(id, input.target)

@@ -1,6 +1,6 @@
-import { z } from 'zod'
-import { ProviderConfigSchema, ModelConfigSchema, type ProviderConfig } from './schema'
-import { SecretPlaceholder, type ProviderDraft, type ProviderView } from './editor-contracts'
+import { z } from "zod"
+import { ProviderConfigSchema, ModelConfigSchema, type ProviderConfig } from "./schema"
+import { SecretPlaceholder, type ProviderDraft, type ProviderView } from "./editor-contracts"
 
 const ObjectSchema = z.record(z.string(), z.unknown())
 const ArraySchema = z.array(z.unknown())
@@ -11,9 +11,9 @@ export function visibleProvider(provider: ProviderConfig): ProviderView {
   const maskedFields: string[] = []
   const secrets = secretValues(provider)
   function mask(value: unknown, path: string[], sensitive = false): unknown {
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       if (value && (sensitive || secrets.includes(value))) {
-        maskedFields.push(path.join('.'))
+        maskedFields.push(path.join("."))
         return SecretPlaceholder
       }
       return value
@@ -37,13 +37,13 @@ export function visibleProvider(provider: ProviderConfig): ProviderView {
   const { apiKey, ...plain } = provider
   const result = ProviderConfigSchema.omit({ apiKey: true }).parse({
     ...plain,
-    headers: mask(plain.headers, ['headers']),
-    body: mask(plain.body, ['body']),
+    headers: mask(plain.headers, ["headers"]),
+    body: mask(plain.body, ["body"]),
     models: plain.models.map((model) => {
       return {
         ...model,
-        headers: mask(model.headers, ['models', model.id, 'headers']),
-        body: mask(model.body, ['models', model.id, 'body'])
+        headers: mask(model.headers, ["models", model.id, "headers"]),
+        body: mask(model.body, ["models", model.id, "body"])
       }
     })
   })
@@ -60,7 +60,7 @@ export function visibleProvider(provider: ProviderConfig): ProviderView {
 function restore(value: unknown, previous: unknown): unknown {
   if (value === SecretPlaceholder) {
     if (previous === undefined) {
-      throw new Error('凭据占位没有对应的已保存值，请重新填写该字段。')
+      throw new Error("凭据占位没有对应的已保存值，请重新填写该字段。")
     }
     return previous
   }
@@ -111,7 +111,7 @@ export function resolveProvider(draft: ProviderDraft, previous?: ProviderConfig)
   }
   if (draft.apiKey) {
     if (draft.apiKey === SecretPlaceholder) {
-      throw new Error('API Key 需要填写真实值，或留空保留原值。')
+      throw new Error("API Key 需要填写真实值，或留空保留原值。")
     }
     apiKey = draft.apiKey
   }
@@ -152,7 +152,7 @@ export function secretValues(provider: ProviderConfig) {
     values.add(process.env[provider.apiKeyEnv]!)
   }
   function visit(value: unknown, sensitive = false) {
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       if (sensitive && value) {
         values.add(value)
       }
@@ -184,9 +184,7 @@ export function secretValues(provider: ProviderConfig) {
 export function redactProviderError(error: unknown, provider: ProviderConfig) {
   let message = String(error)
   for (const secret of secretValues(provider)) {
-    message = message.replaceAll(secret, '[redacted]')
+    message = message.replaceAll(secret, "[redacted]")
   }
-  return message
-    .replace(/Bearer\s+[^\s"']+/gi, 'Bearer [redacted]')
-    .replace(/\bsk-[A-Za-z0-9_-]+/g, '[redacted]')
+  return message.replace(/Bearer\s+[^\s"']+/gi, "Bearer [redacted]").replace(/\bsk-[A-Za-z0-9_-]+/g, "[redacted]")
 }

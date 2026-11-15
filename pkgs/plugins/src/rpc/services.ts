@@ -1,7 +1,7 @@
-import { z } from 'zod'
-import type { PluginBinding } from '../registry'
-import { PluginGrantSchema } from '../manifest'
-import { PluginInvocationViewSchema, type PluginInvocationView } from './protocol'
+import { z } from "zod"
+import type { PluginBinding } from "../registry"
+import { PluginGrantSchema } from "../manifest"
+import { PluginInvocationViewSchema, type PluginInvocationView } from "./protocol"
 
 interface PluginHostCall {
   invocation: Readonly<PluginInvocationView>
@@ -26,7 +26,7 @@ export class PluginHostServices {
     handle: (input: z.output<Schema>, context: PluginHostCall) => Promise<unknown>
   ) {
     if (this.methods.has(name)) {
-      throw new Error('插件宿主方法重复：' + name)
+      throw new Error("插件宿主方法重复：" + name)
     }
     this.methods.set(name, {
       grant: PluginGrantSchema.parse(grant),
@@ -44,7 +44,7 @@ export class PluginHostServices {
   ) {
     const invocation = PluginInvocationViewSchema.parse(structuredClone(context))
     if (invocation.instanceId !== binding.instance.id || invocation.generation !== binding.bundle.revision) {
-      throw new Error('插件宿主服务与调用版本不匹配')
+      throw new Error("插件宿主服务与调用版本不匹配")
     }
     const grants = new Set(
       invocation.grants.filter((grant) => {
@@ -54,11 +54,11 @@ export class PluginHostServices {
     return async (name: string, input: unknown, signal: AbortSignal) => {
       signal.throwIfAborted()
       if (Date.now() >= invocation.deadlineAt) {
-        throw new Error('插件宿主调用已过期')
+        throw new Error("插件宿主调用已过期")
       }
       const method = this.methods.get(name)
       if (!method || !grants.has(method.grant)) {
-        throw new Error('插件未获准调用宿主服务：' + name)
+        throw new Error("插件未获准调用宿主服务：" + name)
       }
       authorize(method.grant, structuredClone(invocation))
       return method.call(input, { invocation: structuredClone(invocation), signal })

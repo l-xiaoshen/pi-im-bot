@@ -1,27 +1,27 @@
-import { z } from 'zod'
-import { OneBotTargetsSchema } from './config'
-import { MediaOriginsSchema } from './media'
+import { z } from "zod"
+import { OneBotTargetsSchema } from "./config"
+import { MediaOriginsSchema } from "./media"
 
 export const DiscoveredChatSchema = z.object({
   selfId: z.string(),
   chatId: z.string(),
   name: z.string(),
-  kind: z.enum(['group', 'direct']),
+  kind: z.enum(["group", "direct"]),
   seenAt: z.number()
 })
 export type DiscoveredChat = z.infer<typeof DiscoveredChatSchema>
 export const RouteReasonSchema = z.enum([
-  'recorded',
-  'command',
-  'agent',
-  'duplicate',
-  'uncertain',
-  'unmatched',
-  'not_selected',
-  'self',
-  'invalid',
-  'disabled',
-  'error'
+  "recorded",
+  "command",
+  "agent",
+  "duplicate",
+  "uncertain",
+  "unmatched",
+  "not_selected",
+  "self",
+  "invalid",
+  "disabled",
+  "error"
 ])
 export type RouteReason = z.infer<typeof RouteReasonSchema>
 export const OneBotStatusSchema = z.object({
@@ -65,5 +65,5 @@ export const OneBotSettingsInputSchema = z
   })
   .refine((input) => {
     return !input.clearToken || !input.accessToken
-  }, '不能同时填写和清除 Token')
+  }, "不能同时填写和清除 Token")
 export type OneBotSettingsInput = z.infer<typeof OneBotSettingsInputSchema>

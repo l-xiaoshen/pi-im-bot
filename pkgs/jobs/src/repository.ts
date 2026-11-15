@@ -1,17 +1,10 @@
-import { BACKGROUND_CONTEXT } from '@earendil-works/chord/context'
-import type { Tx } from '@earendil-works/pi-durable'
-import type { DurableAgentRuntime } from '@pi-im-bot/agent/durable/runtime'
-import { Jobs } from './documents'
-import { JobActivity, initializeJobIndex, indexJob, jobOutstanding } from './index'
-import { JobHistoryPage, historyScope, historyPageKey, linkedHistory } from './history'
-import {
-  JobSchema,
-  JobSummarySchema,
-  jobSummary,
-  type Job,
-  type JobRevision,
-  type JobSummary
-} from './schema'
+import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context"
+import type { Tx } from "@earendil-works/pi-durable"
+import type { DurableAgentRuntime } from "@pi-im-bot/agent/durable/runtime"
+import { Jobs } from "./documents"
+import { JobActivity, initializeJobIndex, indexJob, jobOutstanding } from "./index"
+import { JobHistoryPage, historyScope, historyPageKey, linkedHistory } from "./history"
+import { JobSchema, JobSummarySchema, jobSummary, type Job, type JobRevision, type JobSummary } from "./schema"
 
 interface JobHistoryResult {
   jobs: JobSummary[]
@@ -38,7 +31,7 @@ export class JobRepository {
     const stored = await this.runtime.native.snapshot(Jobs, id, BACKGROUND_CONTEXT)
     const job = stored?.value
     if (!job || (roomId !== undefined && job.roomId !== roomId)) {
-      throw new Error('当前会话中不存在该任务')
+      throw new Error("当前会话中不存在该任务")
     }
     return JobSchema.parse(job)
   }
@@ -96,11 +89,7 @@ export class JobRepository {
     if (beforePage !== undefined) {
       page = Math.min(beforePage, page)
     }
-    const stored = await this.runtime.native.snapshot(
-      JobHistoryPage,
-      historyPageKey(scope, page),
-      BACKGROUND_CONTEXT
-    )
+    const stored = await this.runtime.native.snapshot(JobHistoryPage, historyPageKey(scope, page), BACKGROUND_CONTEXT)
     const result: JobHistoryResult = {
       jobs: Object.values(stored?.jobs ?? {})
         .reverse()
@@ -124,12 +113,12 @@ export class JobRepository {
   async change(tx: Tx, id: string, revision: number, update: (value: JobRevision) => void) {
     const document = await tx.doc(Jobs, id, null)
     if (!document.value) {
-      throw new Error('任务不存在')
+      throw new Error("任务不存在")
     }
     const job = JobSchema.parse(document.value)
     const value = job.revisions[String(revision)]
     if (!value) {
-      throw new Error('任务版本不存在')
+      throw new Error("任务版本不存在")
     }
     update(value)
     await this.save(tx, job)

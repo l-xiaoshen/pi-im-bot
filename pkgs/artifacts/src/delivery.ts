@@ -1,9 +1,9 @@
-import { createHash } from 'node:crypto'
-import { z } from 'zod'
-import type { ChannelCapabilities } from '@pi-im-bot/contracts/channel'
-import { mediaKind, type ChannelMedia } from '@pi-im-bot/contracts/channel-media'
-import type { Attachment } from '@pi-im-bot/contracts/message'
-import type { ArtifactStore } from './store'
+import { createHash } from "node:crypto"
+import { z } from "zod"
+import type { ChannelCapabilities } from "@pi-im-bot/contracts/channel"
+import { mediaKind, type ChannelMedia } from "@pi-im-bot/contracts/channel-media"
+import type { Attachment } from "@pi-im-bot/contracts/message"
+import type { ArtifactStore } from "./store"
 
 const ArtifactIdsSchema = z.array(z.uuid()).max(256)
 const maxDeliveryBytes = 20 * 1024 * 1024
@@ -25,11 +25,11 @@ export async function prepareMedia(
   let bytes = 0
   for (const id of artifactIds) {
     if (!store) {
-      throw new Error('产物交付未配置')
+      throw new Error("产物交付未配置")
     }
     const { metadata, file } = await store.content(id)
     if (metadata.roomId !== roomId || file.size !== metadata.bytes) {
-      throw new Error('产物范围或大小校验失败')
+      throw new Error("产物范围或大小校验失败")
     }
     const kind = mediaKind(metadata.mimeType)
     attachments.push({
@@ -39,13 +39,13 @@ export async function prepareMedia(
       url: artifactUrl(roomId, id)
     })
     let supported = capabilities.files
-    if (kind === 'image') {
+    if (kind === "image") {
       supported = capabilities.images
     }
-    if (kind === 'audio') {
+    if (kind === "audio") {
       supported = capabilities.audio === true
     }
-    if (kind === 'video') {
+    if (kind === "video") {
       supported = capabilities.video === true
     }
     if (!supported || bytes + file.size > maxDeliveryBytes) {
@@ -54,8 +54,8 @@ export async function prepareMedia(
     }
     bytes += file.size
     const data = new Uint8Array(await file.arrayBuffer())
-    if (createHash('sha256').update(data).digest('hex') !== metadata.sha256) {
-      throw new Error('产物内容校验失败')
+    if (createHash("sha256").update(data).digest("hex") !== metadata.sha256) {
+      throw new Error("产物内容校验失败")
     }
     media.push({ id, kind, name: metadata.name, mimeType: metadata.mimeType, data })
   }

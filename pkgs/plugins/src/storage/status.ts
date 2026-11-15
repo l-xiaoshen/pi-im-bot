@@ -1,6 +1,6 @@
-import { z } from 'zod'
-import { StorageStatusSchema } from './contracts'
-import { ArtifactUsageSchema } from '@pi-im-bot/artifacts/limits'
+import { z } from "zod"
+import { StorageStatusSchema } from "./contracts"
+import { ArtifactUsageSchema } from "@pi-im-bot/artifacts/limits"
 
 export const StorageOverviewSchema = z.object({
   executionEnabled: z.boolean(),

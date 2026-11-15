@@ -1,8 +1,8 @@
-import type { Model } from '@earendil-works/pi-ai'
-import { mergeHeaders } from './body'
-import { secretValues } from './editor-secrets'
-import { ProviderPool, type Candidate } from './pool'
-import type { ProviderGroup, ProvidersConfig } from './schema'
+import type { Model } from "@earendil-works/pi-ai"
+import { mergeHeaders } from "./body"
+import { secretValues } from "./editor-secrets"
+import { ProviderPool, type Candidate } from "./pool"
+import type { ProviderGroup, ProvidersConfig } from "./schema"
 
 export class ProviderCatalog {
   readonly pool = new ProviderPool()
@@ -22,7 +22,7 @@ export class ProviderCatalog {
       ) {
         continue
       }
-      let key = provider.apiKey ?? ''
+      let key = provider.apiKey ?? ""
       if (provider.apiKeyEnv) {
         const configured = process.env[provider.apiKeyEnv]
         if (configured === undefined) {
@@ -50,13 +50,13 @@ export class ProviderCatalog {
         if (!modelConfig.enabled) {
           continue
         }
-        const model: Model<'openai-responses'> = {
+        const model: Model<"openai-responses"> = {
           id: modelConfig.id,
           name: modelConfig.name ?? modelConfig.id,
-          api: 'openai-responses',
+          api: "openai-responses",
           provider: provider.id,
-          baseUrl: provider.baseUrl.replace(/\/$/, ''),
-          input: modelConfig.images ? ['text', 'image'] : ['text'],
+          baseUrl: provider.baseUrl.replace(/\/$/, ""),
+          input: modelConfig.images ? ["text", "image"] : ["text"],
           reasoning: modelConfig.reasoning,
           contextWindow: modelConfig.contextWindow,
           maxTokens: modelConfig.maxOutputTokens,
@@ -106,11 +106,9 @@ export class ProviderCatalog {
   redact(value: string) {
     let result = value
     for (const secret of this.secrets) {
-      result = result.replaceAll(secret, '[redacted]')
+      result = result.replaceAll(secret, "[redacted]")
     }
-    return result
-      .replace(/Bearer\s+[^\s"']+/gi, 'Bearer [redacted]')
-      .replace(/\bsk-[A-Za-z0-9_-]+/g, '[redacted]')
+    return result.replace(/Bearer\s+[^\s"']+/gi, "Bearer [redacted]").replace(/\bsk-[A-Za-z0-9_-]+/g, "[redacted]")
   }
 
   publicStatus() {

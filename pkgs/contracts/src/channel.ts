@@ -1,6 +1,6 @@
-import type { Address, DeliveryReceipt, IncomingMessage } from './message'
-import type { ChannelMedia, SendControl } from './channel-media'
-import type { IncomingMedia, MediaBytes } from '@pi-im-bot/media/schema'
+import type { Address, DeliveryReceipt, IncomingMessage } from "./message"
+import type { ChannelMedia, SendControl } from "./channel-media"
+import type { IncomingMedia, MediaBytes } from "@pi-im-bot/media/schema"
 
 export interface ChannelCapabilities {
   forward?: boolean
@@ -17,12 +17,7 @@ export interface ChannelCapabilities {
 export interface ChannelAdapter {
   id: string
   capabilities: ChannelCapabilities
-  send(
-    address: Address,
-    text: string,
-    media?: readonly ChannelMedia[],
-    control?: SendControl
-  ): Promise<DeliveryReceipt>
+  send(address: Address, text: string, media?: readonly ChannelMedia[], control?: SendControl): Promise<DeliveryReceipt>
   sendForward?(
     address: Address,
     text: string,

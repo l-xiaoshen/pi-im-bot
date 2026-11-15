@@ -1,19 +1,19 @@
-import { z } from 'zod'
-import { ChatMessageSchema, RoomSchema } from './message'
-import { RunSchema, TraceSchema } from './run'
-import { ScheduleSchema } from '@pi-im-bot/scheduler/definition'
-import { ExecutionStatusSchema } from '@pi-im-bot/execution/config'
-import { OneBotStatusSchema, OneBotPublicSettingsSchema } from '@pi-im-bot/channels/onebot/status'
-import { ConversationSchema } from '@pi-im-bot/conversations/schema'
-import { EffectiveSettingsSchema, FrameworkConfigSchema } from '@pi-im-bot/settings/schema'
-import { OutboundSchema } from './delivery'
-import { JobSummarySchema } from '@pi-im-bot/jobs/schema'
+import { z } from "zod"
+import { ChatMessageSchema, RoomSchema } from "./message"
+import { RunSchema, TraceSchema } from "./run"
+import { ScheduleSchema } from "@pi-im-bot/scheduler/definition"
+import { ExecutionStatusSchema } from "@pi-im-bot/execution/config"
+import { OneBotStatusSchema, OneBotPublicSettingsSchema } from "@pi-im-bot/channels/onebot/status"
+import { ConversationSchema } from "@pi-im-bot/conversations/schema"
+import { EffectiveSettingsSchema, FrameworkConfigSchema } from "@pi-im-bot/settings/schema"
+import { OutboundSchema } from "./delivery"
+import { JobSummarySchema } from "@pi-im-bot/jobs/schema"
 
 export const FrameworkEditorSchema = z.object({
   version: z.string(),
   config: FrameworkConfigSchema,
   capabilities: z.array(
-    z.object({ id: z.string(), name: z.string(), kind: z.enum(['tool', 'command', 'hook', 'action']) })
+    z.object({ id: z.string(), name: z.string(), kind: z.enum(["tool", "command", "hook", "action"]) })
   )
 })
 export type FrameworkEditorState = z.infer<typeof FrameworkEditorSchema>

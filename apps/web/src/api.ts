@@ -1,5 +1,5 @@
-import { z } from 'zod'
-import { botApiUrl } from './bot-origin'
+import { z } from "zod"
+import { botApiUrl } from "./bot-origin"
 
 export class ApiValidationError extends Error {
   constructor(
@@ -31,10 +31,10 @@ export async function request<T>(path: string, schema: z.ZodType<T>, options: Re
   return schema.parse(value)
 }
 
-export async function mutate(path: string, body?: object, method = 'POST') {
+export async function mutate(path: string, body?: object, method = "POST") {
   const options: RequestInit = { method }
   if (body !== undefined) {
-    options.headers = { 'content-type': 'application/json' }
+    options.headers = { "content-type": "application/json" }
     options.body = JSON.stringify(body)
   }
   return request(path, z.unknown(), options)

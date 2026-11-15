@@ -1,7 +1,7 @@
-import type { Configuration } from '@pi-im-bot/config/load'
-import { gsviExecutionRevision } from './gsvi/identity'
-import { comfyRevision, type ComfyService } from './comfy/resources'
-import type { GsviService } from './gsvi/schema'
+import type { Configuration } from "@pi-im-bot/config/load"
+import { gsviExecutionRevision } from "./gsvi/identity"
+import { comfyRevision, type ComfyService } from "./comfy/resources"
+import type { GsviService } from "./gsvi/schema"
 export function namedService(config: Configuration, id: string) {
   return (
     config.resources.config.services.find((entry) => {
@@ -13,7 +13,7 @@ export function namedService(config: Configuration, id: string) {
   )
 }
 export function serviceRevision(service: GsviService | ComfyService) {
-  if (service.kind === 'comfy') {
+  if (service.kind === "comfy") {
     return comfyRevision(service)
   }
   return gsviExecutionRevision(service)

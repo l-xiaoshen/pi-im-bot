@@ -1,11 +1,11 @@
-import type { JobService, JobInvocation } from '@pi-im-bot/jobs/service'
-import type { PluginService } from './service'
-import type { Settings } from '@pi-im-bot/settings/schema'
-import type { Configuration } from '@pi-im-bot/config/load'
-import type { PluginInvocation } from './invocation'
-import { PluginArgumentsSchema, projectPluginResult, completedPluginResult } from './result'
-import { ArtifactStore } from '@pi-im-bot/artifacts/store'
-import { pluginOperationId } from './identity'
+import type { JobService, JobInvocation } from "@pi-im-bot/jobs/service"
+import type { PluginService } from "./service"
+import type { Settings } from "@pi-im-bot/settings/schema"
+import type { Configuration } from "@pi-im-bot/config/load"
+import type { PluginInvocation } from "./invocation"
+import { PluginArgumentsSchema, projectPluginResult, completedPluginResult } from "./result"
+import { ArtifactStore } from "@pi-im-bot/artifacts/store"
+import { pluginOperationId } from "./identity"
 
 export function findPluginCommand(config: Configuration, settings: Settings, text: string) {
   const match = /^\/([\p{L}\p{N}_-]+)(?:\s+([\s\S]*))?$/u.exec(text.trim())
@@ -16,7 +16,7 @@ export function findPluginCommand(config: Configuration, settings: Settings, tex
   if (!entry) {
     return undefined
   }
-  return { ...entry, text: match[2] ?? '' }
+  return { ...entry, text: match[2] ?? "" }
 }
 
 export function pluginCommandHelp(config: Configuration, settings: Settings, allowed: readonly string[]) {
@@ -28,18 +28,18 @@ export function pluginCommandHelp(config: Configuration, settings: Settings, all
         entry.capabilityId,
         entry.command.names
           .map((name) => {
-            return '/' + name
+            return "/" + name
           })
-          .join('、') +
-          '：' +
+          .join("、") +
+          "：" +
           entry.command.description
       )
     }
   }
   if (lines.size === 0) {
-    return ''
+    return ""
   }
-  return '\n插件指令：\n' + [...lines.values()].join('\n')
+  return "\n插件指令：\n" + [...lines.values()].join("\n")
 }
 
 export async function executePluginCommand(
@@ -59,32 +59,23 @@ export async function executePluginCommand(
       .flatMap((identity) => {
         return identity.messageIds
       })
-      .join(':') || jobInvocation.runId
+      .join(":") || jobInvocation.runId
   let args = PluginArgumentsSchema.parse({})
   if (entry.command.parser) {
-    args = await service.parse(
-      invocation,
-      operation,
-      entry.command.parser,
-      entry.text,
-      callId + ':parse',
-      signal
-    )
-  } else if (entry.command.arguments === 'json') {
-    args = PluginArgumentsSchema.parse(JSON.parse(entry.text || '{}'))
-  } else if (entry.command.arguments === 'text') {
+    args = await service.parse(invocation, operation, entry.command.parser, entry.text, callId + ":parse", signal)
+  } else if (entry.command.arguments === "json") {
+    args = PluginArgumentsSchema.parse(JSON.parse(entry.text || "{}"))
+  } else if (entry.command.arguments === "text") {
     args = PluginArgumentsSchema.parse({ [entry.command.textField]: entry.text })
   } else if (entry.text.trim()) {
-    throw new Error('此指令不接受参数')
+    throw new Error("此指令不接受参数")
   }
   invocation.services.authorize(entry.capabilityId)
-  if (operation.operation.execution === 'background') {
+  if (operation.operation.execution === "background") {
     if (!jobs) {
-      throw new Error('后台任务运行时尚未启用')
+      throw new Error("后台任务运行时尚未启用")
     }
-    const job = await jobs
-      .forInvocation(jobInvocation)
-      .operation(operation.operation.title, capability, args, callId)
+    const job = await jobs.forInvocation(jobInvocation).operation(operation.operation.title, capability, args, callId)
     return { summary: `已受理「${job.title}」，任务 ${job.id.slice(0, 8)}。完成后会回复。`, artifactIds: [] }
   }
   const result = await service.execute(invocation, capability, args, callId, signal)

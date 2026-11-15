@@ -1,36 +1,34 @@
-import { defineDoc, defineDocFamily, type Tx } from '@earendil-works/pi-durable'
-import { JobIndex } from './documents'
-import { jobTerminal, type JobSummary } from './schema'
-import { updateHistory, historyScope } from './history'
-import type { RenderRejection } from '@pi-im-bot/contracts/rendering'
+import { defineDoc, defineDocFamily, type Tx } from "@earendil-works/pi-durable"
+import { JobIndex } from "./documents"
+import { jobTerminal, type JobSummary } from "./schema"
+import { updateHistory, historyScope } from "./history"
+import type { RenderRejection } from "@pi-im-bot/contracts/rendering"
 
 export const JobActivity = defineDoc<{
   migrated: boolean
   jobs: Record<string, JobSummary>
 }>({
-  kind: 'bot.job-activity',
+  kind: "bot.job-activity",
   version: 1,
-  scope: 'session',
+  scope: "session",
   initial: () => ({ migrated: false, jobs: {} }),
   checkpointWhen: (_value, _ops, info) => {
     return info.deltasSinceBase >= 128
   }
 })
 
-export const JobRequests = defineDocFamily<{ jobId: string | null; renderRejection?: RenderRejection }, null>(
-  {
-    kind: 'bot.job-request',
-    version: 1,
-    scope: 'session',
-    family: true,
-    initial: () => ({ jobId: null }),
-    checkpointWhen: () => true
-  }
-)
-export const JobAdmissions = defineDocFamily<{ count: number }, null>({
-  kind: 'bot.job-admissions',
+export const JobRequests = defineDocFamily<{ jobId: string | null; renderRejection?: RenderRejection }, null>({
+  kind: "bot.job-request",
   version: 1,
-  scope: 'session',
+  scope: "session",
+  family: true,
+  initial: () => ({ jobId: null }),
+  checkpointWhen: () => true
+})
+export const JobAdmissions = defineDocFamily<{ count: number }, null>({
+  kind: "bot.job-admissions",
+  version: 1,
+  scope: "session",
   family: true,
   initial: () => ({ count: 0 }),
   checkpointWhen: () => true
@@ -42,16 +40,16 @@ const JobLocation = defineDocFamily<
   },
   null
 >({
-  kind: 'bot.job-history-location',
+  kind: "bot.job-history-location",
   version: 1,
-  scope: 'session',
+  scope: "session",
   family: true,
   initial: () => ({ global: null, room: null }),
   checkpointWhen: () => true
 })
 
 export function jobOutstanding(job: JobSummary) {
-  return !jobTerminal(job.state) || job.delivery === 'pending'
+  return !jobTerminal(job.state) || job.delivery === "pending"
 }
 export async function indexJob(tx: Tx, summary: JobSummary) {
   const activity = await tx.doc(JobActivity)
@@ -62,13 +60,7 @@ export async function indexJob(tx: Tx, summary: JobSummary) {
     delete activity.jobs[summary.id]
   }
   location.global = await updateHistory(tx, historyScope(), location.global, summary, jobOutstanding(summary))
-  location.room = await updateHistory(
-    tx,
-    historyScope(summary.roomId),
-    location.room,
-    summary,
-    jobOutstanding(summary)
-  )
+  location.room = await updateHistory(tx, historyScope(summary.roomId), location.room, summary, jobOutstanding(summary))
 }
 
 /** One atomic conversion; interrupted commits retain the entire original index for the next open. */

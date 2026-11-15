@@ -1,24 +1,24 @@
-import { defineDoc, defineDocFamily, type ConversationId } from '@earendil-works/pi-durable'
+import { defineDoc, defineDocFamily, type ConversationId } from "@earendil-works/pi-durable"
 
 export const ConversationIndex = defineDoc<{ conversations: Record<string, ConversationId> }>({
-  kind: 'bot.conversation-index',
+  kind: "bot.conversation-index",
   version: 1,
-  scope: 'session',
+  scope: "session",
   initial: () => ({ conversations: {} }),
   checkpointWhen: () => false
 })
 
 export const ConversationBindingsReady = defineDoc<{ migrated: boolean }>({
-  kind: 'bot.conversation-bindings-ready',
+  kind: "bot.conversation-bindings-ready",
   version: 1,
-  scope: 'session',
+  scope: "session",
   initial: () => ({ migrated: false }),
   checkpointWhen: () => true
 })
 export const ConversationBinding = defineDocFamily<{ conversationId: ConversationId | null }, null>({
-  kind: 'bot.conversation-binding',
+  kind: "bot.conversation-binding",
   version: 1,
-  scope: 'session',
+  scope: "session",
   family: true,
   initial: () => ({ conversationId: null }),
   checkpointWhen: () => true

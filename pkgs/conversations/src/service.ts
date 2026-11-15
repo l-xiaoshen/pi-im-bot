@@ -1,7 +1,7 @@
-import type { Room } from '@pi-im-bot/contracts/message'
-import type { StateStore } from '@pi-im-bot/storage/state'
-import type { EventHub } from '@pi-im-bot/contracts/events'
-import { ConversationSchema, type Conversation } from './schema'
+import type { Room } from "@pi-im-bot/contracts/message"
+import type { StateStore } from "@pi-im-bot/storage/state"
+import type { EventHub } from "@pi-im-bot/contracts/events"
+import { ConversationSchema, type Conversation } from "./schema"
 
 export class ConversationService {
   constructor(
@@ -12,7 +12,7 @@ export class ConversationService {
   require(id: string, roomId: string) {
     const conversation = this.store.getConversation(id)
     if (!conversation || conversation.roomId !== roomId) {
-      throw new Error('对话不属于当前聊天范围')
+      throw new Error("对话不属于当前聊天范围")
     }
     return conversation
   }
@@ -21,7 +21,7 @@ export class ConversationService {
     return this.require(room.currentConversationId, room.id)
   }
 
-  create(room: Room, title = '新对话', kind: Conversation['kind'] = 'root', parentId?: string) {
+  create(room: Room, title = "新对话", kind: Conversation["kind"] = "root", parentId?: string) {
     const id = crypto.randomUUID()
     const conversation = ConversationSchema.parse({
       id,
@@ -33,7 +33,7 @@ export class ConversationService {
       createdAt: Date.now(),
       updatedAt: Date.now()
     })
-    if (kind === 'root') {
+    if (kind === "root") {
       this.select(room, conversation)
     } else {
       this.store.saveConversation(conversation)
@@ -44,8 +44,8 @@ export class ConversationService {
   ensureChild(room: Room, id: string, title: string, parentId: string) {
     const existing = this.store.getConversation(id)
     if (existing) {
-      if (existing.roomId !== room.id || existing.kind !== 'job' || existing.parentId !== parentId) {
-        throw new Error('任务对话标识冲突')
+      if (existing.roomId !== room.id || existing.kind !== "job" || existing.parentId !== parentId) {
+        throw new Error("任务对话标识冲突")
       }
       return existing
     }
@@ -53,7 +53,7 @@ export class ConversationService {
       id,
       roomId: room.id,
       title,
-      kind: 'job',
+      kind: "job",
       parentId,
       sessionKey: id,
       createdAt: Date.now(),
@@ -64,8 +64,8 @@ export class ConversationService {
   }
 
   select(room: Room, conversation: Conversation) {
-    if (conversation.roomId !== room.id || conversation.kind !== 'root') {
-      throw new Error('只能切换到本聊天范围的主对话')
+    if (conversation.roomId !== room.id || conversation.kind !== "root") {
+      throw new Error("只能切换到本聊天范围的主对话")
     }
     const next = {
       ...room,
@@ -75,7 +75,7 @@ export class ConversationService {
       updatedAt: Date.now()
     }
     this.store.saveConversationSelection(next, conversation)
-    this.events.emit({ type: 'room', room: next })
+    this.events.emit({ type: "room", room: next })
     return next
   }
 }

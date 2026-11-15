@@ -1,17 +1,17 @@
-import { z } from 'zod'
-import { mkdir, readdir, lstat, open, rename, unlink } from 'node:fs/promises'
-import { join, resolve } from 'node:path'
-import { createHash } from 'node:crypto'
-import { RunLimiter } from '@pi-im-bot/support/limiter'
-import { ArtifactLimitsSchema, type ArtifactLimits } from './limits'
+import { z } from "zod"
+import { mkdir, readdir, lstat, open, rename, unlink } from "node:fs/promises"
+import { join, resolve } from "node:path"
+import { createHash } from "node:crypto"
+import { RunLimiter } from "@pi-im-bot/support/limiter"
+import { ArtifactLimitsSchema, type ArtifactLimits } from "./limits"
 
 const EntrySchema = z
   .object({
     id: z.uuid(),
     scope: z.string().regex(/^[a-f0-9]{24}$/u),
-    producer: z.string().max(100).default('core'),
+    producer: z.string().max(100).default("core"),
     bytes: z.number().int().nonnegative(),
-    state: z.enum(['pending', 'ready', 'orphan']),
+    state: z.enum(["pending", "ready", "orphan"]),
     owner: z.string().max(512).optional()
   })
   .strict()
@@ -26,14 +26,14 @@ const LedgerSchema = z
         })
       ).size !== value.entries.length
     ) {
-      context.addIssue({ code: 'custom', message: '产物额度账本包含重复 ID' })
+      context.addIssue({ code: "custom", message: "产物额度账本包含重复 ID" })
     }
   })
 type Entry = z.infer<typeof EntrySchema>
 const budgets = new Map<string, ArtifactBudget>()
 
 export function artifactBudget(dataDir: string) {
-  const root = resolve(dataDir, 'artifacts')
+  const root = resolve(dataDir, "artifacts")
   let budget = budgets.get(root)
   if (!budget) {
     budget = new ArtifactBudget(root, ArtifactLimitsSchema.parse({}))
@@ -61,9 +61,9 @@ export class ArtifactBudget {
 
   private async save(entries: readonly Entry[]) {
     await mkdir(this.root, { recursive: true, mode: 0o700 })
-    const target = join(this.root, 'quota.json')
-    const temporary = target + '.' + crypto.randomUUID() + '.tmp'
-    const file = await open(temporary, 'wx', 0o600)
+    const target = join(this.root, "quota.json")
+    const temporary = target + "." + crypto.randomUUID() + ".tmp"
+    const file = await open(temporary, "wx", 0o600)
     try {
       await file.writeFile(JSON.stringify({ version: 1, entries }))
       await file.sync()
@@ -75,7 +75,7 @@ export class ArtifactBudget {
     } finally {
       await unlink(temporary).catch(() => {})
     }
-    const directory = await open(this.root, 'r')
+    const directory = await open(this.root, "r")
     try {
       await directory.sync()
     } finally {
@@ -87,38 +87,38 @@ export class ArtifactBudget {
       return
     }
     await mkdir(this.root, { recursive: true, mode: 0o700 })
-    const file = Bun.file(join(this.root, 'quota.json'))
+    const file = Bun.file(join(this.root, "quota.json"))
     if (await file.exists()) {
       let entries = LedgerSchema.parse(await file.json()).entries
       for (const entry of entries) {
-        if (entry.state !== 'pending') {
+        if (entry.state !== "pending") {
           continue
         }
         const base = join(this.root, entry.scope, entry.id)
-        const metadata = Bun.file(base + '.json')
-        const binary = Bun.file(base + '.bin')
+        const metadata = Bun.file(base + ".json")
+        const binary = Bun.file(base + ".bin")
         if ((await metadata.exists()) && (await binary.exists())) {
-          const info = await lstat(base + '.bin')
+          const info = await lstat(base + ".bin")
           if (!info.isFile() || info.isSymbolicLink()) {
-            throw new Error('产物目录存在异常文件')
+            throw new Error("产物目录存在异常文件")
           }
           const saved = z
             .object({ id: z.uuid(), roomId: z.string(), bytes: z.number().int().nonnegative() })
             .parse(await metadata.json())
           if (
             saved.id !== entry.id ||
-            createHash('sha256').update(saved.roomId).digest('hex').slice(0, 24) !== entry.scope ||
+            createHash("sha256").update(saved.roomId).digest("hex").slice(0, 24) !== entry.scope ||
             saved.bytes !== info.size
           ) {
-            throw new Error('未完成产物元数据不一致，未自动释放或重建')
+            throw new Error("未完成产物元数据不一致，未自动释放或重建")
           }
-          entry.state = 'ready'
+          entry.state = "ready"
           entry.bytes = info.size
           continue
         }
-        for (const suffix of ['.tmp', '.bin', '.json.tmp']) {
+        for (const suffix of [".tmp", ".bin", ".json.tmp"]) {
           await unlink(base + suffix).catch((error) => {
-            if (!z.object({ code: z.literal('ENOENT') }).safeParse(error).success) {
+            if (!z.object({ code: z.literal("ENOENT") }).safeParse(error).success) {
               throw error
             }
           })
@@ -127,12 +127,12 @@ export class ArtifactBudget {
           const directory = join(
             this.root,
             entry.scope,
-            'owners',
-            createHash('sha256').update(entry.owner).digest('hex')
+            "owners",
+            createHash("sha256").update(entry.owner).digest("hex")
           )
-          for (const suffix of ['.json', '.json.tmp']) {
+          for (const suffix of [".json", ".json.tmp"]) {
             await unlink(join(directory, entry.id + suffix)).catch((error) => {
-              if (!z.object({ code: z.literal('ENOENT') }).safeParse(error).success) {
+              if (!z.object({ code: z.literal("ENOENT") }).safeParse(error).success) {
                 throw error
               }
             })
@@ -140,7 +140,7 @@ export class ArtifactBudget {
         }
       }
       entries = entries.filter((entry) => {
-        return entry.state !== 'pending'
+        return entry.state !== "pending"
       })
       await this.save(entries)
       this.entries = entries
@@ -152,33 +152,26 @@ export class ArtifactBudget {
         continue
       }
       for (const name of await readdir(join(this.root, directory.name))) {
-        const parsed = z.uuid().safeParse(name.replace(/\.bin$/u, ''))
-        if (!name.endsWith('.bin') || !parsed.success) {
+        const parsed = z.uuid().safeParse(name.replace(/\.bin$/u, ""))
+        if (!name.endsWith(".bin") || !parsed.success) {
           continue
         }
         const info = await lstat(join(this.root, directory.name, name))
         if (!info.isFile() || info.isSymbolicLink()) {
-          throw new Error('产物目录存在异常文件，额度初始化已停止')
+          throw new Error("产物目录存在异常文件，额度初始化已停止")
         }
-        let state: Entry['state'] = 'orphan'
-        if (await Bun.file(join(this.root, directory.name, parsed.data + '.json')).exists()) {
-          state = 'ready'
+        let state: Entry["state"] = "orphan"
+        if (await Bun.file(join(this.root, directory.name, parsed.data + ".json")).exists()) {
+          state = "ready"
         }
-        entries.push({ id: parsed.data, scope: directory.name, producer: 'core', bytes: info.size, state })
+        entries.push({ id: parsed.data, scope: directory.name, producer: "core", bytes: info.size, state })
       }
     }
     await this.save(entries)
     this.entries = entries
   }
 
-  async reserve(
-    scope: string,
-    id: string,
-    bytes: number,
-    owner?: string,
-    producer = 'core',
-    signal?: AbortSignal
-  ) {
+  async reserve(scope: string, id: string, bytes: number, owner?: string, producer = "core", signal?: AbortSignal) {
     const release = await this.lock.acquire(signal)
     try {
       await this.initialize()
@@ -194,7 +187,7 @@ export class ArtifactBudget {
           return entry.id === id
         })
       ) {
-        throw new Error('产物 ID 已登记')
+        throw new Error("产物 ID 已登记")
       }
       if (
         bytes > this.limits.maxFileBytes ||
@@ -217,16 +210,16 @@ export class ArtifactBudget {
         produced.length >= this.limits.maxProducerItems ||
         entries.length >= this.limits.maxTotalItems
       ) {
-        throw new Error('产物存储额度已满或文件超过上限')
+        throw new Error("产物存储额度已满或文件超过上限")
       }
       if (
         entries.filter((entry) => {
-          return entry.state === 'pending'
+          return entry.state === "pending"
         }).length >= this.limits.maxPending
       ) {
-        throw new Error('产物写入并发额度已满')
+        throw new Error("产物写入并发额度已满")
       }
-      const entry = EntrySchema.parse({ scope, id, bytes, state: 'pending', owner, producer })
+      const entry = EntrySchema.parse({ scope, id, bytes, state: "pending", owner, producer })
       signal?.throwIfAborted()
       const next = [...entries, entry]
       await this.save(next)
@@ -258,7 +251,7 @@ export class ArtifactBudget {
       if (committed) {
         next = this.entries!.map((entry) => {
           if (entry.id === id) {
-            return { ...entry, state: 'ready' as const }
+            return { ...entry, state: "ready" as const }
           }
           return entry
         })
@@ -280,7 +273,7 @@ export class ArtifactBudget {
         }, 0),
         items: this.entries!.length,
         pending: this.entries!.filter((entry) => {
-          return entry.state === 'pending'
+          return entry.state === "pending"
         }).length
       }
     } finally {
@@ -293,21 +286,21 @@ export class ArtifactBudget {
       await this.initialize()
       if (
         this.entries!.some((entry) => {
-          return entry.state === 'pending'
+          return entry.state === "pending"
         })
       ) {
-        throw new Error('仍有正在发布的产物，请稍后核对')
+        throw new Error("仍有正在发布的产物，请稍后核对")
       }
       const next: Entry[] = []
       for (const entry of this.entries!) {
         try {
-          const info = await lstat(join(this.root, entry.scope, entry.id + '.bin'))
+          const info = await lstat(join(this.root, entry.scope, entry.id + ".bin"))
           if (!info.isFile() || info.isSymbolicLink()) {
-            throw new Error('产物目录包含异常文件，未释放额度')
+            throw new Error("产物目录包含异常文件，未释放额度")
           }
           next.push({ ...entry, bytes: info.size })
         } catch (error) {
-          if (!z.object({ code: z.literal('ENOENT') }).safeParse(error).success) {
+          if (!z.object({ code: z.literal("ENOENT") }).safeParse(error).success) {
             throw error
           }
         }

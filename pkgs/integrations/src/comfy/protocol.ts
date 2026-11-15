@@ -1,17 +1,17 @@
-import { z } from 'zod'
-import { ParametersSchema } from './compile'
-export const ComfyInputSchema = z.discriminatedUnion('action', [
+import { z } from "zod"
+import { ParametersSchema } from "./compile"
+export const ComfyInputSchema = z.discriminatedUnion("action", [
   z
     .object({
-      action: z.literal('catalog'),
+      action: z.literal("catalog"),
       workflow: z.string().max(32).optional(),
-      section: z.enum(['workflows', 'parameters', 'models', 'loras']).default('workflows'),
+      section: z.enum(["workflows", "parameters", "models", "loras"]).default("workflows"),
       cursor: z.number().int().min(0).max(10000).default(0)
     })
     .strict(),
   z
     .object({
-      action: z.literal('submit'),
+      action: z.literal("submit"),
       item: z.number().int().min(0).max(15),
       workflow: z.string().min(1).max(32),
       parameters: ParametersSchema
@@ -19,7 +19,7 @@ export const ComfyInputSchema = z.discriminatedUnion('action', [
     .strict(),
   z
     .object({
-      action: z.enum(['recover', 'poll', 'cancel', 'reconcile', 'peek']),
+      action: z.enum(["recover", "poll", "cancel", "reconcile", "peek"]),
       item: z.number().int().min(0).max(15)
     })
     .strict()
@@ -27,14 +27,14 @@ export const ComfyInputSchema = z.discriminatedUnion('action', [
 export const ComfyItemSchema = z.object({
   item: z.number().int(),
   status: z.enum([
-    'not_started',
-    'submitted',
-    'running',
-    'succeeded',
-    'failed',
-    'cancelled',
-    'outcome_unknown',
-    'abandoned'
+    "not_started",
+    "submitted",
+    "running",
+    "succeeded",
+    "failed",
+    "cancelled",
+    "outcome_unknown",
+    "abandoned"
   ]),
   recordId: z.string().optional(),
   attempted: z.boolean().default(false),

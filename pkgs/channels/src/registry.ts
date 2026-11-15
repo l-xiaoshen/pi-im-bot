@@ -1,6 +1,6 @@
-import type { ChannelAdapter } from '@pi-im-bot/contracts/channel'
-import type { Address } from '@pi-im-bot/contracts/message'
-import type { ChannelMedia, SendControl } from '@pi-im-bot/contracts/channel-media'
+import type { ChannelAdapter } from "@pi-im-bot/contracts/channel"
+import type { Address } from "@pi-im-bot/contracts/message"
+import type { ChannelMedia, SendControl } from "@pi-im-bot/contracts/channel-media"
 
 export class ChannelRegistry {
   private readonly adapters = new Map<string, ChannelAdapter>()

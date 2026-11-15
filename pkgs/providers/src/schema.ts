@@ -1,17 +1,10 @@
-import { z } from 'zod'
+import { z } from "zod"
 
-const ReservedBodyFields = new Set([
-  'model',
-  'input',
-  'tools',
-  'stream',
-  'previous_response_id',
-  'conversation'
-])
+const ReservedBodyFields = new Set(["model", "input", "tools", "stream", "previous_response_id", "conversation"])
 export const ExtraBodySchema = z.record(z.string(), z.unknown()).superRefine((body, context) => {
   for (const key of Object.keys(body)) {
     if (ReservedBodyFields.has(key)) {
-      context.addIssue({ code: 'custom', path: [key], message: `${key} is owned by the agent runtime` })
+      context.addIssue({ code: "custom", path: [key], message: `${key} is owned by the agent runtime` })
     }
   }
 })
@@ -34,9 +27,9 @@ export const ProviderConfigSchema = z.object({
   id: z.string().regex(/^[a-z][a-z0-9_-]*$/),
   name: z.string().optional(),
   enabled: z.boolean().default(true),
-  protocol: z.literal('openai-responses').default('openai-responses'),
+  protocol: z.literal("openai-responses").default("openai-responses"),
   baseUrl: z.url().refine((url) => {
-    return ['http:', 'https:'].includes(new URL(url).protocol)
+    return ["http:", "https:"].includes(new URL(url).protocol)
   }),
   apiKey: z.string().optional(),
   apiKeyEnv: z.string().optional(),
@@ -59,7 +52,7 @@ export type ProviderGroup = z.infer<typeof ProviderGroupSchema>
 
 export const ProvidersConfigSchema = z
   .object({
-    defaultGroup: z.string().default('main'),
+    defaultGroup: z.string().default("main"),
     providers: z.array(ProviderConfigSchema),
     groups: z.array(ProviderGroupSchema)
   })
@@ -67,13 +60,13 @@ export const ProvidersConfigSchema = z
     const providers = new Map<string, ProviderConfig>()
     for (const provider of config.providers) {
       if (providers.has(provider.id)) {
-        context.addIssue({ code: 'custom', message: `Duplicate provider: ${provider.id}` })
+        context.addIssue({ code: "custom", message: `Duplicate provider: ${provider.id}` })
       }
       providers.set(provider.id, provider)
       const models = new Set<string>()
       for (const model of provider.models) {
         if (models.has(model.id)) {
-          context.addIssue({ code: 'custom', message: `Duplicate model: ${provider.id}/${model.id}` })
+          context.addIssue({ code: "custom", message: `Duplicate model: ${provider.id}/${model.id}` })
         }
         models.add(model.id)
       }
@@ -81,14 +74,14 @@ export const ProvidersConfigSchema = z
     const groups = new Set<string>()
     for (const group of config.groups) {
       if (groups.has(group.id)) {
-        context.addIssue({ code: 'custom', message: `Duplicate group: ${group.id}` })
+        context.addIssue({ code: "custom", message: `Duplicate group: ${group.id}` })
       }
       groups.add(group.id)
       const candidates = new Set<string>()
       for (const candidate of group.candidates) {
         const key = `${candidate.provider}/${candidate.model}`
         if (candidates.has(key)) {
-          context.addIssue({ code: 'custom', message: `Duplicate candidate: ${key}` })
+          context.addIssue({ code: "custom", message: `Duplicate candidate: ${key}` })
         }
         candidates.add(key)
         if (
@@ -96,12 +89,12 @@ export const ProvidersConfigSchema = z
             return model.id === candidate.model
           })
         ) {
-          context.addIssue({ code: 'custom', message: `Unknown candidate: ${key}` })
+          context.addIssue({ code: "custom", message: `Unknown candidate: ${key}` })
         }
       }
     }
     if (!groups.has(config.defaultGroup)) {
-      context.addIssue({ code: 'custom', message: 'defaultGroup must reference a group' })
+      context.addIssue({ code: "custom", message: "defaultGroup must reference a group" })
     }
   })
 export type ProvidersConfig = z.infer<typeof ProvidersConfigSchema>

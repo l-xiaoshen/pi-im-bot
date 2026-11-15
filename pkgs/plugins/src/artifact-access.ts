@@ -1,7 +1,7 @@
-import { namedService, serviceRevision } from '@pi-im-bot/integrations/resources'
-import type { ArtifactAccess } from '@pi-im-bot/artifacts/access'
-import type { Configuration } from '@pi-im-bot/config/load'
-import { gsviExecutionRevision } from '@pi-im-bot/integrations/gsvi/identity'
+import { namedService, serviceRevision } from "@pi-im-bot/integrations/resources"
+import type { ArtifactAccess } from "@pi-im-bot/artifacts/access"
+import type { Configuration } from "@pi-im-bot/config/load"
+import { gsviExecutionRevision } from "@pi-im-bot/integrations/gsvi/identity"
 
 /** Persistent dependencies survive Worker completion and Job recovery. */
 export function assertArtifactAccess(
@@ -34,16 +34,12 @@ export function assertArtifactDeliveryAccess(
       return !instance.grants.includes(grant)
     })
   ) {
-    throw new Error('产物所需插件授权已撤销')
+    throw new Error("产物所需插件授权已撤销")
   }
   for (const [alias, binding] of Object.entries(owner.services)) {
     const current = namedService(config, binding.id)
-    if (
-      instance.services[alias] !== binding.id ||
-      !current?.enabled ||
-      serviceRevision(current) !== binding.revision
-    ) {
-      throw new Error('产物所需语音服务已变更')
+    if (instance.services[alias] !== binding.id || !current?.enabled || serviceRevision(current) !== binding.revision) {
+      throw new Error("产物所需语音服务已变更")
     }
   }
 }

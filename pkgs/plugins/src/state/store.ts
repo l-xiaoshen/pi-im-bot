@@ -1,20 +1,20 @@
-import { defineDocFamily, type Tx } from '@earendil-works/pi-durable'
-import { BACKGROUND_CONTEXT } from '@earendil-works/chord/context'
-import { z } from 'zod'
-import { revision } from '@pi-im-bot/settings/resolve'
-import type { DurableAgentRuntime } from '@pi-im-bot/agent/durable/runtime'
+import { defineDocFamily, type Tx } from "@earendil-works/pi-durable"
+import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context"
+import { z } from "zod"
+import { revision } from "@pi-im-bot/settings/resolve"
+import type { DurableAgentRuntime } from "@pi-im-bot/agent/durable/runtime"
 const EntrySchema = z.object({ version: z.number().int().nonnegative(), value: z.json() })
 const NamespaceSchema = z.object({ entries: z.record(z.string(), EntrySchema) })
 const PluginState = defineDocFamily<z.infer<typeof NamespaceSchema>, null>({
-  kind: 'bot.plugin-state',
+  kind: "bot.plugin-state",
   version: 1,
-  scope: 'session',
+  scope: "session",
   family: true,
   initial: () => ({ entries: {} }),
   checkpointWhen: () => true
 })
 export const StateKeySchema = z
-  .object({ area: z.enum(['scope', 'instance']), key: z.string().regex(/^[a-z][a-z0-9_.-]{0,63}$/u) })
+  .object({ area: z.enum(["scope", "instance"]), key: z.string().regex(/^[a-z][a-z0-9_.-]{0,63}$/u) })
   .strict()
 export const StateCompareSchema = StateKeySchema.extend({
   version: z.number().int().nonnegative(),
@@ -26,8 +26,8 @@ export const StateCompareSchema = StateKeySchema.extend({
 }).strict()
 export class PluginStateStore {
   constructor(private readonly runtime: DurableAgentRuntime) {}
-  private namespace(instance: string, room: string, area: 'scope' | 'instance') {
-    if (area === 'instance') {
+  private namespace(instance: string, room: string, area: "scope" | "instance") {
+    if (area === "instance") {
       return revision([instance, area])
     }
     return revision([instance, area, room])
@@ -52,7 +52,7 @@ export class PluginStateStore {
     record?: (tx: Tx) => Promise<boolean>
   ) {
     if (Buffer.byteLength(JSON.stringify(input.value)) > 32768) {
-      throw new Error('状态值超过32KiB额度')
+      throw new Error("状态值超过32KiB额度")
     }
     return this.runtime.native.commit(async (tx) => {
       authorize()
@@ -73,7 +73,7 @@ export class PluginStateStore {
         [input.key]: { version: version + 1, value: input.value }
       }
       if (Object.keys(entries).length > 64 || Buffer.byteLength(JSON.stringify(entries)) > 131072) {
-        throw new Error('状态命名空间超过64键/128KiB额度')
+        throw new Error("状态命名空间超过64键/128KiB额度")
       }
       doc.entries = entries
       return { applied: true, version: version + 1 }

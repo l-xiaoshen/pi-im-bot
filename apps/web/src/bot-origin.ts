@@ -3,11 +3,11 @@ declare global {
   var __PI_IM_BOT_CONFIG__: { apiOrigin?: string } | undefined
 }
 
-const configuredOrigin = globalThis.__PI_IM_BOT_CONFIG__?.apiOrigin ?? ''
-const defaultOrigin = configuredOrigin || globalThis.location?.origin || 'http://localhost:19335'
+const configuredOrigin = globalThis.__PI_IM_BOT_CONFIG__?.apiOrigin ?? ""
+const defaultOrigin = configuredOrigin || globalThis.location?.origin || "http://localhost:19335"
 
 export function botApiUrl(path: string, origin = defaultOrigin) {
-  if (!path.startsWith('/')) {
+  if (!path.startsWith("/")) {
     throw new Error(`Bot API paths must be absolute: ${path}`)
   }
   return new URL(path, new URL(origin)).toString()
@@ -15,6 +15,6 @@ export function botApiUrl(path: string, origin = defaultOrigin) {
 
 export function botWebSocketUrl(path: string, origin = defaultOrigin) {
   const url = new URL(botApiUrl(path, origin))
-  url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:'
+  url.protocol = url.protocol === "https:" ? "wss:" : "ws:"
   return url.toString()
 }

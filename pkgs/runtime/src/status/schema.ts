@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from "zod"
 
 const BytesSchema = z.number().finite().nonnegative()
 export const GpuDeviceSchema = z.object({
@@ -11,15 +11,15 @@ export const GpuDeviceSchema = z.object({
   powerWatts: z.number().finite().nonnegative().nullable()
 })
 export const GpuStatusSchema = z.object({
-  provider: z.literal('nvidia'),
-  source: z.literal('nvidia-smi'),
+  provider: z.literal("nvidia"),
+  source: z.literal("nvidia-smi"),
   devices: z.array(GpuDeviceSchema).min(1).max(16)
 })
 export type GpuStatus = z.infer<typeof GpuStatusSchema>
 export const RuntimeStatusSchema = z.object({
   version: z.literal(1),
   measuredAt: z.number().int(),
-  observer: z.literal('bot-control-plane'),
+  observer: z.literal("bot-control-plane"),
   system: z.object({
     platform: z.string(),
     architecture: z.string(),
@@ -42,7 +42,7 @@ export const RuntimeStatusSchema = z.object({
   swap: z.object({ totalBytes: BytesSchema, availableBytes: BytesSchema }).nullable(),
   disk: z
     .object({
-      scope: z.literal('bot-data-filesystem'),
+      scope: z.literal("bot-data-filesystem"),
       totalBytes: BytesSchema,
       availableBytes: BytesSchema,
       usedPercent: z.number().min(0).max(100)
@@ -50,7 +50,7 @@ export const RuntimeStatusSchema = z.object({
     .nullable(),
   network: z
     .object({
-      scope: z.literal('visible-interface-counters'),
+      scope: z.literal("visible-interface-counters"),
       receivedBytes: BytesSchema,
       sentBytes: BytesSchema
     })
@@ -59,7 +59,7 @@ export const RuntimeStatusSchema = z.object({
   bot: z.object({
     name: z.string(),
     version: z.string(),
-    runtime: z.literal('bun'),
+    runtime: z.literal("bun"),
     runtimeVersion: z.string(),
     uptimeSeconds: z.number().nonnegative(),
     rssBytes: BytesSchema,
@@ -71,13 +71,7 @@ export const RuntimeStatusSchema = z.object({
   }),
   warnings: z
     .array(
-      z.enum([
-        'cpu-unavailable',
-        'swap-unavailable',
-        'disk-unavailable',
-        'network-unavailable',
-        'gpu-unavailable'
-      ])
+      z.enum(["cpu-unavailable", "swap-unavailable", "disk-unavailable", "network-unavailable", "gpu-unavailable"])
     )
     .max(5)
 })

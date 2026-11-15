@@ -1,11 +1,11 @@
-import { z } from 'zod'
-import type { PluginHostServices } from './rpc/services'
-import type { PluginInvocation } from './invocation'
-import type { PluginBinding } from './registry'
-import type { ArtifactStore } from '@pi-im-bot/artifacts/store'
-import { ResourceLibrary } from '@pi-im-bot/resources/library'
-import { createMcpTools } from '@pi-im-bot/resources/mcp/tools'
-import { mcpCapabilityId } from '@pi-im-bot/resources/mcp/identity'
+import { z } from "zod"
+import type { PluginHostServices } from "./rpc/services"
+import type { PluginInvocation } from "./invocation"
+import type { PluginBinding } from "./registry"
+import type { ArtifactStore } from "@pi-im-bot/artifacts/store"
+import { ResourceLibrary } from "@pi-im-bot/resources/library"
+import { createMcpTools } from "@pi-im-bot/resources/mcp/tools"
+import { mcpCapabilityId } from "@pi-im-bot/resources/mcp/identity"
 
 const ConnectorCallSchema = z
   .object({ tool: z.string().min(1).max(128), arguments: z.record(z.string(), z.json()).default({}) })
@@ -24,7 +24,7 @@ export function registerPluginConnectors(
   callId: string
 ) {
   for (const [alias, serverId] of Object.entries(binding.instance.connectors)) {
-    host.register('connector:' + alias, 'connector:' + alias, ConnectorCallSchema, async (input, context) => {
+    host.register("connector:" + alias, "connector:" + alias, ConnectorCallSchema, async (input, context) => {
       const capability = mcpCapabilityId(serverId, input.tool)
       invocation.services.authorize(capability)
       const library = invocation.config.resources
@@ -33,7 +33,7 @@ export function registerPluginConnectors(
           return tool.name === input.tool
         })
         if (definition?.annotations?.readOnlyHint !== true) {
-          throw new Error('此切入点只允许声明为只读的 MCP 工具')
+          throw new Error("此切入点只允许声明为只读的 MCP 工具")
         }
       }
       const selected = new ResourceLibrary(
@@ -59,14 +59,9 @@ export function registerPluginConnectors(
           return tools.capabilityFor(tool.name) === capability
         })
         if (!tool) {
-          throw new Error('连接器工具未登记、未启用或未获授权')
+          throw new Error("连接器工具未登记、未启用或未获授权")
         }
-        const result = await tool.execute(
-          callId + ':connector:' + alias,
-          input.arguments,
-          context.signal,
-          undefined
-        )
+        const result = await tool.execute(callId + ":connector:" + alias, input.arguments, context.signal, undefined)
         invocation.services.authorize(capability)
         context.signal.throwIfAborted()
         const details = ResultDetailsSchema.parse(result.details)
@@ -77,12 +72,12 @@ export function registerPluginConnectors(
         return {
           text: result.content
             .filter((part) => {
-              return part.type === 'text'
+              return part.type === "text"
             })
             .map((part) => {
               return part.text
             })
-            .join('\n'),
+            .join("\n"),
           artifactIds: [...new Set(artifactIds)],
           isError: Boolean(result.isError)
         }

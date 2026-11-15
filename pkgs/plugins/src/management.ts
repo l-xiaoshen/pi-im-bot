@@ -1,9 +1,9 @@
-import type { ResourceLibrary } from '@pi-im-bot/resources/library'
-import type { PluginInstance, PluginPackage } from './config'
-import type { PluginGrantSchema } from './manifest'
-import type { z } from 'zod'
-import { configIssues } from './configuration/values'
-import { gsviWorkerDefinition } from '@pi-im-bot/integrations/gsvi/plugin-config/definition'
+import type { ResourceLibrary } from "@pi-im-bot/resources/library"
+import type { PluginInstance, PluginPackage } from "./config"
+import type { PluginGrantSchema } from "./manifest"
+import type { z } from "zod"
+import { configIssues } from "./configuration/values"
+import { gsviWorkerDefinition } from "@pi-im-bot/integrations/gsvi/plugin-config/definition"
 
 export function requestedGrants(bundle: PluginPackage): z.infer<typeof PluginGrantSchema>[] {
   return [
@@ -17,27 +17,27 @@ export function requestedGrants(bundle: PluginPackage): z.infer<typeof PluginGra
 export function pluginConnections(bundle: PluginPackage) {
   const connections = [...bundle.manifest.connections]
   for (const grant of requestedGrants(bundle)) {
-    let kind: 'mcp' | 'plugin' | 'service' = 'mcp'
-    let alias = ''
-    if (grant.startsWith('connector:')) {
+    let kind: "mcp" | "plugin" | "service" = "mcp"
+    let alias = ""
+    if (grant.startsWith("connector:")) {
       alias = grant.slice(10)
     }
-    if (grant.startsWith('service:')) {
+    if (grant.startsWith("service:")) {
       alias = grant.slice(8)
-      kind = 'service'
+      kind = "service"
     }
-    if (grant.startsWith('operation:')) {
-      alias = grant.slice(10).split('/')[0]
-      kind = 'plugin'
+    if (grant.startsWith("operation:")) {
+      alias = grant.slice(10).split("/")[0]
+      kind = "plugin"
     }
     if (
-      kind !== 'service' &&
+      kind !== "service" &&
       alias &&
       !connections.some((connection) => {
         return connection.alias === alias && connection.kind === kind
       })
     ) {
-      connections.push({ alias, kind, title: alias, description: '', required: false })
+      connections.push({ alias, kind, title: alias, description: "", required: false })
     }
   }
   return connections
@@ -48,14 +48,14 @@ export function resolvePluginConnections(instance: PluginInstance, bundle: Plugi
       continue
     }
     const value = instance.settings[connection.setting]
-    if (typeof value !== 'string') {
-      throw new Error('服务绑定配置必须是字符串：' + connection.setting)
+    if (typeof value !== "string") {
+      throw new Error("服务绑定配置必须是字符串：" + connection.setting)
     }
     let mapping = instance.connectors
-    if (connection.kind === 'plugin') {
+    if (connection.kind === "plugin") {
       mapping = instance.dependencies
     }
-    if (connection.kind === 'service') {
+    if (connection.kind === "service") {
       mapping = instance.services
     }
     if (value) {
@@ -75,21 +75,21 @@ export function pluginIssues(instance: PluginInstance, bundle: PluginPackage, li
       continue
     }
     let mapping = instance.connectors
-    if (connection.kind === 'plugin') {
+    if (connection.kind === "plugin") {
       mapping = instance.dependencies
     }
-    if (connection.kind === 'service') {
+    if (connection.kind === "service") {
       mapping = instance.services
     }
     const target = mapping[connection.alias]
     let available = false
-    if (connection.kind === 'mcp') {
+    if (connection.kind === "mcp") {
       available = library.config.mcp.some((entry) => {
         return entry.id === target && entry.enabled
       })
-    } else if (connection.kind === 'service') {
+    } else if (connection.kind === "service") {
       available =
-        ['gsvi@1', 'comfy@1'].includes(connection.service ?? '') &&
+        ["gsvi@1", "comfy@1"].includes(connection.service ?? "") &&
         [...library.config.services, ...library.config.comfyServices].some((entry) => {
           return entry.id === target && entry.enabled
         })
@@ -99,7 +99,7 @@ export function pluginIssues(instance: PluginInstance, bundle: PluginPackage, li
       })
     }
     if (!available) {
-      issues.push({ path: connection.alias, message: '请绑定已启用的' + connection.title })
+      issues.push({ path: connection.alias, message: "请绑定已启用的" + connection.title })
     }
   }
   return issues

@@ -1,8 +1,8 @@
-import type { ChannelAdapter } from '@pi-im-bot/contracts/channel'
+import type { ChannelAdapter } from "@pi-im-bot/contracts/channel"
 
 export function createMockAdapter(): ChannelAdapter {
   return {
-    id: 'mock',
+    id: "mock",
     capabilities: {
       text: true,
       images: true,

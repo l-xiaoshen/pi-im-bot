@@ -1,5 +1,5 @@
-import { assertArtifactAccess, assertArtifactDeliveryAccess } from '@pi-im-bot/plugins/artifact-access'
-import type { Configuration } from '@pi-im-bot/config/load'
+import { assertArtifactAccess, assertArtifactDeliveryAccess } from "@pi-im-bot/plugins/artifact-access"
+import type { Configuration } from "@pi-im-bot/config/load"
 import {
   RoomSchema,
   addressKey,
@@ -7,58 +7,53 @@ import {
   type Room,
   type IncomingMessage,
   type InboundOutcome
-} from '@pi-im-bot/contracts/message'
-import type { Run, RunInput, PreparedRunInput, Trace, ExecutionContext } from '@pi-im-bot/contracts/run'
-import { BACKGROUND_CONTEXT, withAbortSignal, awaitWithContext } from '@earendil-works/chord/context'
-import { executeRun } from './execute-run'
-import type { HostToolServices } from '@pi-im-bot/agent/host-tools'
-import type { StateStore } from '@pi-im-bot/storage/state'
-import { DeliverySuppressed, DeliveryAdmissionUnknown, type DeliveryService } from './delivery'
-import type { EventHub } from '@pi-im-bot/contracts/events'
-import type { Scheduler } from '@pi-im-bot/scheduler/service'
-import type { ScheduleToolServices } from '@pi-im-bot/agent/schedule-tools'
-import { executionStatus } from '@pi-im-bot/execution/config'
-import { oneBotAllowed } from '@pi-im-bot/channels/onebot/config'
-import { isBuiltinCommand, isControlCommand, extractPrompt } from './trigger'
-import { executeJobCommand, isJobCommand, jobCommandHelp } from '@pi-im-bot/jobs/commands'
-import { ConversationService } from '@pi-im-bot/conversations/service'
-import { resolveSettings } from '@pi-im-bot/settings/resolve'
-import { captureAuthority, assertCapability } from '@pi-im-bot/permissions/authorize'
-import { localIdentity, type TriggerIdentity, type Authority } from '@pi-im-bot/permissions/identity'
-import { projectHistory, projectOutput } from '@pi-im-bot/messages/projection'
-import { freezeSnapshot } from './snapshot'
-import { requestedSkill } from '@pi-im-bot/resources/skills/invocation'
-import { skillCapabilityId } from '@pi-im-bot/resources/skills/package'
-import type { DurableAgentRuntime } from '@pi-im-bot/agent/durable/runtime'
-import { ConfigurationSnapshots } from '@pi-im-bot/config/snapshots'
-import { runObserver } from './run-observer'
-import { ConversationInbox } from './inbox'
-import type { QueuedExecution } from './execution-request'
-import type { JobService } from '@pi-im-bot/jobs/service'
-import type { JobInvocation } from '@pi-im-bot/jobs/service'
-import type { MediaService } from '@pi-im-bot/media/service'
-import type { ReplyReference } from '@pi-im-bot/media/schema'
-import {
-  attachmentReferences,
-  quoteContext,
-  type QuoteContext,
-  type ImageReference
-} from '@pi-im-bot/media/provenance'
-import { createMediaProjection } from '@pi-im-bot/media/projection'
-import type { Schedule } from '@pi-im-bot/scheduler/definition'
-import { ScheduleOverlap } from '@pi-im-bot/scheduler/occurrences'
-import type { PluginService } from '@pi-im-bot/plugins/service'
-import { findPluginCommand, executePluginCommand, pluginCommandHelp } from '@pi-im-bot/plugins/commands'
-import { pluginOperationId } from '@pi-im-bot/plugins/identity'
-import { pluginPresentation } from '@pi-im-bot/plugins/hooks/presentation'
-import type { DeliveryPhase } from '@pi-im-bot/plugins/hooks/points'
-import type { PluginInvocation } from '@pi-im-bot/plugins/invocation'
-import { PluginObservations } from '@pi-im-bot/plugins/observations/service'
-import type { ChatMessage as ObservedMessage } from '@pi-im-bot/contracts/message'
-import { receiptNode, recordedNode } from '@pi-im-bot/plugins/hooks/points'
-import { DeliveryDeferred } from '@pi-im-bot/contracts/rendering'
-import type { DeliveryView } from '@pi-im-bot/plugins/hooks/points'
-import type { Outbound } from '@pi-im-bot/contracts/delivery'
+} from "@pi-im-bot/contracts/message"
+import type { Run, RunInput, PreparedRunInput, Trace, ExecutionContext } from "@pi-im-bot/contracts/run"
+import { BACKGROUND_CONTEXT, withAbortSignal, awaitWithContext } from "@earendil-works/chord/context"
+import { executeRun } from "./execute-run"
+import type { HostToolServices } from "@pi-im-bot/agent/host-tools"
+import type { StateStore } from "@pi-im-bot/storage/state"
+import { DeliverySuppressed, DeliveryAdmissionUnknown, type DeliveryService } from "./delivery"
+import type { EventHub } from "@pi-im-bot/contracts/events"
+import type { Scheduler } from "@pi-im-bot/scheduler/service"
+import type { ScheduleToolServices } from "@pi-im-bot/agent/schedule-tools"
+import { executionStatus } from "@pi-im-bot/execution/config"
+import { oneBotAllowed } from "@pi-im-bot/channels/onebot/config"
+import { isBuiltinCommand, isControlCommand, extractPrompt } from "./trigger"
+import { executeJobCommand, isJobCommand, jobCommandHelp } from "@pi-im-bot/jobs/commands"
+import { ConversationService } from "@pi-im-bot/conversations/service"
+import { resolveSettings } from "@pi-im-bot/settings/resolve"
+import { captureAuthority, assertCapability } from "@pi-im-bot/permissions/authorize"
+import { localIdentity, type TriggerIdentity, type Authority } from "@pi-im-bot/permissions/identity"
+import { projectHistory, projectOutput } from "@pi-im-bot/messages/projection"
+import { freezeSnapshot } from "./snapshot"
+import { requestedSkill } from "@pi-im-bot/resources/skills/invocation"
+import { skillCapabilityId } from "@pi-im-bot/resources/skills/package"
+import type { DurableAgentRuntime } from "@pi-im-bot/agent/durable/runtime"
+import { ConfigurationSnapshots } from "@pi-im-bot/config/snapshots"
+import { runObserver } from "./run-observer"
+import { ConversationInbox } from "./inbox"
+import type { QueuedExecution } from "./execution-request"
+import type { JobService } from "@pi-im-bot/jobs/service"
+import type { JobInvocation } from "@pi-im-bot/jobs/service"
+import type { MediaService } from "@pi-im-bot/media/service"
+import type { ReplyReference } from "@pi-im-bot/media/schema"
+import { attachmentReferences, quoteContext, type QuoteContext, type ImageReference } from "@pi-im-bot/media/provenance"
+import { createMediaProjection } from "@pi-im-bot/media/projection"
+import type { Schedule } from "@pi-im-bot/scheduler/definition"
+import { ScheduleOverlap } from "@pi-im-bot/scheduler/occurrences"
+import type { PluginService } from "@pi-im-bot/plugins/service"
+import { findPluginCommand, executePluginCommand, pluginCommandHelp } from "@pi-im-bot/plugins/commands"
+import { pluginOperationId } from "@pi-im-bot/plugins/identity"
+import { pluginPresentation } from "@pi-im-bot/plugins/hooks/presentation"
+import type { DeliveryPhase } from "@pi-im-bot/plugins/hooks/points"
+import type { PluginInvocation } from "@pi-im-bot/plugins/invocation"
+import { PluginObservations } from "@pi-im-bot/plugins/observations/service"
+import type { ChatMessage as ObservedMessage } from "@pi-im-bot/contracts/message"
+import { receiptNode, recordedNode } from "@pi-im-bot/plugins/hooks/points"
+import { DeliveryDeferred } from "@pi-im-bot/contracts/rendering"
+import type { DeliveryView } from "@pi-im-bot/plugins/hooks/points"
+import type { Outbound } from "@pi-im-bot/contracts/delivery"
 
 interface ActiveRun {
   roomId: string
@@ -99,7 +94,7 @@ export class Coordinator {
       create: (input) => {
         const messageId = input.identities[0]?.messageIds[0]
         if (!messageId) {
-          throw new Error('合批输入缺少来源消息')
+          throw new Error("合批输入缺少来源消息")
         }
         const part = {
           messageId,
@@ -110,13 +105,13 @@ export class Coordinator {
           attachments: input.attachments ?? [],
           quote: input.quote
         }
-        return this.prepareExecution({ ...input, parts: [part] }, 'batching')
+        return this.prepareExecution({ ...input, parts: [part] }, "batching")
       },
       append: (execution, input) => {
         this.appendBatch(execution, input)
       },
       dispatch: (execution) => {
-        execution.run.status = 'queued'
+        execution.run.status = "queued"
         this.update(execution.run)
         this.queueExecution(execution)
       }
@@ -127,7 +122,7 @@ export class Coordinator {
     if (this.store.listRooms().length > 0) {
       return
     }
-    this.createMockRoom('开发测试群', 'group')
+    this.createMockRoom("开发测试群", "group")
   }
 
   attachScheduler(scheduler: Scheduler) {
@@ -153,7 +148,7 @@ export class Coordinator {
       return undefined
     }
     return {
-      content(reference: Pick<ImageReference, 'source' | 'id'>, signal: AbortSignal) {
+      content(reference: Pick<ImageReference, "source" | "id">, signal: AbortSignal) {
         return media.content(room, reference, signal)
       },
       require(id: string) {
@@ -193,19 +188,15 @@ export class Coordinator {
     const admission = outbound.renderAdmission
     const render = outbound.render
     if (!admission || !render || outbound.cancelRequested) {
-      throw new Error('呈现已停止或缺少快照')
+      throw new Error("呈现已停止或缺少快照")
     }
     assertArtifactDeliveryAccess(this.configuration(), render.access, (id) => {
       if (!this.media) {
-        throw new Error('媒体服务不可用')
+        throw new Error("媒体服务不可用")
       }
       return this.media.require(outbound.roomId, id)
     })
-    for (const capability of [
-      render.capability,
-      ...render.access.capabilities,
-      ...outbound.presentationHandlers
-    ]) {
+    for (const capability of [render.capability, ...render.access.capabilities, ...outbound.presentationHandlers]) {
       this.authorizeRetainedContext(outbound.roomId, admission.mode, admission.input.context, capability)
     }
   }
@@ -214,17 +205,14 @@ export class Coordinator {
     for (const run of this.store.recoverableRuns()) {
       try {
         if (!run.input || !run.context || !run.configSnapshot) {
-          throw new Error('任务缺少恢复快照')
+          throw new Error("任务缺少恢复快照")
         }
         const room = { ...this.requireRoom(run.roomId), mode: run.mode }
         this.assertRoomEnabled(room)
         const config = await this.snapshots.load(run.configSnapshot)
         const input = freezeSnapshot({ ...run.input, context: run.context })
-        if (
-          !run.startedAt &&
-          Date.now() - run.createdAt > input.context.effective.settings.behavior.queueMaxAgeMs
-        ) {
-          throw new Error('排队请求已过期，未自动补发旧回答')
+        if (!run.startedAt && Date.now() - run.createdAt > input.context.effective.settings.behavior.queueMaxAgeMs) {
+          throw new Error("排队请求已过期，未自动补发旧回答")
         }
         const controller = new AbortController()
         const host = this.executionHost(config, room, input, run, controller)
@@ -239,16 +227,7 @@ export class Coordinator {
             this.trace(run, event)
           }
         )
-        this.durable.prepare(
-          run.id,
-          config,
-          room,
-          input,
-          controller.signal,
-          host.tools,
-          callbacks,
-          run.modelCalls
-        )
+        this.durable.prepare(run.id, config, room, input, controller.signal, host.tools, callbacks, run.modelCalls)
         this.active.set(run.id, {
           roomId: room.id,
           run,
@@ -257,7 +236,7 @@ export class Coordinator {
         })
         this.recovery.push({ config, room, input, run, controller })
       } catch (error) {
-        run.status = 'failed'
+        run.status = "failed"
         run.error = this.configuration().catalog.redact(String(error))
         run.finishedAt = Date.now()
         this.update(run)
@@ -278,24 +257,24 @@ export class Coordinator {
     for (const room of this.store.listRooms()) {
       for (const outbound of this.store.pendingPresentations(room.id)) {
         if (outbound.inlineRender) {
-          let stage: 'presentation' | 'transport' = 'presentation'
+          let stage: "presentation" | "transport" = "presentation"
           let inline = outbound.inlineRender
-          if (outbound.state === 'sending') {
-            stage = 'transport'
+          if (outbound.state === "sending") {
+            stage = "transport"
           }
-          if (inline === 'started' || inline === 'planned') {
-            inline = 'unknown'
+          if (inline === "started" || inline === "planned") {
+            inline = "unknown"
           }
           this.store.saveOutbound({
             ...outbound,
             inlineRender: inline,
-            state: 'unknown',
+            state: "unknown",
             uncertaintyStage: stage,
-            error: '短时工具呈现或发送被进程中断，未自动重新合成或发送'
+            error: "短时工具呈现或发送被进程中断，未自动重新合成或发送"
           })
           continue
         }
-        if (outbound.state !== 'rendering' && !(outbound.state === 'prepared' && outbound.renderFallback)) {
+        if (outbound.state !== "rendering" && !(outbound.state === "prepared" && outbound.renderFallback)) {
           continue
         }
         try {
@@ -312,7 +291,7 @@ export class Coordinator {
               this.validateRender(this.store.getOutbound(outbound.id)!)
             },
             presentation: {
-              key: outbound.presentationKey ?? '',
+              key: outbound.presentationKey ?? "",
               enqueue: (outbound) => {
                 return this.jobs!.present(outbound)
               },
@@ -323,18 +302,18 @@ export class Coordinator {
                 this.validateRender(this.store.getOutbound(outbound.id)!)
               },
               async prepare() {
-                throw new Error('恢复仅复用原呈现决定')
+                throw new Error("恢复仅复用原呈现决定")
               }
             }
           })
           const run = outbound.runId && this.store.getRun(outbound.runId)
           if (run) {
-            run.presentation = { state: 'sent' }
+            run.presentation = { state: "sent" }
             this.update(run)
           }
         } catch {
           const latest = this.store.getOutbound(outbound.id)
-          if (latest?.state === 'rendering') {
+          if (latest?.state === "rendering") {
             try {
               this.validateRender(latest)
               continue
@@ -343,8 +322,8 @@ export class Coordinator {
             }
             this.store.saveOutbound({
               ...latest,
-              state: 'suppressed',
-              error: '呈现接纳恢复未获授权，未重选或发送'
+              state: "suppressed",
+              error: "呈现接纳恢复未获授权，未重选或发送"
             })
           }
         }
@@ -352,37 +331,37 @@ export class Coordinator {
     }
   }
 
-  createMockRoom(name: string, kind: 'group' | 'direct') {
+  createMockRoom(name: string, kind: "group" | "direct") {
     const id = crypto.randomUUID()
     const room = RoomSchema.parse({
       id,
       name,
-      address: { channel: 'mock', accountId: 'mock-bot', kind, chatId: id },
-      mode: 'demo',
+      address: { channel: "mock", accountId: "mock-bot", kind, chatId: id },
+      mode: "demo",
       createdAt: Date.now(),
       updatedAt: Date.now()
     })
-    this.conversations.create(room, '初始对话')
+    this.conversations.create(room, "初始对话")
     return this.requireRoom(room.id)
   }
 
   async receive(
     roomId: string,
     text: string,
-    actorId = 'developer',
-    actorName = '开发者',
+    actorId = "developer",
+    actorName = "开发者",
     mediaIds: readonly string[] = [],
     replyTo?: ReplyReference
   ) {
     if (this.closing) {
-      throw new Error('服务正在关闭，请稍后重试')
+      throw new Error("服务正在关闭，请稍后重试")
     }
     const room = this.requireRoom(roomId)
     this.assertRoomEnabled(room)
     const id = crypto.randomUUID()
     const attachments = mediaIds.map((mediaId) => {
       if (!this.media) {
-        throw new Error('媒体服务未配置')
+        throw new Error("媒体服务未配置")
       }
       const record = this.media.require(room.id, mediaId)
       if (!record.messageId) {
@@ -391,12 +370,12 @@ export class Coordinator {
       return this.media.attachment(record)
     })
     if (replyTo?.messageId && this.store.getMessage(replyTo.messageId)?.roomId !== roomId) {
-      throw new Error('引用不属于当前会话')
+      throw new Error("引用不属于当前会话")
     }
     const message: ChatMessage = {
       id,
       roomId,
-      role: 'user',
+      role: "user",
       actorId,
       actorName,
       text,
@@ -414,36 +393,32 @@ export class Coordinator {
     const control = this.prepareInbound(room, message, text, identity)
     this.store.saveMessage(message, this.messageObservation(message, identity))
     this.observations?.wake()
-    this.events.emit({ type: 'message', message })
+    this.events.emit({ type: "message", message })
     return this.dispatchInbound(room, message, control)
   }
 
-  async receiveIncoming(
-    roomId: string,
-    incoming: IncomingMessage,
-    prompt: string | null
-  ): Promise<InboundOutcome> {
+  async receiveIncoming(roomId: string, incoming: IncomingMessage, prompt: string | null): Promise<InboundOutcome> {
     if (this.closing) {
-      throw new Error('服务正在关闭')
+      throw new Error("服务正在关闭")
     }
     const room = this.requireRoom(roomId)
     this.assertRoomEnabled(room)
     if (addressKey(room.address) !== addressKey(incoming.address)) {
-      throw new Error('消息来源与聊天范围不匹配')
+      throw new Error("消息来源与聊天范围不匹配")
     }
     const existing = this.store.findPlatformMessage(room.id, incoming.externalId)
     if (existing) {
-      if (existing.inbound?.state === 'unknown') {
-        return 'uncertain'
+      if (existing.inbound?.state === "unknown") {
+        return "uncertain"
       }
-      if (existing.inbound?.state === 'pending') {
+      if (existing.inbound?.state === "pending") {
         return this.acceptInbound(room, existing)
       }
-      return 'duplicate'
+      return "duplicate"
     }
-    let role: ChatMessage['role'] = 'user'
+    let role: ChatMessage["role"] = "user"
     if (incoming.isSelf) {
-      role = 'assistant'
+      role = "assistant"
     }
     const id = crypto.randomUUID()
     const message: ChatMessage = {
@@ -466,7 +441,7 @@ export class Coordinator {
       recalled: this.store.wasRecalled(room.id, incoming.externalId)
     }
     const identity: TriggerIdentity = Object.freeze({
-      origin: 'platform',
+      origin: "platform",
       actorId: incoming.actorId,
       actorName: incoming.actorName,
       channel: incoming.address.channel,
@@ -491,21 +466,21 @@ export class Coordinator {
     if (!incoming.isSelf && !message.recalled && prompt !== null) {
       control = this.prepareInbound(room, message, prompt, identity)
     }
-    let observation: ReturnType<PluginObservations['create']>
+    let observation: ReturnType<PluginObservations["create"]>
     if (!incoming.isSelf) {
       observation = this.messageObservation(message, identity)
     }
     this.store.saveMessage(message, observation)
     this.observations?.wake()
-    this.events.emit({ type: 'message', message })
+    this.events.emit({ type: "message", message })
     if (incoming.isSelf) {
-      return 'self'
+      return "self"
     }
     if (message.recalled) {
-      return 'recorded'
+      return "recorded"
     }
     if (!message.inbound) {
-      return 'recorded'
+      return "recorded"
     }
     return this.acceptInbound(room, message, control)
   }
@@ -513,10 +488,10 @@ export class Coordinator {
   private prepareInbound(room: Room, message: ChatMessage, prompt: string, identity: TriggerIdentity) {
     if (isControlCommand(prompt)) {
       if (this.controlDispatches >= 16) {
-        throw new Error('控制指令正忙，请稍后重试')
+        throw new Error("控制指令正忙，请稍后重试")
       }
       message.inbound = {
-        state: 'dispatching',
+        state: "dispatching",
         control: true,
         prompt,
         identity,
@@ -528,15 +503,15 @@ export class Coordinator {
     const limit = this.configuration().bot.agent.maxQueuedRuns
     const pending = this.store.pendingInbound(limit + 1, true)
     for (const item of pending) {
-      if (item.inbound?.state === 'pending' && item.inbound.expiresAt <= Date.now()) {
-        this.finishInbound(item, { state: 'expired', error: '受理等待已过期，未自动执行旧输入' })
+      if (item.inbound?.state === "pending" && item.inbound.expiresAt <= Date.now()) {
+        this.finishInbound(item, { state: "expired", error: "受理等待已过期，未自动执行旧输入" })
       }
     }
     if (this.store.pendingInbound(limit, true).length >= limit) {
-      throw new Error('入站受理队列已满，请稍后重试')
+      throw new Error("入站受理队列已满，请稍后重试")
     }
     message.inbound = {
-      state: 'pending',
+      state: "pending",
       control: false,
       prompt,
       identity,
@@ -546,36 +521,36 @@ export class Coordinator {
     return false
   }
 
-  private finishInbound(message: ChatMessage, inbound: NonNullable<ChatMessage['inbound']>) {
+  private finishInbound(message: ChatMessage, inbound: NonNullable<ChatMessage["inbound"]>) {
     const updated = { ...(this.store.getMessage(message.id) ?? message), inbound }
     this.store.saveMessage(updated)
-    this.events.emit({ type: 'message', message: updated })
+    this.events.emit({ type: "message", message: updated })
   }
 
   private async acceptInbound(room: Room, message: ChatMessage, control = false): Promise<InboundOutcome> {
     await this.dispatchInbound(room, message, control)
     const state = this.store.getMessage(message.id)?.inbound
-    if (state?.state === 'unknown') {
-      return 'uncertain'
+    if (state?.state === "unknown") {
+      return "uncertain"
     }
-    if (state?.state === 'accepted') {
+    if (state?.state === "accepted") {
       return state.outcome
     }
-    return 'recorded'
+    return "recorded"
   }
 
   private async dispatchInbound(room: Room, message: ChatMessage, control = false) {
     if (this.closing) {
-      throw new Error('服务正在关闭')
+      throw new Error("服务正在关闭")
     }
     this.assertRoomEnabled(room)
     message = this.store.getMessage(message.id) ?? message
     const admission = message.inbound
-    const claimedControl = control && admission?.state === 'dispatching' && admission.control
-    if (admission?.state !== 'pending' && !claimedControl) {
+    const claimedControl = control && admission?.state === "dispatching" && admission.control
+    if (admission?.state !== "pending" && !claimedControl) {
       return null
     }
-    if (admission.state !== 'pending' && admission.state !== 'dispatching') {
+    if (admission.state !== "pending" && admission.state !== "dispatching") {
       return null
     }
     if (
@@ -584,29 +559,23 @@ export class Coordinator {
       message.conversationId !== room.currentConversationId ||
       message.recalled
     ) {
-      this.finishInbound(message, { state: 'expired', error: '输入已过期、撤回或所属对话已变化，未自动执行' })
+      this.finishInbound(message, { state: "expired", error: "输入已过期、撤回或所属对话已变化，未自动执行" })
       return null
     }
     if (claimedControl) {
       this.controlDispatches += 1
     }
     try {
-      const run = await this.processInput(
-        room,
-        admission.prompt,
-        admission.identity,
-        message.createdAt,
-        message
-      )
+      const run = await this.processInput(room, admission.prompt, admission.identity, message.createdAt, message)
       if (!run) {
-        this.finishInbound(message, { state: 'accepted', outcome: 'command' })
+        this.finishInbound(message, { state: "accepted", outcome: "command" })
       }
       return run
     } catch (error) {
-      if (this.store.getMessage(message.id)?.inbound?.state === 'dispatching') {
+      if (this.store.getMessage(message.id)?.inbound?.state === "dispatching") {
         this.finishInbound(message, {
-          state: 'unknown',
-          error: '直接指令执行或交付未完成，未自动重做；请核对实际结果'
+          state: "unknown",
+          error: "直接指令执行或交付未完成，未自动重做；请核对实际结果"
         })
       }
       throw error
@@ -628,11 +597,11 @@ export class Coordinator {
         limit += 16
       }
       for (const message of this.store.pendingInbound(limit, !startup)) {
-        if (message.inbound?.state === 'dispatching') {
+        if (message.inbound?.state === "dispatching") {
           if (startup) {
             this.finishInbound(message, {
-              state: 'unknown',
-              error: '服务在直接指令期间中断，未自动重做；请核对实际结果'
+              state: "unknown",
+              error: "服务在直接指令期间中断，未自动重做；请核对实际结果"
             })
           }
           continue
@@ -655,9 +624,9 @@ export class Coordinator {
         continue
       }
       const address = {
-        channel: 'onebot-v11',
+        channel: "onebot-v11",
         accountId: target.selfId,
-        kind: 'group' as const,
+        kind: "group" as const,
         chatId: target.chatId
       }
       if (
@@ -671,19 +640,19 @@ export class Coordinator {
         id: crypto.randomUUID(),
         name: target.name,
         address,
-        mode: 'live',
+        mode: "live",
         createdAt: Date.now(),
         updatedAt: Date.now()
       })
-      this.conversations.create(room, '初始对话')
+      this.conversations.create(room, "初始对话")
     }
     for (const room of this.store.listRooms()) {
-      if (room.address.channel === 'onebot-v11' && !oneBotAllowed(config.bot.onebot, room.address)) {
+      if (room.address.channel === "onebot-v11" && !oneBotAllowed(config.bot.onebot, room.address)) {
         this.stop(room.id)
       }
     }
   }
-  receiveRecall(address: Room['address'], platformId: string) {
+  receiveRecall(address: Room["address"], platformId: string) {
     const room = this.store.listRooms().find((room) => {
       return addressKey(room.address) === addressKey(address)
     })
@@ -692,16 +661,13 @@ export class Coordinator {
     }
     const message = this.store.recordRecall(room.id, platformId)
     if (message) {
-      this.events.emit({ type: 'message', message })
+      this.events.emit({ type: "message", message })
     }
   }
 
   private assertRoomEnabled(room: Room) {
-    if (
-      room.address.channel === 'onebot-v11' &&
-      !oneBotAllowed(this.configuration().bot.onebot, room.address)
-    ) {
-      throw new Error('该 QQ 会话已停用，请在 QQ 接入中启用对应测试群')
+    if (room.address.channel === "onebot-v11" && !oneBotAllowed(this.configuration().bot.onebot, room.address)) {
+      throw new Error("该 QQ 会话已停用，请在 QQ 接入中启用对应测试群")
     }
   }
 
@@ -713,14 +679,14 @@ export class Coordinator {
     message?: ChatMessage
   ) {
     const beginDispatch = () => {
-      if (message?.inbound?.state === 'pending') {
-        this.finishInbound(message, { ...message.inbound, state: 'dispatching' })
+      if (message?.inbound?.state === "pending") {
+        this.finishInbound(message, { ...message.inbound, state: "dispatching" })
       }
     }
     const roomId = room.id
     if (isJobCommand(text)) {
       beginDispatch()
-      let response = '后台任务运行时尚未启用。'
+      let response = "后台任务运行时尚未启用。"
       if (this.jobs) {
         try {
           response = await executeJobCommand(this.jobs, this.jobInvocation(roomId, identity, text), text)
@@ -728,7 +694,7 @@ export class Coordinator {
           response = this.configuration().catalog.redact(String(error))
         }
       }
-      await this.delivery.send(room, response, undefined, 'system')
+      await this.delivery.send(room, response, undefined, "system")
       return null
     }
     const effective = this.effective(room.id)
@@ -739,7 +705,7 @@ export class Coordinator {
       this.configuration().resources.capabilityIds(effective.settings)
     )
     const skill = requestedSkill(text)
-    if (text.trim() === '/skills') {
+    if (text.trim() === "/skills") {
       beginDispatch()
       const available = this.configuration()
         .resources.skills(effective.settings)
@@ -749,47 +715,47 @@ export class Coordinator {
       const lines = available.map((manifest) => {
         return `${manifest.id} · ${manifest.name}`
       })
-      lines.push('用法：/skill ID 任务内容')
-      await this.delivery.send(room, lines.join('\n'), undefined, 'system')
+      lines.push("用法：/skill ID 任务内容")
+      await this.delivery.send(room, lines.join("\n"), undefined, "system")
       return null
     }
     if (skill && !authority.capabilities.includes(skillCapabilityId(skill))) {
       beginDispatch()
       await this.delivery.send(
         room,
-        '此 Skill 未启用、尚未导入或当前触发来源无权使用。可用 /skills 查看。',
+        "此 Skill 未启用、尚未导入或当前触发来源无权使用。可用 /skills 查看。",
         undefined,
-        'system'
+        "system"
       )
       return null
     }
-    if (text.trim() === '/stop') {
+    if (text.trim() === "/stop") {
       beginDispatch()
-      assertCapability(authority, effective.settings, 'command:stop')
+      assertCapability(authority, effective.settings, "command:stop")
       const count = this.stop(roomId)
       await this.delivery.send(
         room,
         `已请求停止当前会话的前后台工作（当前 ${count} 个 Agent 执行）。`,
         undefined,
-        'system'
+        "system"
       )
       return null
     }
-    if (text.trim() === '/new') {
+    if (text.trim() === "/new") {
       beginDispatch()
-      assertCapability(authority, effective.settings, 'command:new')
+      assertCapability(authority, effective.settings, "command:new")
       this.newConversation(roomId)
       await this.delivery.send(
         this.requireRoom(roomId),
-        '已开启新的共享对话，聊天记录与工作区文件仍保留。',
+        "已开启新的共享对话，聊天记录与工作区文件仍保留。",
         undefined,
-        'system'
+        "system"
       )
       return null
     }
-    if (text.trim() === '/status' || text.trim() === '/help') {
+    if (text.trim() === "/status" || text.trim() === "/help") {
       beginDispatch()
-      let pluginHelp = ''
+      let pluginHelp = ""
       if (this.plugins?.available()) {
         pluginHelp = pluginCommandHelp(this.configuration(), effective.settings, authority.capabilities)
       }
@@ -797,9 +763,9 @@ export class Coordinator {
       const status = `会话：${room.name}\n当前对话：${room.currentConversationId}\n人格：${effective.persona.name}\n模式：${room.mode}\n模型组：${effective.settings.preferences.providerGroup}\n执行环境：${execution.message}\n\n/help 查看帮助\n/stop 停止任务\n/new 新建共享对话\n/status 查看状态\n${this.configuration().bot.onebot.commandPrefix} 内容：触发 Agent。普通 QQ 消息只同步到会话。`
       await this.delivery.send(
         room,
-        status + '\n/skills 查看可用技能\n/skill ID 内容：显式使用技能\n' + jobCommandHelp + pluginHelp,
+        status + "\n/skills 查看可用技能\n/skill ID 内容：显式使用技能\n" + jobCommandHelp + pluginHelp,
         undefined,
-        'system'
+        "system"
       )
       return null
     }
@@ -812,7 +778,7 @@ export class Coordinator {
         media: this.pluginMedia(room) && {
           ...this.pluginMedia(room)!,
           preview: async () => {
-            throw new Error('指令不提供图片预览')
+            throw new Error("指令不提供图片预览")
           },
           visionEnabled: false
         },
@@ -825,13 +791,13 @@ export class Coordinator {
         },
         send: (value, callId, artifactIds, beforePart) => {
           commandSignal.throwIfAborted()
-          invocation.authorize('chat_send')
+          invocation.authorize("chat_send")
           return this.delivery.send(
             room,
             value,
             undefined,
-            'assistant',
-            'plugin-command:' + invocation.runId + ':' + callId,
+            "assistant",
+            "plugin-command:" + invocation.runId + ":" + callId,
             {
               artifactIds,
               authorize: services.authorize,
@@ -839,14 +805,14 @@ export class Coordinator {
                 invocation.config,
                 room,
                 invocation.input,
-                'plugin-command:' + invocation.runId + ':' + callId,
-                'tool-direct',
+                "plugin-command:" + invocation.runId + ":" + callId,
+                "tool-direct",
                 commandSignal
               ),
               beforePart: () => {
                 commandSignal.throwIfAborted()
                 beforePart?.()
-                invocation.authorize('chat_send')
+                invocation.authorize("chat_send")
               }
             }
           )
@@ -854,7 +820,7 @@ export class Coordinator {
       }
       try {
         if (!this.plugins) {
-          throw new Error('插件执行后端未启用')
+          throw new Error("插件执行后端未启用")
         }
         const plugins = this.plugins
         await plugins.scoped(
@@ -876,8 +842,8 @@ export class Coordinator {
               room,
               result.summary,
               undefined,
-              'assistant',
-              'plugin-command:' + invocation.runId + ':result',
+              "assistant",
+              "plugin-command:" + invocation.runId + ":result",
               {
                 artifactIds: result.artifactIds.slice(0, 8),
                 authorize: services.authorize,
@@ -885,8 +851,8 @@ export class Coordinator {
                   invocation.config,
                   room,
                   invocation.input,
-                  'plugin-command:' + invocation.runId + ':result',
-                  'final',
+                  "plugin-command:" + invocation.runId + ":result",
+                  "final",
                   signal
                 ),
                 beforePart: () => {
@@ -904,29 +870,22 @@ export class Coordinator {
           return null
         }
         await this.delivery
-          .send(
-            room,
-            this.publicError(error),
-            undefined,
-            'system',
-            'plugin-command:' + invocation.runId + ':error',
-            {
-              beforePart: () => {
-                this.checkContext(room.id, room.mode, invocation.input.context)
-              }
+          .send(room, this.publicError(error), undefined, "system", "plugin-command:" + invocation.runId + ":error", {
+            beforePart: () => {
+              this.checkContext(room.id, room.mode, invocation.input.context)
             }
-          )
+          })
           .catch(() => {})
       }
       return null
     }
-    let source: Run['source'] = 'im'
-    if (text.startsWith('/')) {
-      source = 'command'
+    let source: Run["source"] = "im"
+    if (text.startsWith("/")) {
+      source = "command"
     }
     if (!effective.settings.behavior.agentEnabled) {
       beginDispatch()
-      await this.delivery.send(room, '此聊天范围已关闭 Agent，仍可使用指令和查看历史。', undefined, 'system')
+      await this.delivery.send(room, "此聊天范围已关闭 Agent，仍可使用指令和查看历史。", undefined, "system")
       return null
     }
     const input: RunInput = {
@@ -939,54 +898,51 @@ export class Coordinator {
       identities: [identity],
       ...this.messageContext(room.id, identity.messageIds[0])
     }
-    if (source === 'im' && effective.settings.behavior.batchQuietMs > 0) {
+    if (source === "im" && effective.settings.behavior.batchQuietMs > 0) {
       return this.inbox.accept(input, effective.settings.behavior)
     }
     return this.enqueue(input)
   }
   private messageContext(roomId: string, messageId?: string) {
-    const message = this.store.getMessage(messageId ?? '')
+    const message = this.store.getMessage(messageId ?? "")
     if (!message || message.roomId !== roomId) {
       return {}
     }
     let quote: QuoteContext | undefined
     if (message.replyTo) {
-      let reference = this.store.getMessage(message.replyTo.messageId ?? '')
+      let reference = this.store.getMessage(message.replyTo.messageId ?? "")
       if (!reference && message.replyTo.platformMessageId) {
         reference = this.store.findPlatformMessage(roomId, message.replyTo.platformMessageId)
       }
       if (reference?.roomId === roomId) {
         quote = quoteContext(reference)
       } else {
-        quote = { state: 'not_observed', ...message.replyTo, attachments: [] }
+        quote = { state: "not_observed", ...message.replyTo, attachments: [] }
       }
     }
     return { attachments: attachmentReferences(roomId, message.attachments), quote }
   }
 
   enqueue(input: RunInput) {
-    const execution = this.prepareExecution(input, 'queued')
+    const execution = this.prepareExecution(input, "queued")
     this.queueExecution(execution)
     return execution.run
   }
 
-  private prepareExecution(input: RunInput, status: 'queued' | 'batching'): QueuedExecution {
+  private prepareExecution(input: RunInput, status: "queued" | "batching"): QueuedExecution {
     if (this.closing) {
-      throw new Error('服务正在关闭，请稍后重试')
+      throw new Error("服务正在关闭，请稍后重试")
     }
     const config = this.configuration()
     if (this.active.size >= config.bot.agent.maxQueuedRuns) {
-      throw new Error('任务队列已满，请稍后重试。')
+      throw new Error("任务队列已满，请稍后重试。")
     }
     const room = structuredClone(this.requireRoom(input.roomId))
     this.assertRoomEnabled(room)
-    const conversation = this.conversations.require(
-      input.conversationId ?? room.currentConversationId,
-      room.id
-    )
+    const conversation = this.conversations.require(input.conversationId ?? room.currentConversationId, room.id)
     const effective = this.effective(room.id, conversation.id)
     if (!effective.settings.behavior.agentEnabled) {
-      throw new Error('当前聊天范围已关闭 Agent')
+      throw new Error("当前聊天范围已关闭 Agent")
     }
     const authority = captureAuthority(
       effective,
@@ -995,8 +951,8 @@ export class Coordinator {
       config.resources.capabilityIds(effective.settings)
     )
     let workspaceScope = room.id
-    if (conversation.kind !== 'root') {
-      workspaceScope = room.id + ':conversation:' + conversation.id
+    if (conversation.kind !== "root") {
+      workspaceScope = room.id + ":conversation:" + conversation.id
     }
     if (input.workspaceScope) {
       workspaceScope = input.workspaceScope
@@ -1034,8 +990,8 @@ export class Coordinator {
     const controller = new AbortController()
     this.linkMessages(run)
     this.active.set(run.id, { roomId: room.id, controller, run, completion: Promise.withResolvers<Run>() })
-    this.events.emit({ type: 'run', run })
-    this.trace(run, { kind: 'queued', title: '任务已排队', detail: input.source })
+    this.events.emit({ type: "run", run })
+    this.trace(run, { kind: "queued", title: "任务已排队", detail: input.source })
     return { config, room, input: prepared, run, controller }
   }
 
@@ -1051,13 +1007,13 @@ export class Coordinator {
       room.mode,
       effective.revision,
       configuration
-    ].join(':')
+    ].join(":")
   }
 
   private appendBatch(execution: QueuedExecution, incoming: RunInput) {
     const messageId = incoming.identities[0]?.messageIds[0]
     if (!messageId) {
-      throw new Error('合批输入缺少来源消息')
+      throw new Error("合批输入缺少来源消息")
     }
     const { context, ...previous } = execution.input
     const parts = [
@@ -1081,9 +1037,9 @@ export class Coordinator {
         .map((part) => {
           return part.text
         })
-        .join('\n\n'),
-      actorId: 'shared-scope',
-      actorName: '群内合批'
+        .join("\n\n"),
+      actorId: "shared-scope",
+      actorName: "群内合批"
     })
     const authority = captureAuthority(
       context.effective,
@@ -1095,7 +1051,7 @@ export class Coordinator {
     execution.run.input = input
     execution.run.context = execution.input.context
     this.linkMessages(execution.run)
-    this.events.emit({ type: 'run', run: execution.run })
+    this.events.emit({ type: "run", run: execution.run })
   }
 
   private linkMessages(run: Run) {
@@ -1103,10 +1059,10 @@ export class Coordinator {
     for (const identity of run.input?.identities ?? []) {
       for (const id of identity.messageIds) {
         const message = this.store.getMessage(id)
-        if (message?.roomId === run.roomId && message.role === 'user' && message.runId !== run.id) {
+        if (message?.roomId === run.roomId && message.role === "user" && message.runId !== run.id) {
           const linked: ChatMessage = { ...message, runId: run.id }
-          if (message.inbound?.state === 'pending') {
-            linked.inbound = { state: 'accepted', outcome: 'agent' }
+          if (message.inbound?.state === "pending") {
+            linked.inbound = { state: "accepted", outcome: "agent" }
           }
           messages.push(linked)
         }
@@ -1114,14 +1070,14 @@ export class Coordinator {
     }
     this.store.saveRunAdmission(run, messages)
     for (const message of messages) {
-      this.events.emit({ type: 'message', message })
+      this.events.emit({ type: "message", message })
     }
   }
 
   private queueExecution({ config, room, input, run, controller }: QueuedExecution) {
     let key = room.id
     if (input.context.conversationId !== input.context.rootConversationId) {
-      key = room.id + ':background:' + input.context.conversationId
+      key = room.id + ":background:" + input.context.conversationId
     }
     const previous = this.queues.get(key) ?? Promise.resolve()
     const task = previous
@@ -1130,12 +1086,9 @@ export class Coordinator {
         if (controller.signal.aborted) {
           return
         }
-        if (
-          !run.startedAt &&
-          Date.now() - run.createdAt > input.context.effective.settings.behavior.queueMaxAgeMs
-        ) {
-          run.status = 'failed'
-          run.error = '排队请求已过期，未自动补发旧回答'
+        if (!run.startedAt && Date.now() - run.createdAt > input.context.effective.settings.behavior.queueMaxAgeMs) {
+          run.status = "failed"
+          run.error = "排队请求已过期，未自动补发旧回答"
           run.finishedAt = Date.now()
           this.update(run)
           return
@@ -1153,7 +1106,7 @@ export class Coordinator {
       })
     this.queues.set(key, task)
     void task.catch((error) => {
-      console.error('Task bookkeeping failed:', config.catalog.redact(String(error)))
+      console.error("Task bookkeeping failed:", config.catalog.redact(String(error)))
     })
   }
 
@@ -1164,14 +1117,7 @@ export class Coordinator {
     run: Run,
     controller: AbortController
   ) {
-    await executeRun(
-      config,
-      room,
-      input,
-      run,
-      controller,
-      this.executionHost(config, room, input, run, controller)
-    )
+    await executeRun(config, room, input, run, controller, this.executionHost(config, room, input, run, controller))
   }
 
   private executionHost(
@@ -1188,19 +1134,19 @@ export class Coordinator {
       controller.signal.throwIfAborted()
       assertCurrent()
       if (run.deadlineAt !== undefined && Date.now() >= run.deadlineAt) {
-        controller.abort(new Error('任务执行期限已到'))
+        controller.abort(new Error("任务执行期限已到"))
         controller.signal.throwIfAborted()
       }
     }
-    const deliver = async (text: string, role: 'assistant' | 'system' = 'assistant') => {
+    const deliver = async (text: string, role: "assistant" | "system" = "assistant") => {
       const validate = () => {
-        if (role === 'assistant') {
+        if (role === "assistant") {
           assertActive()
           return
         }
         // Failure notices can explain a timeout, but cannot outlive stop/shutdown or their scope.
         assertCurrent()
-        if (controller.signal.reason === 'user' || controller.signal.reason === 'shutdown') {
+        if (controller.signal.reason === "user" || controller.signal.reason === "shutdown") {
           controller.signal.throwIfAborted()
         }
       }
@@ -1208,16 +1154,16 @@ export class Coordinator {
       return this.delivery.send(room, text, run.id, role, `run:${run.id}:${role}`, {
         beforePart: validate,
         presentation:
-          (role === 'assistant' &&
+          (role === "assistant" &&
             this.presentation(
               config,
               room,
               input,
               `run:${run.id}:${role}`,
-              'final',
+              "final",
               controller.signal,
               undefined,
-              'agent-final',
+              "agent-final",
               true
             )) ||
           undefined
@@ -1231,32 +1177,32 @@ export class Coordinator {
           assertActive()
           this.authorizeContext(room.id, room.mode, input.context, capability)
         }
-        authorize('chat_present')
-        authorize('chat_send')
+        authorize("chat_present")
+        authorize("chat_send")
         const id = `run:${run.id}:present:${callId}`
         try {
           const message = await this.delivery.send(
             room,
             projectOutput(text, input.context.effective.settings),
             run.id,
-            'assistant',
+            "assistant",
             id,
             {
               artifactIds,
               authorize,
               beforePart: () => {
-                authorize('chat_present')
-                authorize('chat_send')
+                authorize("chat_present")
+                authorize("chat_send")
               },
               presentation: this.presentation(
                 config,
                 room,
                 input,
                 id,
-                'tool-direct',
+                "tool-direct",
                 controller.signal,
-                'tool',
-                'agent-tool',
+                "tool",
+                "agent-tool",
                 true
               )
             }
@@ -1291,7 +1237,7 @@ export class Coordinator {
           room,
           projectOutput(text, input.context.effective.settings),
           run.id,
-          'assistant',
+          "assistant",
           `run:${run.id}:tool:${callId}`,
           {
             artifactIds,
@@ -1304,10 +1250,10 @@ export class Coordinator {
               room,
               input,
               `run:${run.id}:tool:${callId}`,
-              'tool-direct',
+              "tool-direct",
               signal,
-              'tool',
-              'agent-tool',
+              "tool",
+              "agent-tool",
               false,
               renderDeadline
             ),
@@ -1315,7 +1261,7 @@ export class Coordinator {
               assertActive()
               signal.throwIfAborted()
               beforePart?.()
-              this.authorizeContext(room.id, room.mode, input.context, 'chat_send')
+              this.authorizeContext(room.id, room.mode, input.context, "chat_send")
             }
           }
         )
@@ -1337,12 +1283,10 @@ export class Coordinator {
       })
     }
     const supportsImages =
-      room.mode === 'live' &&
-      config.catalog
-        .forGroup(input.context.effective.settings.preferences.providerGroup)
-        .some((candidate) => {
-          return candidate.config.images
-        })
+      room.mode === "live" &&
+      config.catalog.forGroup(input.context.effective.settings.preferences.providerGroup).some((candidate) => {
+        return candidate.config.images
+      })
     tools.projectContext = createMediaProjection(
       this.media,
       room,
@@ -1352,7 +1296,7 @@ export class Coordinator {
       supportsImages,
       (facts) => {
         this.trace(run, {
-          kind: 'media',
+          kind: "media",
           title: `本次请求投影 ${facts.images} 张图片`,
           detail: `图片引用 ${facts.referenced} 项；图片编码 ${facts.bytes} 字节；最长边预算 ${input.context.effective.settings.data.imageMaxSide} 像素。历史不重复载入像素。`
         })
@@ -1386,11 +1330,11 @@ export class Coordinator {
       update: (run: Run) => {
         this.update(run)
       },
-      trace: (run: Run, trace: Omit<Trace, 'id' | 'at' | 'runId' | 'roomId'>) => {
+      trace: (run: Run, trace: Omit<Trace, "id" | "at" | "runId" | "roomId">) => {
         this.trace(run, trace)
       },
       tools,
-      invoke: (callbacks: import('@pi-im-bot/agent/events').AgentCallbacks) => {
+      invoke: (callbacks: import("@pi-im-bot/agent/events").AgentCallbacks) => {
         this.durable.prepare(run.id, config, room, input, controller.signal, tools, callbacks, run.modelCalls)
         return this.durable.run(run.id, config, room, input, controller.signal, tools, callbacks)
       }
@@ -1399,27 +1343,27 @@ export class Coordinator {
 
   stop(roomId: string) {
     for (const outbound of this.store.pendingPresentations(roomId)) {
-      if (outbound.render && ['rendering', 'prepared', 'sending'].includes(outbound.state)) {
+      if (outbound.render && ["rendering", "prepared", "sending"].includes(outbound.state)) {
         let state = outbound.state
-        if (state !== 'sending') {
-          state = 'cancelled'
+        if (state !== "sending") {
+          state = "cancelled"
         }
         this.store.saveOutbound({ ...outbound, state, cancelRequested: true })
       }
     }
     const entries = [...this.active.values()].filter((entry) => {
-      return entry.roomId === roomId && ['batching', 'queued', 'running'].includes(entry.run.status)
+      return entry.roomId === roomId && ["batching", "queued", "running"].includes(entry.run.status)
     })
     const cancelled = this.store.cancelPendingInbound(roomId)
     for (const message of cancelled) {
-      this.events.emit({ type: 'message', message })
+      this.events.emit({ type: "message", message })
     }
     this.plugins?.cancelScope(roomId)
     if (this.jobs) {
       const cancellation = this.jobs
         .cancelScope(roomId)
         .catch((error) => {
-          console.warn('Job cancellation:', this.configuration().catalog.redact(String(error)))
+          console.warn("Job cancellation:", this.configuration().catalog.redact(String(error)))
         })
         .finally(() => {
           this.jobCancellations.delete(cancellation)
@@ -1429,11 +1373,11 @@ export class Coordinator {
     this.inbox.discard(roomId)
     let count = 0
     for (const entry of entries) {
-      entry.controller.abort('user')
-      const batching = entry.run.status === 'batching'
-      entry.run.status = 'cancelled'
+      entry.controller.abort("user")
+      const batching = entry.run.status === "batching"
+      entry.run.status = "cancelled"
       entry.run.finishedAt = Date.now()
-      entry.run.error = 'user'
+      entry.run.error = "user"
       this.update(entry.run)
       if (batching) {
         entry.completion.resolve(entry.run)
@@ -1451,10 +1395,7 @@ export class Coordinator {
     }
     return {
       create(schedule) {
-        return scheduler.save(
-          { ...schedule, roomId: room.id, enabled: true, isolated: true },
-          input.context.authority
-        )
+        return scheduler.save({ ...schedule, roomId: room.id, enabled: true, isolated: true }, input.context.authority)
       },
       list: () => {
         return this.store.listSchedules().filter((schedule) => {
@@ -1466,7 +1407,7 @@ export class Coordinator {
           return item.id === id && item.roomId === room.id
         })
         if (!schedule) {
-          throw new Error('当前会话中不存在该计划任务')
+          throw new Error("当前会话中不存在该计划任务")
         }
         await scheduler.remove(id)
       }
@@ -1481,10 +1422,10 @@ export class Coordinator {
       this.plugins?.cancelScope(room.id)
     }
     for (const entry of this.active.values()) {
-      entry.controller.abort('shutdown')
-      if (entry.run.status === 'batching') {
-        entry.run.status = 'interrupted'
-        entry.run.error = 'shutdown'
+      entry.controller.abort("shutdown")
+      if (entry.run.status === "batching") {
+        entry.run.status = "interrupted"
+        entry.run.error = "shutdown"
         this.update(entry.run)
       }
     }
@@ -1496,47 +1437,47 @@ export class Coordinator {
   requireRoom(id: string) {
     const room = this.store.getRoom(id)
     if (!room) {
-      throw new Error('会话不存在')
+      throw new Error("会话不存在")
     }
     return room
   }
 
-  checkContext(roomId: string, mode: Room['mode'], context: ExecutionContext) {
+  checkContext(roomId: string, mode: Room["mode"], context: ExecutionContext) {
     const current = this.requireRoom(roomId)
     this.assertRoomEnabled(current)
     if (current.conversationEpoch !== context.conversationEpoch) {
-      throw new Error('当前对话已切换，旧任务不可继续操作')
+      throw new Error("当前对话已切换，旧任务不可继续操作")
     }
     if (current.mode !== mode) {
-      throw new Error('会话模式已切换，旧任务不可继续操作')
+      throw new Error("会话模式已切换，旧任务不可继续操作")
     }
     if (context.schedule) {
       const schedule = this.store.listSchedules().find((schedule) => {
         return schedule.id === context.schedule?.id
       })
       if (!schedule || schedule.executionEpoch !== context.schedule.epoch) {
-        throw new Error('计划工作已停止或移除')
+        throw new Error("计划工作已停止或移除")
       }
     }
   }
 
-  authorizeContext(roomId: string, mode: Room['mode'], context: ExecutionContext, capability: string) {
+  authorizeContext(roomId: string, mode: Room["mode"], context: ExecutionContext, capability: string) {
     this.checkContext(roomId, mode, context)
     const effective = this.effective(roomId, context.conversationId)
     if (!this.configuration().resources.capabilityIds(effective.settings).includes(capability)) {
       throw new Error(`能力已停用或配置已变化：${capability}`)
     }
     if (
-      ['read', 'write', 'edit', 'ls', 'bash'].includes(capability) &&
-      this.configuration().bot.agent.execution.backend !== 'shipyard'
+      ["read", "write", "edit", "ls", "bash"].includes(capability) &&
+      this.configuration().bot.agent.execution.backend !== "shipyard"
     ) {
-      throw new Error('沙盒执行已停用')
+      throw new Error("沙盒执行已停用")
     }
     assertCapability(context.authority, effective.settings, capability)
   }
   authorizeExternalContext(
     roomId: string,
-    mode: Room['mode'],
+    mode: Room["mode"],
     context: ExecutionContext,
     capability: string,
     serverId: string
@@ -1548,8 +1489,8 @@ export class Coordinator {
       return server.id === serverId
     })
     const selected = effective.settings.resources.mcp
-    if (!server?.enabled || (selected.mode === 'selected' && !selected.ids.includes(serverId))) {
-      throw new Error('此 MCP 服务已停用或从当前范围移除')
+    if (!server?.enabled || (selected.mode === "selected" && !selected.ids.includes(serverId))) {
+      throw new Error("此 MCP 服务已停用或从当前范围移除")
     }
   }
   presentation(
@@ -1559,8 +1500,8 @@ export class Coordinator {
     id: string,
     phase: DeliveryPhase,
     signal: AbortSignal,
-    origin?: PluginInvocation['origin'],
-    producer: DeliveryView['producer'] = 'unknown',
+    origin?: PluginInvocation["origin"],
+    producer: DeliveryView["producer"] = "unknown",
     deferred = false,
     inlineDeadlineAt?: number
   ) {
@@ -1581,7 +1522,7 @@ export class Coordinator {
             return projectHistory(this.store.listMessages(room.id, limit), input.context.effective.settings)
           },
           async send() {
-            throw new Error('呈现处理器不能直接发送消息')
+            throw new Error("呈现处理器不能直接发送消息")
           }
         }
       },
@@ -1594,13 +1535,13 @@ export class Coordinator {
           at: Date.now(),
           runId: id,
           roomId: room.id,
-          kind: 'plugin',
-          title: trace.point + ' · ' + trace.handler + ' · ' + trace.outcome,
-          detail: trace.error ?? '',
+          kind: "plugin",
+          title: trace.point + " · " + trace.handler + " · " + trace.outcome,
+          detail: trace.error ?? "",
           durationMs: trace.elapsedMs
         }
         this.store.saveTrace(event)
-        this.events.emit({ type: 'trace', trace: event })
+        this.events.emit({ type: "trace", trace: event })
       },
       producer,
       deferred,
@@ -1634,12 +1575,12 @@ export class Coordinator {
           artifactIds: outbound.artifactIds,
           platformMessageIds: outbound.platformMessageIds
         })
-        const previous = this.store.getObservation('delivery.receipt@1:' + outbound.id)
+        const previous = this.store.getObservation("delivery.receipt@1:" + outbound.id)
         if (previous) {
-          return { ...previous, ready: outbound.state !== 'sending', deadlineAt: Date.now() + 60000, payload }
+          return { ...previous, ready: outbound.state !== "sending", deadlineAt: Date.now() + 60000, payload }
         }
         const event = observers.create(config, room, input, receiptNode.id, outbound.id, payload, origin)
-        if (event && outbound.state === 'sending') {
+        if (event && outbound.state === "sending") {
           event.ready = false
         }
         return event
@@ -1659,41 +1600,30 @@ export class Coordinator {
     return this.observations.create(
       invocation.config,
       invocation.room,
-      { ...invocation.input, source: 'im' },
+      { ...invocation.input, source: "im" },
       recordedNode.id,
       message.id,
       recordedNode.input.parse({ message })
     )
   }
 
-  authorizeRetainedContext(
-    roomId: string,
-    mode: Room['mode'],
-    context: ExecutionContext,
-    capability: string
-  ) {
-    if (capability.startsWith('mcp:')) {
-      return this.authorizeExternalContext(
-        roomId,
-        mode,
-        context,
-        capability,
-        capability.slice(4).split('/')[0]
-      )
+  authorizeRetainedContext(roomId: string, mode: Room["mode"], context: ExecutionContext, capability: string) {
+    if (capability.startsWith("mcp:")) {
+      return this.authorizeExternalContext(roomId, mode, context, capability, capability.slice(4).split("/")[0])
     }
-    if (!capability.startsWith('plugin:') && !capability.startsWith('hook:plugin:')) {
+    if (!capability.startsWith("plugin:") && !capability.startsWith("hook:plugin:")) {
       return this.authorizeContext(roomId, mode, context, capability)
     }
     this.checkContext(roomId, mode, context)
     const effective = this.effective(roomId, context.conversationId)
     assertCapability(context.authority, effective.settings, capability)
-    let path = capability.slice('plugin:'.length)
-    if (capability.startsWith('hook:plugin:')) {
-      path = capability.slice('hook:plugin:'.length)
+    let path = capability.slice("plugin:".length)
+    if (capability.startsWith("hook:plugin:")) {
+      path = capability.slice("hook:plugin:".length)
     }
-    const [id, handler] = path.split('/')
-    if (capability.startsWith('hook:') && effective.settings.extensions.disabled[id + '/' + handler]) {
-      throw new Error('此处理器已停用')
+    const [id, handler] = path.split("/")
+    if (capability.startsWith("hook:") && effective.settings.extensions.disabled[id + "/" + handler]) {
+      throw new Error("此处理器已停用")
     }
     const config = this.configuration()
     const instance = config.resources.config.plugins.find((instance) => {
@@ -1703,9 +1633,9 @@ export class Coordinator {
     if (
       !config.bot.plugins.enabled ||
       !instance?.enabled ||
-      (selection.mode === 'selected' && !selection.ids.includes(id))
+      (selection.mode === "selected" && !selection.ids.includes(id))
     ) {
-      throw new Error('此插件已停用或从当前范围移除')
+      throw new Error("此插件已停用或从当前范围移除")
     }
   }
 
@@ -1731,14 +1661,14 @@ export class Coordinator {
 
   scheduleInvocation(schedule: Schedule, occurrence: string): JobInvocation {
     if (!schedule.authority) {
-      throw new Error('此计划缺少触发来源，请先重新授权')
+      throw new Error("此计划缺少触发来源，请先重新授权")
     }
     if (
       this.store.recoverableRuns().some((run) => {
-        return run.roomId === schedule.roomId && run.source === 'schedule' && !run.context?.jobId
+        return run.roomId === schedule.roomId && run.source === "schedule" && !run.context?.jobId
       })
     ) {
-      throw new ScheduleOverlap('此范围的旧版计划执行仍在恢复，暂不启动新计划工作')
+      throw new ScheduleOverlap("此范围的旧版计划执行仍在恢复，暂不启动新计划工作")
     }
     const invocation = this.prepareJobInvocation(
       schedule.roomId,
@@ -1747,13 +1677,13 @@ export class Coordinator {
       schedule.authority
     )
     if (!invocation.input.context.effective.settings.behavior.agentEnabled) {
-      throw new Error('当前聊天范围已关闭 Agent')
+      throw new Error("当前聊天范围已关闭 Agent")
     }
     invocation.runId = `schedule:${schedule.id}:${occurrence}`
     invocation.input = freezeSnapshot({
       ...invocation.input,
-      source: 'schedule',
-      actorId: 'scheduler',
+      source: "schedule",
+      actorId: "scheduler",
       actorName: schedule.name,
       context: { ...invocation.input.context, schedule: { id: schedule.id, epoch: schedule.executionEpoch } }
     })
@@ -1765,7 +1695,7 @@ export class Coordinator {
 
   startSchedule(schedule: Schedule, occurrence: string, scheduledAt: number) {
     if (!this.jobs) {
-      throw new Error('持久后台任务运行时尚未启用')
+      throw new Error("持久后台任务运行时尚未启用")
     }
     return this.jobs.startSchedule(schedule, occurrence, scheduledAt)
   }
@@ -1798,7 +1728,7 @@ export class Coordinator {
       text,
       actorId: identities[0].actorId,
       actorName: identities[0].actorName,
-      source: 'command',
+      source: "command",
       receivedAt: Date.now(),
       identities,
       inheritedAuthority: ceiling,
@@ -1841,7 +1771,7 @@ export class Coordinator {
       return existing
     }
     if (this.closing) {
-      throw new Error('服务正在关闭')
+      throw new Error("服务正在关闭")
     }
     this.checkContext(room.id, room.mode, input.context)
     const { context, ...request } = input
@@ -1854,7 +1784,7 @@ export class Coordinator {
       context,
       configSnapshot,
       deadlineAt,
-      status: 'queued',
+      status: "queued",
       providerGroup: input.context.effective.settings.preferences.providerGroup,
       createdAt: Date.now(),
       modelCalls: 0,
@@ -1878,7 +1808,7 @@ export class Coordinator {
     }
     const run = this.store.getRun(id)
     if (!run) {
-      throw new Error('任务执行记录不存在')
+      throw new Error("任务执行记录不存在")
     }
     return run
   }
@@ -1888,7 +1818,7 @@ export class Coordinator {
     if (!active) {
       return false
     }
-    active.controller.abort('user')
+    active.controller.abort("user")
     return true
   }
 
@@ -1925,8 +1855,8 @@ export class Coordinator {
   switchConversation(roomId: string, conversationId: string) {
     const room = this.requireRoom(roomId)
     const conversation = this.conversations.require(conversationId, roomId)
-    if (conversation.kind !== 'root') {
-      throw new Error('后台任务对话不可切换为主对话')
+    if (conversation.kind !== "root") {
+      throw new Error("后台任务对话不可切换为主对话")
     }
     if (room.currentConversationId === conversation.id) {
       return room
@@ -1937,9 +1867,9 @@ export class Coordinator {
 
   private update(run: Run) {
     this.store.saveRun(run)
-    this.events.emit({ type: 'run', run: { ...run, usage: { ...run.usage } } })
+    this.events.emit({ type: "run", run: { ...run, usage: { ...run.usage } } })
   }
-  private trace(run: Run, event: Omit<Trace, 'id' | 'at' | 'runId' | 'roomId'>) {
+  private trace(run: Run, event: Omit<Trace, "id" | "at" | "runId" | "roomId">) {
     const trace: Trace = {
       ...event,
       id: crypto.randomUUID(),
@@ -1948,6 +1878,6 @@ export class Coordinator {
       roomId: run.roomId
     }
     this.store.saveTrace(trace)
-    this.events.emit({ type: 'trace', trace })
+    this.events.emit({ type: "trace", trace })
   }
 }

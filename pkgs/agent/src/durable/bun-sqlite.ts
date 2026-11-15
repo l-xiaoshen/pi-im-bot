@@ -1,6 +1,6 @@
-import { Database } from 'bun:sqlite'
-import type { SqliteDatabase, SqliteExecutor, SqliteValue } from '@earendil-works/pi-durable/storage/sqlite'
-import { privateSqliteFiles } from '@pi-im-bot/storage/private-file'
+import { Database } from "bun:sqlite"
+import type { SqliteDatabase, SqliteExecutor, SqliteValue } from "@earendil-works/pi-durable/storage/sqlite"
+import { privateSqliteFiles } from "@pi-im-bot/storage/private-file"
 
 /** Serial async facade required by durable; transaction callbacks use only their scoped executor. */
 export class BunSqliteDatabase implements SqliteDatabase {
@@ -11,9 +11,9 @@ export class BunSqliteDatabase implements SqliteDatabase {
   constructor(path: string) {
     this.database = new Database(path, { create: true, strict: true })
     privateSqliteFiles(path)
-    this.database.exec('PRAGMA journal_mode=WAL')
-    this.database.exec('PRAGMA foreign_keys=ON')
-    this.database.exec('PRAGMA busy_timeout=2500')
+    this.database.exec("PRAGMA journal_mode=WAL")
+    this.database.exec("PRAGMA foreign_keys=ON")
+    this.database.exec("PRAGMA busy_timeout=2500")
   }
 
   exec(sql: string) {
@@ -44,12 +44,12 @@ export class BunSqliteDatabase implements SqliteDatabase {
 
   transaction<T>(callback: (transaction: SqliteExecutor) => Promise<T>): Promise<T> {
     return this.enqueue(async () => {
-      this.database.exec('BEGIN IMMEDIATE')
+      this.database.exec("BEGIN IMMEDIATE")
       let active = true
       const database = this.database
       function assertActive() {
         if (!active) {
-          throw new Error('SQLite transaction handle is no longer active')
+          throw new Error("SQLite transaction handle is no longer active")
         }
       }
       const executor: SqliteExecutor = {
@@ -76,16 +76,13 @@ export class BunSqliteDatabase implements SqliteDatabase {
       }
       try {
         const result = await callback(executor)
-        this.database.exec('COMMIT')
+        this.database.exec("COMMIT")
         return result
       } catch (error) {
         try {
-          this.database.exec('ROLLBACK')
+          this.database.exec("ROLLBACK")
         } catch (rollback) {
-          throw new AggregateError(
-            [error, rollback],
-            'SQLite transaction failed and rollback could not be confirmed'
-          )
+          throw new AggregateError([error, rollback], "SQLite transaction failed and rollback could not be confirmed")
         }
         throw error
       } finally {
@@ -108,7 +105,7 @@ export class BunSqliteDatabase implements SqliteDatabase {
 
   private enqueue<T>(operation: () => Promise<T>): Promise<T> {
     if (this.closing) {
-      return Promise.reject(new Error('SQLite database is closing'))
+      return Promise.reject(new Error("SQLite database is closing"))
     }
     const task = this.line.then(operation)
     this.line = task.then(

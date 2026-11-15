@@ -1,11 +1,11 @@
-import { z } from 'zod'
-import { parseOneBotContent } from './content'
+import { z } from "zod"
+import { parseOneBotContent } from "./content"
 
 const IdSchema = z.union([z.string(), z.number()]).transform(String)
 export const OneBotSegmentSchema = z.object({ type: z.string(), data: z.record(z.string(), z.unknown()) })
 export const OneBotMessageSchema = z.object({
-  post_type: z.enum(['message', 'message_sent']),
-  message_type: z.enum(['group', 'private']),
+  post_type: z.enum(["message", "message_sent"]),
+  message_type: z.enum(["group", "private"]),
   self_id: IdSchema,
   user_id: IdSchema,
   group_id: IdSchema.optional(),
@@ -17,7 +17,7 @@ export const OneBotMessageSchema = z.object({
     .object({
       nickname: z.string().optional(),
       card: z.string().optional(),
-      role: z.enum(['owner', 'admin', 'member']).optional()
+      role: z.enum(["owner", "admin", "member"]).optional()
     })
     .default({})
 })

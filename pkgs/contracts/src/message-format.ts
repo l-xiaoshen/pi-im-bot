@@ -1,5 +1,5 @@
-import { z } from 'zod'
-export const MessageFormatSchema = z.enum(['direct', 'forward'])
+import { z } from "zod"
+export const MessageFormatSchema = z.enum(["direct", "forward"])
 export const BusinessItemSchema = z.object({
   item: z.number().int().min(0).max(15),
   status: z.string().max(40),
@@ -8,4 +8,4 @@ export const BusinessItemSchema = z.object({
   workflow: z.string().optional(),
   workflowDigest: z.string().optional()
 })
-export const BusinessStatusSchema = z.enum(['succeeded', 'partial', 'failed', 'unknown'])
+export const BusinessStatusSchema = z.enum(["succeeded", "partial", "failed", "unknown"])

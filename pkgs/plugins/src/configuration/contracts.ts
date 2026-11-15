@@ -1,20 +1,20 @@
-import { z } from 'zod'
-import { ConfigDefinitionSchema, ConfigValuesSchema } from './schema'
-import { SecretChangeSchema, SecretStateSchema } from './secrets'
+import { z } from "zod"
+import { ConfigDefinitionSchema, ConfigValuesSchema } from "./schema"
+import { SecretChangeSchema, SecretStateSchema } from "./secrets"
 
-export const PluginConfigTargetSchema = z.discriminatedUnion('level', [
-  z.object({ level: z.literal('instance') }).strict(),
+export const PluginConfigTargetSchema = z.discriminatedUnion("level", [
+  z.object({ level: z.literal("instance") }).strict(),
   z
     .object({
-      level: z.literal('account'),
+      level: z.literal("account"),
       channel: z.string().min(1).max(100),
       accountId: z.string().min(1).max(100)
     })
     .strict(),
-  z.object({ level: z.literal('room'), roomId: z.string().min(1).max(200) }).strict(),
+  z.object({ level: z.literal("room"), roomId: z.string().min(1).max(200) }).strict(),
   z
     .object({
-      level: z.literal('conversation'),
+      level: z.literal("conversation"),
       roomId: z.string().min(1).max(200),
       conversationId: z.string().min(1).max(200)
     })
@@ -35,19 +35,19 @@ export const PluginConfigViewSchema = z.object({
   gsviConfiguration: z
     .object({
       projectionSupported: z.literal(true),
-      inlinePresentationContract: z.literal('tool-send@1'),
-      runtimeContract: z.literal('gsvi-plugin@1'),
+      inlinePresentationContract: z.literal("tool-send@1"),
+      runtimeContract: z.literal("gsvi-plugin@1"),
       projectionActive: z.boolean(),
       refreshDisabled: z.boolean(),
       voiceChoices: z.array(z.string()).default([]),
-      voiceHint: z.string().default('')
+      voiceHint: z.string().default("")
     })
     .optional(),
   bindings: z
     .array(
       z.object({
         alias: z.string(),
-        kind: z.enum(['mcp', 'plugin', 'service']),
+        kind: z.enum(["mcp", "plugin", "service"]),
         title: z.string(),
         required: z.boolean(),
         value: z.string(),

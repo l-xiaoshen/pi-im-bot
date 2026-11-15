@@ -1,17 +1,17 @@
-import { ObservationWorker } from './worker'
-import type { ObserverTaskInput, ObserverCheckpoint } from './task'
-import { z } from 'zod'
-import { BACKGROUND_CONTEXT } from '@earendil-works/chord/context'
-import { defineTask, defineExtension, type TaskId } from '@earendil-works/pi-durable'
-import type { Coordinator } from '@pi-im-bot/runtime/coordinator'
-import type { DurableAgentRuntime } from '@pi-im-bot/agent/durable/runtime'
-import type { Configuration } from '@pi-im-bot/config/load'
-import type { Room } from '@pi-im-bot/contracts/message'
-import type { PreparedRunInput } from '@pi-im-bot/contracts/run'
-import { pluginHookId } from '../identity'
-import { ObserverIndex } from './documents'
-import { ObservationSchema, ObserverStatusSchema, type Observation, type ObserverRecord } from './schema'
-import type { PluginInvocation } from '../invocation'
+import { ObservationWorker } from "./worker"
+import type { ObserverTaskInput, ObserverCheckpoint } from "./task"
+import { z } from "zod"
+import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context"
+import { defineTask, defineExtension, type TaskId } from "@earendil-works/pi-durable"
+import type { Coordinator } from "@pi-im-bot/runtime/coordinator"
+import type { DurableAgentRuntime } from "@pi-im-bot/agent/durable/runtime"
+import type { Configuration } from "@pi-im-bot/config/load"
+import type { Room } from "@pi-im-bot/contracts/message"
+import type { PreparedRunInput } from "@pi-im-bot/contracts/run"
+import { pluginHookId } from "../identity"
+import { ObserverIndex } from "./documents"
+import { ObservationSchema, ObserverStatusSchema, type Observation, type ObserverRecord } from "./schema"
+import type { PluginInvocation } from "../invocation"
 
 export class PluginObservations {
   private readonly task
@@ -38,34 +38,34 @@ export class PluginObservations {
       }
     )
     this.task = defineTask<ObserverTaskInput, ObserverCheckpoint, object>({
-      name: 'bot.plugin-observer',
+      name: "bot.plugin-observer",
       version: 1,
-      initial: () => ({ phase: 'run' }),
+      initial: () => ({ phase: "run" }),
       phases: {
         run: worker.run.bind(worker),
         dispatched: async (task, runtime, context) => {
-          await worker.finish(task, runtime, context, 'unknown', '服务在观察动作期间中断，未自动重放')
+          await worker.finish(task, runtime, context, "unknown", "服务在观察动作期间中断，未自动重放")
         }
       },
       abort: async (task, runtime, context) => {
-        let state: ObserverRecord['state'] = 'cancelled'
-        if (task.state.checkpoint.phase === 'dispatched') {
-          state = 'unknown'
+        let state: ObserverRecord["state"] = "cancelled"
+        if (task.state.checkpoint.phase === "dispatched") {
+          state = "unknown"
         }
-        await worker.finish(task, runtime, context, state, '观察动作已停止')
+        await worker.finish(task, runtime, context, state, "观察动作已停止")
       }
     })
-    runtime.registry.install(defineExtension({ name: 'bot-plugin-observers', tasks: [this.task] }))
+    runtime.registry.install(defineExtension({ name: "bot-plugin-observers", tasks: [this.task] }))
   }
 
   create(
     config: Configuration,
     room: Room,
     input: PreparedRunInput,
-    point: Observation['point'],
+    point: Observation["point"],
     id: string,
     payload: unknown,
-    origin: PluginInvocation['origin'] = input.source
+    origin: PluginInvocation["origin"] = input.source
   ) {
     if (!this.coordinator.plugins?.available()) {
       return undefined
@@ -73,7 +73,7 @@ export class PluginObservations {
     const registry = config.resources.pluginRegistry(input.context.effective.settings)
     const raw = z.record(z.string(), z.json()).parse(JSON.parse(JSON.stringify(payload)))
     let phase: string | undefined
-    if (typeof raw.phase === 'string') {
+    if (typeof raw.phase === "string") {
       phase = raw.phase
     }
     const pending = this.coordinator.store.listObservations(true)
@@ -85,7 +85,7 @@ export class PluginObservations {
       .filter((entry) => {
         const count = pending.filter((event) => {
           return event.handlers.some((key) => {
-            return key.startsWith(entry.instanceId + '/')
+            return key.startsWith(entry.instanceId + "/")
           })
         }).length
         if (count >= config.bot.plugins.maxObserverPendingPerPlugin) {
@@ -105,7 +105,7 @@ export class PluginObservations {
       return undefined
     }
     const event = ObservationSchema.parse({
-      id: point + ':' + id,
+      id: point + ":" + id,
       roomId: room.id,
       createdAt: Date.now(),
       deadlineAt: Date.now() + 60000,
@@ -118,7 +118,7 @@ export class PluginObservations {
       handlers: handlers.slice(0, 64)
     })
     const encoded = JSON.stringify(event)
-    if (Buffer.byteLength(encoded, 'utf8') > 256 * 1024) {
+    if (Buffer.byteLength(encoded, "utf8") > 256 * 1024) {
       this.dropped += 1
       return undefined
     }
@@ -171,7 +171,7 @@ export class PluginObservations {
         const conversation = await this.runtime.ensureConversation(room, event.input)
         let complete = true
         for (const handler of event.handlers) {
-          const accepted = await this.admit({ event, handler, key: event.id + ':' + handler }, conversation)
+          const accepted = await this.admit({ event, handler, key: event.id + ":" + handler }, conversation)
           if (!accepted) {
             complete = false
           }
@@ -191,7 +191,7 @@ export class PluginObservations {
       const busy = new Set(
         Object.values(index.requests)
           .filter((record) => {
-            return ['queued', 'running'].includes(record.state)
+            return ["queued", "running"].includes(record.state)
           })
           .map((record) => {
             return record.eventId
@@ -210,7 +210,7 @@ export class PluginObservations {
 
   private async admit(
     input: ObserverTaskInput,
-    conversation: Awaited<ReturnType<DurableAgentRuntime['ensureConversation']>>
+    conversation: Awaited<ReturnType<DurableAgentRuntime["ensureConversation"]>>
   ) {
     return this.runtime.native.commit(async (tx) => {
       const index = await tx.doc(ObserverIndex)
@@ -219,9 +219,9 @@ export class PluginObservations {
       }
       const maximum = this.coordinator.plugins?.manager.config.maxObserverQueue ?? 64
       const active = Object.values(index.requests).filter((record) => {
-        return ['queued', 'running'].includes(record.state)
+        return ["queued", "running"].includes(record.state)
       })
-      const instance = input.handler.split('/')[0]
+      const instance = input.handler.split("/")[0]
       const perPlugin = this.coordinator.plugins?.manager.config.maxObserverPerPlugin ?? 8
       let candidates = active.filter((record) => {
         return record.dueAt === undefined
@@ -238,14 +238,14 @@ export class PluginObservations {
       if (
         candidates.length >= totalLimit ||
         candidates.filter((record) => {
-          return record.handler.startsWith(instance + '/')
+          return record.handler.startsWith(instance + "/")
         }).length >= instanceLimit
       ) {
         return undefined
       }
       const taskId = await tx.createTask(this.task, input, {
         conversationId: conversation,
-        ownership: { kind: 'conversation' },
+        ownership: { kind: "conversation" },
         background: true
       })
       const record: ObserverRecord = {
@@ -254,7 +254,7 @@ export class PluginObservations {
         eventId: input.event.id,
         roomId: input.event.roomId,
         handler: input.handler,
-        state: 'queued',
+        state: "queued",
         at: Date.now()
       }
       if (input.recall) {
@@ -273,7 +273,7 @@ export class PluginObservations {
       dropped: this.dropped,
       lastError: this.lastError,
       active: Object.values(index?.requests ?? {}).filter((record) => {
-        return ['queued', 'running'].includes(record.state)
+        return ["queued", "running"].includes(record.state)
       }),
       recent: index?.recent ?? []
     })
@@ -282,10 +282,10 @@ export class PluginObservations {
     const index = await this.runtime.native.snapshot(ObserverIndex, BACKGROUND_CONTEXT)
     if (
       !Object.values(index?.requests ?? {}).some((record) => {
-        return record.taskId === id && ['queued', 'running'].includes(record.state)
+        return record.taskId === id && ["queued", "running"].includes(record.state)
       })
     ) {
-      throw new Error('观察动作不存在或已结束')
+      throw new Error("观察动作不存在或已结束")
     }
     await this.runtime.native.abortTask(id as TaskId, BACKGROUND_CONTEXT)
     return this.status()

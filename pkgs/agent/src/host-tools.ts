@@ -1,15 +1,15 @@
-import type { AgentMessage } from '@earendil-works/pi-agent-core'
-import type { BotTool } from '@pi-im-bot/capabilities/tool'
-import { z } from 'zod'
-import { obj, int, str, opt, arr } from '@earendil-works/pi-schema'
-import type { ChatMessage } from '@pi-im-bot/contracts/message'
-import type { projectHistory } from '@pi-im-bot/messages/projection'
-import { createJobTools, type JobToolServices } from '@pi-im-bot/jobs/tools'
-import { createScheduleTools, type ScheduleToolServices } from './schedule-tools'
-import type { Message } from '@earendil-works/pi-ai'
-import type { MediaToolServices } from '@pi-im-bot/media/tool'
-import type { PluginService } from '@pi-im-bot/plugins/service'
-import { chatSendTool } from './chat-send'
+import type { AgentMessage } from "@earendil-works/pi-agent-core"
+import type { BotTool } from "@pi-im-bot/capabilities/tool"
+import { z } from "zod"
+import { obj, int, str, opt, arr } from "@earendil-works/pi-schema"
+import type { ChatMessage } from "@pi-im-bot/contracts/message"
+import type { projectHistory } from "@pi-im-bot/messages/projection"
+import { createJobTools, type JobToolServices } from "@pi-im-bot/jobs/tools"
+import { createScheduleTools, type ScheduleToolServices } from "./schedule-tools"
+import type { Message } from "@earendil-works/pi-ai"
+import type { MediaToolServices } from "@pi-im-bot/media/tool"
+import type { PluginService } from "@pi-im-bot/plugins/service"
+import { chatSendTool } from "./chat-send"
 
 export interface HostToolServices {
   mediaSources?: Set<string>
@@ -48,21 +48,20 @@ const SendInputSchema = z
   .object({ text: z.string().max(20000), artifactIds: z.array(z.uuid()).max(8).default([]) })
   .refine((value) => {
     return value.text.length > 0 || value.artifactIds.length > 0
-  }, '消息和产物不能同时为空')
+  }, "消息和产物不能同时为空")
 
 export function createHostTools(services: HostToolServices): BotTool[] {
   const tools: BotTool[] = [
     {
-      name: 'chat_history',
-      label: '会话历史',
-      description:
-        'Read recent messages from the current IM conversation. Use when earlier chat context is needed.',
+      name: "chat_history",
+      label: "会话历史",
+      description: "Read recent messages from the current IM conversation. Use when earlier chat context is needed.",
       parameters: obj({ limit: int({ minimum: 1, maximum: 100 }) }),
       async execute(_id, input) {
         const { limit } = HistoryInputSchema.parse(input)
         const messages = services.history(limit)
         return {
-          content: [{ type: 'text', text: JSON.stringify(messages) }],
+          content: [{ type: "text", text: JSON.stringify(messages) }],
           details: { count: messages.length }
         }
       }
@@ -71,16 +70,16 @@ export function createHostTools(services: HostToolServices): BotTool[] {
   ]
   if (services.present) {
     tools.push({
-      name: 'chat_present',
-      label: '受管呈现消息',
+      name: "chat_present",
+      label: "受管呈现消息",
       description:
-        'Accept an explicit Agent notification for managed presentation. Returns delivered:true only after platform ACK, or delivered:false with an accepted render jobId. Do not resend accepted messages. Final replies are delivered automatically.',
+        "Accept an explicit Agent notification for managed presentation. Returns delivered:true only after platform ACK, or delivered:false with an accepted render jobId. Do not resend accepted messages. Final replies are delivered automatically.",
       parameters: obj({ text: str(), artifactIds: opt(arr(str(), { maxItems: 8 })) }),
       async execute(id, input, signal) {
         signal?.throwIfAborted()
         const { text, artifactIds } = SendInputSchema.parse(input)
         const result = await services.present!(text, id, artifactIds)
-        return { content: [{ type: 'text', text: JSON.stringify(result) }], details: result }
+        return { content: [{ type: "text", text: JSON.stringify(result) }], details: result }
       }
     })
   }

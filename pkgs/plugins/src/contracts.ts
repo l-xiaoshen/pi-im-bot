@@ -1,9 +1,9 @@
-import { z } from 'zod'
-import { PluginInstanceSchema, PluginPackageSchema } from './config'
+import { z } from "zod"
+import { PluginInstanceSchema, PluginPackageSchema } from "./config"
 
-export const PluginSettingPlaceholder = '__PI_PLUGIN_SETTING_PRESERVED__'
+export const PluginSettingPlaceholder = "__PI_PLUGIN_SETTING_PRESERVED__"
 export const PluginViewSchema = PluginInstanceSchema.extend({
-  state: z.enum(['disabled', 'unimported', 'runtime-disabled', 'configured', 'needs-configuration']),
+  state: z.enum(["disabled", "unimported", "runtime-disabled", "configured", "needs-configuration"]),
   issues: z.array(z.object({ path: z.string(), message: z.string() })).default([]),
   bundle: PluginPackageSchema.optional()
 })

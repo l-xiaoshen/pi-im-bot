@@ -1,7 +1,7 @@
-import { z } from 'zod'
-import { PluginIdSchema, PluginGrantSchema, PluginManifestSchema, PluginPathSchema } from './manifest'
-import { ConfigDefinitionSchema } from './configuration/schema'
-import { PluginOriginSchema } from './install/origin'
+import { z } from "zod"
+import { PluginIdSchema, PluginGrantSchema, PluginManifestSchema, PluginPathSchema } from "./manifest"
+import { ConfigDefinitionSchema } from "./configuration/schema"
+import { PluginOriginSchema } from "./install/origin"
 
 export const PluginInstanceSchema = z
   .object({
@@ -50,14 +50,14 @@ export const PluginPackageSchema = z
     const paths = value.files.map((file) => {
       return file.path
     })
-    const expected = new Set(['plugin.json', ...value.manifest.files])
-    for (const path of ['_conf_schema.json', 'README.md', 'CHANGELOG.md']) {
+    const expected = new Set(["plugin.json", ...value.manifest.files])
+    for (const path of ["_conf_schema.json", "README.md", "CHANGELOG.md"]) {
       if (paths.includes(path)) {
         expected.add(path)
       }
     }
-    if (value.configuration && !paths.includes('_conf_schema.json')) {
-      context.addIssue({ code: 'custom', message: '配置 schema 缺少对应的固定文件' })
+    if (value.configuration && !paths.includes("_conf_schema.json")) {
+      context.addIssue({ code: "custom", message: "配置 schema 缺少对应的固定文件" })
     }
     if (
       new Set(paths).size !== paths.length ||
@@ -66,7 +66,7 @@ export const PluginPackageSchema = z
         return !expected.has(path)
       })
     ) {
-      context.addIssue({ code: 'custom', message: '插件快照文件列表与声明不一致' })
+      context.addIssue({ code: "custom", message: "插件快照文件列表与声明不一致" })
     }
     if (
       value.files.reduce((sum, file) => {
@@ -74,7 +74,7 @@ export const PluginPackageSchema = z
       }, 0) >
       64 * 1024 * 1024
     ) {
-      context.addIssue({ code: 'custom', message: '插件快照超过 64 MiB' })
+      context.addIssue({ code: "custom", message: "插件快照超过 64 MiB" })
     }
   })
 export type PluginPackage = z.infer<typeof PluginPackageSchema>

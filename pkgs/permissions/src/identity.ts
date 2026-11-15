@@ -1,12 +1,12 @@
-import { z } from 'zod'
+import { z } from "zod"
 
 export const TriggerIdentitySchema = z.object({
-  origin: z.enum(['platform', 'local', 'mock', 'legacy']),
+  origin: z.enum(["platform", "local", "mock", "legacy"]),
   actorId: z.string(),
   actorName: z.string(),
   channel: z.string(),
   accountId: z.string(),
-  role: z.enum(['owner', 'admin', 'member']).optional(),
+  role: z.enum(["owner", "admin", "member"]).optional(),
   messageIds: z.array(z.string()).default([])
 })
 export type TriggerIdentity = Readonly<z.infer<typeof TriggerIdentitySchema>>
@@ -22,12 +22,12 @@ export type Authority = z.infer<typeof AuthoritySchema>
 export function localIdentity(
   channel: string,
   accountId: string,
-  actorId = 'developer',
-  actorName = '开发者'
+  actorId = "developer",
+  actorName = "开发者"
 ): TriggerIdentity {
-  let origin: TriggerIdentity['origin'] = 'local'
-  if (channel === 'mock') {
-    origin = 'mock'
+  let origin: TriggerIdentity["origin"] = "local"
+  if (channel === "mock") {
+    origin = "mock"
   }
   return Object.freeze({ origin, channel, accountId, actorId, actorName, messageIds: [] })
 }

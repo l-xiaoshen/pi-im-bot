@@ -1,16 +1,16 @@
-import { access } from 'node:fs/promises'
-import { constants } from 'node:fs'
-import { GpuStatusSchema, type GpuStatus } from './schema'
+import { access } from "node:fs/promises"
+import { constants } from "node:fs"
+import { GpuStatusSchema, type GpuStatus } from "./schema"
 
-const nvidiaSmi = '/usr/bin/nvidia-smi'
+const nvidiaSmi = "/usr/bin/nvidia-smi"
 const nvidiaQuery = [
-  '--query-gpu=index,name,memory.total,memory.used,utilization.gpu,temperature.gpu,power.draw',
-  '--format=csv,noheader,nounits'
+  "--query-gpu=index,name,memory.total,memory.used,utilization.gpu,temperature.gpu,power.draw",
+  "--format=csv,noheader,nounits"
 ]
 
 function numeric(value: string) {
   const trimmed = value.trim()
-  if (!trimmed || trimmed === 'N/A' || trimmed === '[Not Supported]') {
+  if (!trimmed || trimmed === "N/A" || trimmed === "[Not Supported]") {
     return null
   }
   const parsed = Number(trimmed)
@@ -19,9 +19,9 @@ function numeric(value: string) {
 
 export function parseNvidiaSmiCsv(text: string): GpuStatus | undefined {
   const devices = text
-    .split('\n')
+    .split("\n")
     .map((line) => {
-      const fields = line.split(',').map((field) => field.trim())
+      const fields = line.split(",").map((field) => field.trim())
       if (fields.length < 7) {
         return undefined
       }
@@ -34,7 +34,7 @@ export function parseNvidiaSmiCsv(text: string): GpuStatus | undefined {
       }
       return {
         index,
-        name: fields.slice(1, nameEnd).join(', ').slice(0, 300),
+        name: fields.slice(1, nameEnd).join(", ").slice(0, 300),
         memoryTotalBytes: Math.max(0, Math.round(totalMiB * 1024 * 1024)),
         memoryUsedBytes: Math.max(0, Math.round(usedMiB * 1024 * 1024)),
         utilizationPercent: numeric(fields[nameEnd + 2]),
@@ -48,7 +48,7 @@ export function parseNvidiaSmiCsv(text: string): GpuStatus | undefined {
   if (devices.length === 0) {
     return undefined
   }
-  return GpuStatusSchema.parse({ provider: 'nvidia', source: 'nvidia-smi', devices })
+  return GpuStatusSchema.parse({ provider: "nvidia", source: "nvidia-smi", devices })
 }
 
 /**
@@ -62,23 +62,23 @@ export async function probeNvidiaGpu(): Promise<GpuStatus | undefined> {
     return undefined
   }
   const child = Bun.spawn([nvidiaSmi, ...nvidiaQuery], {
-    cwd: '/',
-    env: { PATH: '/usr/bin:/bin', LC_ALL: 'C', LANG: 'C' },
-    stdin: 'ignore',
-    stdout: 'pipe',
-    stderr: 'ignore'
+    cwd: "/",
+    env: { PATH: "/usr/bin:/bin", LC_ALL: "C", LANG: "C" },
+    stdin: "ignore",
+    stdout: "pipe",
+    stderr: "ignore"
   })
   const output = new Response(child.stdout).text()
   let timedOut = false
   const timeout = setTimeout(() => {
     timedOut = true
-    child.kill('SIGKILL')
+    child.kill("SIGKILL")
   }, 1500)
   try {
     const [code, text] = await Promise.race([
       Promise.all([child.exited, output]),
       Bun.sleep(1600).then(() => {
-        return [-1, ''] as const
+        return [-1, ""] as const
       })
     ])
     if (timedOut || code !== 0 || text.length > 64 * 1024) {

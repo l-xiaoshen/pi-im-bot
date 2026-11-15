@@ -1,7 +1,7 @@
-import { requestedSkill } from '@pi-im-bot/resources/skills/invocation'
-import { isJobCommand, isJobControlCommand } from '@pi-im-bot/jobs/commands'
+import { requestedSkill } from "@pi-im-bot/resources/skills/invocation"
+import { isJobCommand, isJobControlCommand } from "@pi-im-bot/jobs/commands"
 
-const COMMANDS = new Set(['/help', '/status', '/stop', '/new', '/skills'])
+const COMMANDS = new Set(["/help", "/status", "/stop", "/new", "/skills"])
 
 export function isControlCommand(text: string) {
   return COMMANDS.has(text.trim()) || isJobControlCommand(text)
@@ -15,9 +15,9 @@ export function extractPrompt(
 ) {
   let trimmed = text.trim()
   let mentioned = false
-  trimmed = trimmed.replace(/^\[CQ:reply,id=-?\d+\]\s*/u, '')
+  trimmed = trimmed.replace(/^\[CQ:reply,id=-?\d+\]\s*/u, "")
   if (selfId) {
-    const mention = '[CQ:at,qq=' + selfId + ']'
+    const mention = "[CQ:at,qq=" + selfId + "]"
     if (trimmed.startsWith(mention)) {
       trimmed = trimmed.slice(mention.length).trimStart()
       mentioned = true
@@ -33,15 +33,15 @@ export function extractPrompt(
     return trimmed
   }
   if (trimmed === prefix) {
-    return '/help'
+    return "/help"
   }
   if (!trimmed.startsWith(prefix) || !/\s/u.test(trimmed.charAt(prefix.length))) {
     if (mentioned) {
-      return trimmed || '请查看这条消息中的附件。'
+      return trimmed || "请查看这条消息中的附件。"
     }
     return null
   }
-  return trimmed.slice(prefix.length).trim() || '/help'
+  return trimmed.slice(prefix.length).trim() || "/help"
 }
 
 export function isBuiltinCommand(text: string) {

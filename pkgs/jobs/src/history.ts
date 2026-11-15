@@ -1,5 +1,5 @@
-import { defineDocFamily, type Tx } from '@earendil-works/pi-durable'
-import type { JobSummary } from './schema'
+import { defineDocFamily, type Tx } from "@earendil-works/pi-durable"
+import type { JobSummary } from "./schema"
 
 export const jobHistoryPageSize = 128
 
@@ -12,9 +12,9 @@ export const JobHistoryHead = defineDocFamily<
   },
   null
 >({
-  kind: 'bot.job-history-head',
+  kind: "bot.job-history-head",
   version: 1,
-  scope: 'session',
+  scope: "session",
   family: true,
   initial: () => ({ page: 0, size: 0, latest: null, linked: true }),
   checkpointWhen: () => true
@@ -27,9 +27,9 @@ export const JobHistoryPage = defineDocFamily<
   },
   null
 >({
-  kind: 'bot.job-history-page',
+  kind: "bot.job-history-page",
   version: 1,
-  scope: 'session',
+  scope: "session",
   family: true,
   initial: () => ({ jobs: {} }),
   checkpointWhen: (_value, _ops, info) => {

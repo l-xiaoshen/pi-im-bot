@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from "zod"
 
 export const ArtifactAccessSchema = z.object({
   mediaIds: z.array(z.uuid()).max(16).default([]),

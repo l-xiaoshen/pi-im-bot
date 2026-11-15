@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from "zod"
 
 export const ArtifactLimitsSchema = z
   .object({
@@ -41,8 +41,8 @@ export const ArtifactLimitsSchema = z
       value.maxProducerItems > value.maxTotalItems
     ) {
       context.addIssue({
-        code: 'custom',
-        message: '产物额度须满足单文件 ≤ 会话/生产者 ≤ 全局，数量额度也不得超过全局'
+        code: "custom",
+        message: "产物额度须满足单文件 ≤ 会话/生产者 ≤ 全局，数量额度也不得超过全局"
       })
     }
   })

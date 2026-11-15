@@ -1,7 +1,7 @@
-import { z } from 'zod'
-import { PluginIdSchema } from '../manifest'
-import { PluginInstallUrlSchema } from './url'
-import { PluginOriginSchema } from './origin'
+import { z } from "zod"
+import { PluginIdSchema } from "../manifest"
+import { PluginInstallUrlSchema } from "./url"
+import { PluginOriginSchema } from "./origin"
 
 export const InstallRequestSchema = z
   .object({
@@ -21,20 +21,11 @@ export const InstallRequestSchema = z
   .strict()
   .refine((value) => {
     return [value.url, value.directory, value.builtin].filter(Boolean).length === 1
-  }, '请选择一个插件来源')
+  }, "请选择一个插件来源")
 export const InstallationSchema = z.object({
   id: z.uuid(),
   name: z.string(),
-  stage: z.enum([
-    'queued',
-    'downloading',
-    'verifying',
-    'applying',
-    'succeeded',
-    'failed',
-    'cancelled',
-    'interrupted'
-  ]),
+  stage: z.enum(["queued", "downloading", "verifying", "applying", "succeeded", "failed", "cancelled", "interrupted"]),
   createdAt: z.number(),
   updatedAt: z.number(),
   pluginId: z.string().optional(),

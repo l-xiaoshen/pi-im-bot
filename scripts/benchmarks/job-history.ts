@@ -1,6 +1,6 @@
-import { performance } from 'node:perf_hooks'
-import { jobOutstanding } from '@pi-im-bot/jobs'
-import type { JobSummary } from '@pi-im-bot/jobs/schema'
+import { performance } from "node:perf_hooks"
+import { jobOutstanding } from "@pi-im-bot/jobs"
+import type { JobSummary } from "@pi-im-bot/jobs/schema"
 
 let sink = 0
 function measure(operation: () => number) {
@@ -23,26 +23,26 @@ for (const size of [1000, 10000, 100000]) {
   const requests: Record<string, string> = {}
   const admissions: Record<string, number> = {}
   for (let n = 0; n < size; n += 1) {
-    const id = 'history-' + n
+    const id = "history-" + n
     jobs[id] = {
       id,
-      roomId: 'room',
-      title: 'synthetic history',
-      kind: 'tool',
+      roomId: "room",
+      title: "synthetic history",
+      kind: "tool",
       revision: 1,
-      state: 'succeeded',
-      delivery: 'sent',
+      state: "succeeded",
+      delivery: "sent",
       createdAt: n,
       updatedAt: n
     }
-    requests['source-' + n + ':call'] = id
-    admissions['source-' + n] = 1
+    requests["source-" + n + ":call"] = id
+    admissions["source-" + n] = 1
   }
   const active = Object.fromEntries(
     Object.entries(jobs)
       .slice(-16)
       .map(([id, job]) => {
-        return [id, { ...job, state: 'running' as const, delivery: 'pending' as const }]
+        return [id, { ...job, state: "running" as const, delivery: "pending" as const }]
       })
   )
   Object.assign(jobs, active)
@@ -51,7 +51,7 @@ for (const size of [1000, 10000, 100000]) {
   const oldListMs = measure(() => {
     const history = Object.values(jobs)
       .filter((job) => {
-        return job.roomId === 'room'
+        return job.roomId === "room"
       })
       .sort((a, b) => {
         return b.createdAt - a.createdAt
@@ -103,6 +103,6 @@ for (const size of [1000, 10000, 100000]) {
 console.log(
   JSON.stringify({
     sink,
-    note: 'Authored in-memory projection benchmark, median of 20 samples after 5 warmups. Excludes SDK storage, transaction and migration costs. No performance claim for request archive deletion.'
+    note: "Authored in-memory projection benchmark, median of 20 samples after 5 warmups. Excludes SDK storage, transaction and migration costs. No performance claim for request archive deletion."
   })
 )

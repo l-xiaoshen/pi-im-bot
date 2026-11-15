@@ -1,10 +1,10 @@
-import { z } from 'zod'
-import type { Address } from '@pi-im-bot/contracts/message'
+import { z } from "zod"
+import type { Address } from "@pi-im-bot/contracts/message"
 
 const IdSchema = z.union([z.string(), z.number()]).transform(String)
 const RecallSchema = z.object({
-  post_type: z.literal('notice'),
-  notice_type: z.enum(['group_recall', 'friend_recall']),
+  post_type: z.literal("notice"),
+  notice_type: z.enum(["group_recall", "friend_recall"]),
   self_id: IdSchema,
   group_id: IdSchema.optional(),
   user_id: IdSchema.optional(),
@@ -16,14 +16,14 @@ export function parseRecall(input: unknown, selfId: string) {
     return undefined
   }
   const notice = result.data
-  let kind: Address['kind'] = 'direct'
+  let kind: Address["kind"] = "direct"
   let chatId = notice.user_id
-  if (notice.notice_type === 'group_recall') {
-    kind = 'group'
+  if (notice.notice_type === "group_recall") {
+    kind = "group"
     chatId = notice.group_id
   }
   if (!chatId) {
     return undefined
   }
-  return { address: { channel: 'onebot-v11', accountId: selfId, kind, chatId }, messageId: notice.message_id }
+  return { address: { channel: "onebot-v11", accountId: selfId, kind, chatId }, messageId: notice.message_id }
 }

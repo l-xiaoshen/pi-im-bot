@@ -1,5 +1,5 @@
-import type { Tx } from '@earendil-works/pi-durable'
-import { ConversationBinding, ConversationBindingsReady, ConversationIndex } from './documents'
+import type { Tx } from "@earendil-works/pi-durable"
+import { ConversationBinding, ConversationBindingsReady, ConversationIndex } from "./documents"
 
 export async function migrateConversationIndex(tx: Tx) {
   const state = await tx.doc(ConversationBindingsReady)

@@ -1,14 +1,14 @@
-import { BACKGROUND_CONTEXT } from '@earendil-works/chord/context'
-import type { JobService } from '@pi-im-bot/jobs/service'
-import type { JobTaskInput } from '@pi-im-bot/jobs/task'
-import type { JobWorker } from '@pi-im-bot/jobs/worker'
-import { externalKey } from '@pi-im-bot/jobs/external/documents'
-import { PluginExecutions, PluginExecutionSchema, type PluginExecution } from './documents'
-import { projectHistory } from '@pi-im-bot/messages/projection'
-import type { PluginInvocation } from '../invocation'
-import type { Tx } from '@earendil-works/pi-durable'
+import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context"
+import type { JobService } from "@pi-im-bot/jobs/service"
+import type { JobTaskInput } from "@pi-im-bot/jobs/task"
+import type { JobWorker } from "@pi-im-bot/jobs/worker"
+import { externalKey } from "@pi-im-bot/jobs/external/documents"
+import { PluginExecutions, PluginExecutionSchema, type PluginExecution } from "./documents"
+import { projectHistory } from "@pi-im-bot/messages/projection"
+import type { PluginInvocation } from "../invocation"
+import type { Tx } from "@earendil-works/pi-durable"
 
-export type CreateJobInvocation = JobWorker['invocation']
+export type CreateJobInvocation = JobWorker["invocation"]
 
 export async function pluginJobContext(
   service: JobService,
@@ -18,15 +18,15 @@ export async function pluginJobContext(
 ) {
   const job = await service.repository.get(input.jobId)
   const value = job.revisions[String(input.revision)]
-  if (!value || value.spec.kind !== 'tool' || !value.spec.capability.startsWith('plugin:')) {
-    throw new Error('此任务不属于插件操作')
+  if (!value || value.spec.kind !== "tool" || !value.spec.capability.startsWith("plugin:")) {
+    throw new Error("此任务不属于插件操作")
   }
   const plugins = service.coordinator.plugins
   if (!plugins) {
-    throw new Error('插件运行时未启用')
+    throw new Error("插件运行时未启用")
   }
   if (!value.nativeTaskId) {
-    throw new Error('插件任务缺少持久任务标识')
+    throw new Error("插件任务缺少持久任务标识")
   }
   const prepared = await create(job, value, value.nativeTaskId)
   const invocation: PluginInvocation = {
@@ -37,17 +37,12 @@ export async function pluginJobContext(
       authorize(capability) {
         if (value.presentation) {
           const outbound = service.coordinator.store.getOutbound(value.presentation.outboundId)
-          if (!outbound || outbound.cancelRequested || outbound.state !== 'rendering') {
-            throw new Error('呈现计划已停止或不在执行阶段')
+          if (!outbound || outbound.cancelRequested || outbound.state !== "rendering") {
+            throw new Error("呈现计划已停止或不在执行阶段")
           }
           service.coordinator.validateRender(outbound)
           for (const handler of outbound.presentationHandlers) {
-            service.coordinator.authorizeRetainedContext(
-              job.roomId,
-              value.mode,
-              prepared.input.context,
-              handler
-            )
+            service.coordinator.authorizeRetainedContext(job.roomId, value.mode, prepared.input.context, handler)
           }
         }
         if (retained) {
@@ -67,7 +62,7 @@ export async function pluginJobContext(
         )
       },
       async send() {
-        throw new Error('后台插件不直接发送群消息，由 Job 统一交付')
+        throw new Error("后台插件不直接发送群消息，由 Job 统一交付")
       }
     }
   }
@@ -84,7 +79,7 @@ export async function pluginJobContext(
     execution = PluginExecutionSchema.parse(stored.value)
   }
   if (execution.instanceId !== entry.instance.id || execution.generation !== entry.bundle.revision) {
-    throw new Error('插件任务回执与固定代码版本不匹配')
+    throw new Error("插件任务回执与固定代码版本不匹配")
   }
   return { job, value, spec: value.spec, plugins, invocation, entry, key, execution }
 }
@@ -98,13 +93,13 @@ export async function savePluginExecution(tx: Tx, key: string, execution: Plugin
 export function pluginJobError(error: unknown, execution: PluginExecution) {
   let message = String(error)
   function redact(value: unknown) {
-    if (typeof value === 'string' && value) {
-      message = message.replaceAll(value, '[task-handle]')
+    if (typeof value === "string" && value) {
+      message = message.replaceAll(value, "[task-handle]")
     } else if (Array.isArray(value)) {
       for (const item of value) {
         redact(item)
       }
-    } else if (value !== null && typeof value === 'object') {
+    } else if (value !== null && typeof value === "object") {
       for (const item of Object.values(value)) {
         redact(item)
       }

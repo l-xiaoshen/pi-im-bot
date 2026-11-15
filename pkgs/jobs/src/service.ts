@@ -1,17 +1,17 @@
-import { PluginStateStore } from '@pi-im-bot/plugins/state/store'
-import { ComfyBroker } from '@pi-im-bot/integrations/comfy/broker'
-import { BACKGROUND_CONTEXT, awaitWithContext, withAbortSignal } from '@earendil-works/chord/context'
-import { defineExtension, type TaskId } from '@earendil-works/pi-durable'
-import type { Configuration } from '@pi-im-bot/config/load'
-import type { Room } from '@pi-im-bot/contracts/message'
-import type { PreparedRunInput } from '@pi-im-bot/contracts/run'
-import type { Coordinator } from '@pi-im-bot/runtime/coordinator'
-import type { DurableAgentRuntime } from '@pi-im-bot/agent/durable/runtime'
-import { Jobs, JobFacts } from './documents'
-import { JobRequests, JobAdmissions, initializeJobIndex } from './index'
-import { JobRepository } from './repository'
-import { createJobTask } from './task'
-import { JobWorker } from './worker'
+import { PluginStateStore } from "@pi-im-bot/plugins/state/store"
+import { ComfyBroker } from "@pi-im-bot/integrations/comfy/broker"
+import { BACKGROUND_CONTEXT, awaitWithContext, withAbortSignal } from "@earendil-works/chord/context"
+import { defineExtension, type TaskId } from "@earendil-works/pi-durable"
+import type { Configuration } from "@pi-im-bot/config/load"
+import type { Room } from "@pi-im-bot/contracts/message"
+import type { PreparedRunInput } from "@pi-im-bot/contracts/run"
+import type { Coordinator } from "@pi-im-bot/runtime/coordinator"
+import type { DurableAgentRuntime } from "@pi-im-bot/agent/durable/runtime"
+import { Jobs, JobFacts } from "./documents"
+import { JobRequests, JobAdmissions, initializeJobIndex } from "./index"
+import { JobRepository } from "./repository"
+import { createJobTask } from "./task"
+import { JobWorker } from "./worker"
 import {
   JobRevisionSchema,
   JobSchema,
@@ -20,22 +20,18 @@ import {
   type JobSpec,
   type Job,
   type JobSummary
-} from './schema'
-import type { JobToolServices } from './tools'
-import { ExternalJobRunner } from './external/runner'
-import { ScheduleOccurrences, admitSchedule } from '@pi-im-bot/scheduler/occurrences'
-import type { ScheduleOrigin } from '@pi-im-bot/scheduler/origin'
-import type { Schedule } from '@pi-im-bot/scheduler/definition'
-import { reconcileExternal } from './external/reconcile'
-import { PluginJobRunner } from '@pi-im-bot/plugins/jobs/runner'
-import type { Outbound } from '@pi-im-bot/contracts/delivery'
-import {
-  RenderAdmissionRejected,
-  RenderRejectionSchema,
-  type RenderRejection
-} from '@pi-im-bot/contracts/rendering'
-import { serviceOperationBudget } from '@pi-im-bot/plugins/operation-budget'
-import type { PluginOperationEntry } from '@pi-im-bot/plugins/registry'
+} from "./schema"
+import type { JobToolServices } from "./tools"
+import { ExternalJobRunner } from "./external/runner"
+import { ScheduleOccurrences, admitSchedule } from "@pi-im-bot/scheduler/occurrences"
+import type { ScheduleOrigin } from "@pi-im-bot/scheduler/origin"
+import type { Schedule } from "@pi-im-bot/scheduler/definition"
+import { reconcileExternal } from "./external/reconcile"
+import { PluginJobRunner } from "@pi-im-bot/plugins/jobs/runner"
+import type { Outbound } from "@pi-im-bot/contracts/delivery"
+import { RenderAdmissionRejected, RenderRejectionSchema, type RenderRejection } from "@pi-im-bot/contracts/rendering"
+import { serviceOperationBudget } from "@pi-im-bot/plugins/operation-budget"
+import type { PluginOperationEntry } from "@pi-im-bot/plugins/registry"
 
 interface AdmissionOptions {
   operationOwned?: boolean
@@ -87,21 +83,16 @@ export class JobService {
       report: worker.report.bind(worker),
       abort: worker.abort.bind(worker)
     })
-    runtime.registry.install(defineExtension({ name: 'bot-jobs', tasks: [this.task] }))
+    runtime.registry.install(defineExtension({ name: "bot-jobs", tasks: [this.task] }))
   }
 
   forInvocation(invocation: JobInvocation): JobToolServices {
     const roomId = invocation.room.id
     return {
       operation: (title, capability, args, callId) => {
-        return this.admit(
-          invocation,
-          title,
-          { kind: 'tool', capability, arguments: args },
-          callId,
-          undefined,
-          { operationOwned: true }
-        )
+        return this.admit(invocation, title, { kind: "tool", capability, arguments: args }, callId, undefined, {
+          operationOwned: true
+        })
       },
       start: (title, spec, callId, messageIds) => {
         return this.start(invocation, title, spec, callId, messageIds)
@@ -122,7 +113,7 @@ export class JobService {
       },
       wait: async (id, signal) => {
         if (!invocation.input.context.jobId) {
-          throw new Error('主对话不等待后台任务；请先回复群聊，完成后会自动交付')
+          throw new Error("主对话不等待后台任务；请先回复群聊，完成后会自动交付")
         }
         for (;;) {
           signal?.throwIfAborted()
@@ -148,7 +139,7 @@ export class JobService {
   private checkChildControl(invocation: JobInvocation, job: Job) {
     const parentId = invocation.input.context.jobId
     if (parentId && job.revisions[String(job.currentRevision)].parentJobId !== parentId) {
-      throw new Error('后台 Agent 只能操作自己创建的子任务')
+      throw new Error("后台 Agent 只能操作自己创建的子任务")
     }
   }
 
@@ -166,7 +157,7 @@ export class JobService {
     const admission = outbound.renderAdmission
     const plan = outbound.render
     if (!admission || !plan) {
-      throw new Error('呈现缺少固定接纳快照')
+      throw new Error("呈现缺少固定接纳快照")
     }
     this.coordinator.validateRender(outbound)
     const config = await this.coordinator.loadConfigurationSnapshot(admission.configSnapshot)
@@ -180,9 +171,9 @@ export class JobService {
     }
     const job = await this.admit(
       { config, room, input, runId: outbound.runId ?? outbound.id, authorize },
-      '回复呈现',
-      { kind: 'tool', capability: plan.capability, arguments: plan.arguments },
-      outbound.id + ':render',
+      "回复呈现",
+      { kind: "tool", capability: plan.capability, arguments: plan.arguments },
+      outbound.id + ":render",
       undefined,
       {
         operationOwned: true,
@@ -196,24 +187,20 @@ export class JobService {
     return job.id
   }
 
-  async recordPresentationDelivery(
-    job: Job,
-    value: Job['revisions'][string],
-    delivery: JobSummary['delivery']
-  ) {
+  async recordPresentationDelivery(job: Job, value: Job["revisions"][string], delivery: JobSummary["delivery"]) {
     if (!value.presentation) {
       return
     }
     const outbound = this.coordinator.store.getOutbound(value.presentation.outboundId)
     const run = outbound?.runId && this.coordinator.store.getRun(outbound.runId)
-    let state: 'sent' | 'unknown' | 'partial' | 'suppressed' = 'suppressed'
-    if (delivery === 'sent' || delivery === 'unknown' || delivery === 'partial') {
+    let state: "sent" | "unknown" | "partial" | "suppressed" = "suppressed"
+    if (delivery === "sent" || delivery === "unknown" || delivery === "partial") {
       state = delivery
     }
     if (run) {
       run.presentation = { state, jobId: job.id }
       this.coordinator.store.saveRun(run)
-      this.coordinator.events.emit({ type: 'run', run })
+      this.coordinator.events.emit({ type: "run", run })
     }
     const parentId = value.presentation.parentJobId
     const parentRevision = value.presentation.parentJobRevision
@@ -235,23 +222,19 @@ export class JobService {
     sourceMessageIds?: string[],
     options: AdmissionOptions = {}
   ): Promise<JobSummary> {
-    if (spec.kind === 'agent' && !invocation.input.context.effective.settings.behavior.agentEnabled) {
-      throw new Error('当前聊天范围已关闭 Agent')
+    if (spec.kind === "agent" && !invocation.input.context.effective.settings.behavior.agentEnabled) {
+      throw new Error("当前聊天范围已关闭 Agent")
     }
-    let capability = 'start_job'
-    if (spec.kind === 'agent') {
-      capability = 'delegate_task'
+    let capability = "start_job"
+    if (spec.kind === "agent") {
+      capability = "delegate_task"
     }
-    if (!options.schedule?.entry && (!options.operationOwned || spec.kind !== 'tool')) {
+    if (!options.schedule?.entry && (!options.operationOwned || spec.kind !== "tool")) {
       invocation.authorize(capability)
     }
-    if (spec.kind === 'tool') {
-      if (
-        spec.capability !== 'bash' &&
-        !spec.capability.startsWith('mcp:') &&
-        !spec.capability.startsWith('plugin:')
-      ) {
-        throw new Error('后台操作当前支持沙盒 bash、MCP 和插件；多步任务请使用 delegate_task')
+    if (spec.kind === "tool") {
+      if (spec.capability !== "bash" && !spec.capability.startsWith("mcp:") && !spec.capability.startsWith("plugin:")) {
+        throw new Error("后台操作当前支持沙盒 bash、MCP 和插件；多步任务请使用 delegate_task")
       }
       invocation.authorize(spec.capability)
     }
@@ -270,7 +253,7 @@ export class JobService {
         return !allowedSources.has(id)
       })
     ) {
-      throw new Error('任务只能关联当前输入中的消息')
+      throw new Error("任务只能关联当前输入中的消息")
     }
     const nativeConversation = await this.runtime.ensureConversation(invocation.room, invocation.input)
     let parentTask: TaskId | undefined
@@ -278,7 +261,7 @@ export class JobService {
     let detached = false
     let deadlineAt = Date.now() + invocation.input.context.effective.settings.behavior.jobTimeoutMs
     let operation: PluginOperationEntry | undefined
-    if (spec.kind === 'tool' && spec.capability.startsWith('plugin:')) {
+    if (spec.kind === "tool" && spec.capability.startsWith("plugin:")) {
       operation = this.coordinator.plugins?.operation(
         {
           ...invocation,
@@ -288,7 +271,7 @@ export class JobService {
               return []
             },
             async send() {
-              throw new Error('admission never sends')
+              throw new Error("admission never sends")
             }
           }
         },
@@ -304,15 +287,15 @@ export class JobService {
     if (parentId) {
       const parent = await this.repository.get(parentId, invocation.room.id)
       const current = parent.revisions[String(parent.currentRevision)]
-      if (spec.kind === 'agent' && !current.schedule?.entry) {
-        throw new Error('后台 Agent 不能递归启动 Agent')
+      if (spec.kind === "agent" && !current.schedule?.entry) {
+        throw new Error("后台 Agent 不能递归启动 Agent")
       }
       if (
         parent.currentRevision !== invocation.input.context.jobRevision ||
         current.cancelRequested ||
         !current.nativeTaskId
       ) {
-        throw new Error('父任务版本已失效')
+        throw new Error("父任务版本已失效")
       }
       parentTask = current.nativeTaskId as TaskId
       deadlineAt = Math.min(deadlineAt, current.deadlineAt)
@@ -321,14 +304,14 @@ export class JobService {
         detached = current.schedule.entry && !current.schedule.isolated
       }
     }
-    const request = invocation.runId + ':' + callId
+    const request = invocation.runId + ":" + callId
     const id = crypto.randomUUID()
     const value = JobRevisionSchema.parse({
       revision: 1,
       title,
       spec,
       requiredActions: [],
-      state: 'queued',
+      state: "queued",
       createdAt: Date.now(),
       deadlineAt,
       sourceRunId: invocation.runId,
@@ -340,35 +323,35 @@ export class JobService {
       mode: invocation.room.mode,
       configSnapshot: this.coordinator.snapshotConfiguration(invocation.config),
       presentation: options.presentation,
-      childConversationId: 'job:' + id + ':1',
+      childConversationId: "job:" + id + ":1",
       runId: crypto.randomUUID()
     })
     if (parentId && !detached) {
-      value.delivery = 'none'
+      value.delivery = "none"
     }
-    if (spec.kind === 'tool' && spec.capability.startsWith('plugin:')) {
+    if (spec.kind === "tool" && spec.capability.startsWith("plugin:")) {
       value.requiredActions = operation?.operation.actions ?? []
       for (const action of value.requiredActions) {
         invocation.authorize(action)
       }
     }
-    const job: Job = { id, roomId: invocation.room.id, currentRevision: 1, revisions: { '1': value } }
+    const job: Job = { id, roomId: invocation.room.id, currentRevision: 1, revisions: { "1": value } }
     const acceptedId = await this.runtime.native.commit(async (tx) => {
       const index = await initializeJobIndex(tx)
       if (options.presentation) {
         const outbound = this.coordinator.store.getOutbound(options.presentation.outboundId)
-        if (!outbound || outbound.cancelRequested || outbound.state !== 'rendering') {
-          throw new Error('待呈现回复已停止，未新建任务')
+        if (!outbound || outbound.cancelRequested || outbound.state !== "rendering") {
+          throw new Error("待呈现回复已停止，未新建任务")
         }
       }
       const receipt = await tx.doc(JobRequests, request, null)
       const prior = receipt.jobId
       if (prior) {
-        return { status: 'accepted' as const, id: prior }
+        return { status: "accepted" as const, id: prior }
       }
       if (receipt.renderRejection) {
         return {
-          status: 'rejected' as const,
+          status: "rejected" as const,
           rejection: RenderRejectionSchema.parse(receipt.renderRejection)
         }
       }
@@ -380,12 +363,12 @@ export class JobService {
         const outbound = this.coordinator.store.getOutbound(options.presentation.outboundId)!
         this.coordinator.validateRender(outbound)
         receipt.renderRejection = rejection
-        return { status: 'rejected' as const, rejection }
+        return { status: "rejected" as const, rejection }
       }
       if (options.presentation && (this.coordinator.plugins?.manager.config.maxWorkers ?? 0) < 2) {
         return reject({
-          code: 'worker_capacity',
-          message: '自动呈现需要至少 2 个业务 Worker；当前容量保留文字与控制可用性'
+          code: "worker_capacity",
+          message: "自动呈现需要至少 2 个业务 Worker；当前容量保留文字与控制可用性"
         })
       }
       if (schedule) {
@@ -395,24 +378,24 @@ export class JobService {
         if (
           !current ||
           current.executionEpoch !== schedule.epoch ||
-          (schedule.entry && schedule.occurrence.startsWith('cron:') && !current.enabled)
+          (schedule.entry && schedule.occurrence.startsWith("cron:") && !current.enabled)
         ) {
-          throw new Error('此计划触发已失效或被停止')
+          throw new Error("此计划触发已失效或被停止")
         }
         await admitSchedule(tx, schedule, id)
       }
       const admissions = await tx.doc(JobAdmissions, invocation.runId, null)
       const count = admissions.count
       if (count >= invocation.input.context.effective.settings.behavior.maxJobsPerRun) {
-        return reject({ code: 'run_capacity', message: '本轮后台任务数量已达上限' })
+        return reject({ code: "run_capacity", message: "本轮后台任务数量已达上限" })
       }
       const outstanding = Object.values(index.jobs).filter((job) => {
-        return !jobTerminal(job.state) || job.delivery === 'pending'
+        return !jobTerminal(job.state) || job.delivery === "pending"
       })
       if (outstanding.length >= invocation.config.bot.agent.maxOutstandingJobs) {
         return reject({
-          code: 'global_capacity',
-          message: '全局未收尾后台任务数量已达上限，请先完成或停止部分任务'
+          code: "global_capacity",
+          message: "全局未收尾后台任务数量已达上限，请先完成或停止部分任务"
         })
       }
       if (
@@ -421,31 +404,31 @@ export class JobService {
         }).length >= invocation.input.context.effective.settings.behavior.maxOutstandingJobs
       ) {
         return reject({
-          code: 'scope_capacity',
-          message: '此会话未收尾后台任务数量已达上限，请先完成或停止部分任务'
+          code: "scope_capacity",
+          message: "此会话未收尾后台任务数量已达上限，请先完成或停止部分任务"
         })
       }
       const taskOptions = {
         conversationId: nativeConversation,
-        ownership: { kind: 'conversation' as const },
+        ownership: { kind: "conversation" as const },
         background: true
       }
-      if (!options.schedule?.entry && (!options.operationOwned || spec.kind !== 'tool')) {
+      if (!options.schedule?.entry && (!options.operationOwned || spec.kind !== "tool")) {
         invocation.authorize(capability)
       }
-      if (spec.kind === 'tool') {
+      if (spec.kind === "tool") {
         invocation.authorize(spec.capability)
       }
       let taskId: TaskId
       if (parentTask && !detached) {
         const parent = await tx.task(parentTask)
         if (!parent) {
-          throw new Error('父任务不存在')
+          throw new Error("父任务不存在")
         }
         taskId = await tx.createTask(
           this.task,
           { jobId: id, revision: 1 },
-          { conversationId: parent.conversationId, ownership: { kind: 'task', taskId: parentTask } }
+          { conversationId: parent.conversationId, ownership: { kind: "task", taskId: parentTask } }
         )
       } else {
         taskId = await tx.createTask(this.task, { jobId: id, revision: 1 }, taskOptions)
@@ -454,9 +437,9 @@ export class JobService {
       await this.repository.save(tx, job)
       receipt.jobId = id
       admissions.count = count + 1
-      return { status: 'accepted' as const, id }
+      return { status: "accepted" as const, id }
     }, BACKGROUND_CONTEXT)
-    if (acceptedId.status === 'rejected') {
+    if (acceptedId.status === "rejected") {
       throw new RenderAdmissionRejected(acceptedId.rejection)
     }
     const accepted = await this.repository.get(acceptedId.id, invocation.room.id)
@@ -473,7 +456,7 @@ export class JobService {
       return jobSummary(await this.repository.get(prior, schedule.roomId))
     }
     const invocation = this.coordinator.scheduleInvocation(schedule, occurrence)
-    return this.admit(invocation, schedule.name, { kind: 'agent', prompt: schedule.prompt }, 'tick', [], {
+    return this.admit(invocation, schedule.name, { kind: "agent", prompt: schedule.prompt }, "tick", [], {
       schedule: {
         id: schedule.id,
         occurrence,
@@ -526,7 +509,7 @@ export class JobService {
       return jobSummary(job)
     }
     const current = job.revisions[String(job.currentRevision)]
-    if (current.delivery === 'accepted') {
+    if (current.delivery === "accepted") {
       for (const child of await this.repository.list(roomId)) {
         const rendering = await this.repository.get(child.id, roomId)
         const presentation = rendering.revisions[String(rendering.currentRevision)].presentation
@@ -535,14 +518,14 @@ export class JobService {
         }
       }
     }
-    if (jobTerminal(current.state) && current.delivery !== 'pending') {
+    if (jobTerminal(current.state) && current.delivery !== "pending") {
       return jobSummary(job)
     }
     await this.runtime.native.commit(async (tx) => {
       await this.repository.change(tx, id, current.revision, (value) => {
         value.cancelRequested = true
         if (!jobTerminal(value.state)) {
-          value.state = 'cancel_requested'
+          value.state = "cancel_requested"
         }
       })
     }, BACKGROUND_CONTEXT)
@@ -558,51 +541,51 @@ export class JobService {
   }
 
   async update(invocation: JobInvocation, id: string, expected: number, instruction: string, callId: string) {
-    invocation.authorize('job_update')
-    invocation.authorize('delegate_task')
+    invocation.authorize("job_update")
+    invocation.authorize("delegate_task")
     if (invocation.input.context.jobId) {
-      throw new Error('后台 Agent 不能修订其他 Agent 任务')
+      throw new Error("后台 Agent 不能修订其他 Agent 任务")
     }
     await this.repository.initialize()
     const previousReceipt = await this.runtime.native.snapshot(
       JobRequests,
-      invocation.runId + ':' + callId,
+      invocation.runId + ":" + callId,
       BACKGROUND_CONTEXT
     )
     if (previousReceipt?.jobId) {
       if (previousReceipt.jobId !== id) {
-        throw new Error('任务修订幂等键与已有操作不匹配')
+        throw new Error("任务修订幂等键与已有操作不匹配")
       }
       return jobSummary(await this.repository.get(id, invocation.room.id))
     }
     const job = await this.repository.get(id, invocation.room.id)
     const previous = job.revisions[String(job.currentRevision)]
-    if (previous.spec.kind !== 'agent') {
-      throw new Error('已提交的外部操作不能改写；请先核对取消状态，再明确创建新任务')
+    if (previous.spec.kind !== "agent") {
+      throw new Error("已提交的外部操作不能改写；请先核对取消状态，再明确创建新任务")
     }
     if (job.currentRevision !== expected) {
-      throw new Error('任务版本已变化，请重新读取状态')
+      throw new Error("任务版本已变化，请重新读取状态")
     }
     const nextRevision = expected + 1
-    const prompt = previous.spec.prompt + '\n\n当前群成员的新修订：\n' + instruction
+    const prompt = previous.spec.prompt + "\n\n当前群成员的新修订：\n" + instruction
     if (prompt.length > 20000) {
-      throw new Error('任务说明过长，请精简后重新委派')
+      throw new Error("任务说明过长，请精简后重新委派")
     }
     const nativeConversation = await this.runtime.ensureConversation(invocation.room, invocation.input)
     const configSnapshot = this.coordinator.snapshotConfiguration(invocation.config)
     await this.runtime.native.commit(async (tx) => {
       const index = await initializeJobIndex(tx)
-      const request = invocation.runId + ':' + callId
+      const request = invocation.runId + ":" + callId
       const receipt = await tx.doc(JobRequests, request, null)
       if (receipt.jobId) {
         if (receipt.jobId !== id) {
-          throw new Error('任务修订幂等键与已有操作不匹配')
+          throw new Error("任务修订幂等键与已有操作不匹配")
         }
         return
       }
       const stored = await tx.doc(Jobs, id, null)
       if (!stored.value || stored.value.currentRevision !== expected) {
-        throw new Error('任务版本已变化')
+        throw new Error("任务版本已变化")
       }
       const current = JobSchema.parse(stored.value)
       if (!index.jobs[id]) {
@@ -613,20 +596,20 @@ export class JobService {
             return job.roomId === invocation.room.id
           }).length >= invocation.input.context.effective.settings.behavior.maxOutstandingJobs
         ) {
-          throw new Error('未收尾后台任务数量已达上限，请先完成或停止部分任务')
+          throw new Error("未收尾后台任务数量已达上限，请先完成或停止部分任务")
         }
       }
       current.revisions[String(expected)].cancelRequested = true
       const admissions = await tx.doc(JobAdmissions, invocation.runId, null)
       const count = admissions.count
       if (count >= invocation.input.context.effective.settings.behavior.maxJobsPerRun) {
-        throw new Error('本轮后台任务数量已达上限')
+        throw new Error("本轮后台任务数量已达上限")
       }
       const value = JobRevisionSchema.parse({
         ...current.revisions[String(expected)],
         revision: nextRevision,
-        spec: { kind: 'agent', prompt },
-        state: 'queued',
+        spec: { kind: "agent", prompt },
+        state: "queued",
         createdAt: Date.now(),
         startedAt: undefined,
         finishedAt: undefined,
@@ -637,9 +620,9 @@ export class JobService {
         }),
         context: invocation.input.context,
         configSnapshot,
-        childConversationId: 'job:' + id + ':' + nextRevision,
+        childConversationId: "job:" + id + ":" + nextRevision,
         runId: crypto.randomUUID(),
-        delivery: 'pending',
+        delivery: "pending",
         cancelRequested: false,
         result: undefined,
         deliveryError: undefined,
@@ -648,7 +631,7 @@ export class JobService {
       value.nativeTaskId = await tx.createTask(
         this.task,
         { jobId: id, revision: nextRevision },
-        { conversationId: nativeConversation, ownership: { kind: 'conversation' }, background: true }
+        { conversationId: nativeConversation, ownership: { kind: "conversation" }, background: true }
       )
       current.currentRevision = nextRevision
       current.revisions[String(nextRevision)] = value
@@ -676,7 +659,7 @@ export class JobService {
       text: value.title,
       actorId: actor.actorId,
       actorName: actor.actorName,
-      source: 'job',
+      source: "job",
       receivedAt: value.createdAt,
       identities: value.context.authority.identities,
       context: value.context
@@ -700,7 +683,7 @@ export class JobService {
     }, BACKGROUND_CONTEXT)
   }
   changed(job: Job) {
-    this.coordinator.events.emit({ type: 'job', job: jobSummary(job) })
+    this.coordinator.events.emit({ type: "job", job: jobSummary(job) })
   }
 
   async cancelScope(roomId: string) {

@@ -1,9 +1,9 @@
-import { z } from 'zod'
-import type { PluginConfigurationEditor } from '../configuration/editor'
-import { builtinPluginPoints } from '../hooks/points'
-import { revision } from '@pi-im-bot/settings/resolve'
-import { SettingsEditError } from '@pi-im-bot/settings/editor'
-import type { SavePipelineSchema } from './contracts'
+import { z } from "zod"
+import type { PluginConfigurationEditor } from "../configuration/editor"
+import { builtinPluginPoints } from "../hooks/points"
+import { revision } from "@pi-im-bot/settings/resolve"
+import { SettingsEditError } from "@pi-im-bot/settings/editor"
+import type { SavePipelineSchema } from "./contracts"
 
 export class PluginPipelineEditor {
   constructor(private readonly editor: PluginConfigurationEditor) {}
@@ -28,7 +28,7 @@ export class PluginPipelineEditor {
                   return hook.point === node.id
                 })
                 .map((hook) => {
-                  const key = plugin.id + '/' + hook.id
+                  const key = plugin.id + "/" + hook.id
                   return {
                     key,
                     pluginId: plugin.id,
@@ -82,7 +82,7 @@ export class PluginPipelineEditor {
   async save(input: z.infer<typeof SavePipelineSchema>) {
     const state = await this.read()
     if (state.revision !== input.revision) {
-      throw new SettingsEditError('流程或插件版本已变化，请刷新后重试', 409)
+      throw new SettingsEditError("流程或插件版本已变化，请刷新后重试", 409)
     }
     const keys = new Set(
       state.nodes.flatMap((node) => {
@@ -94,14 +94,14 @@ export class PluginPipelineEditor {
     const framework = await this.editor.framework.read()
     for (const change of input.changes) {
       if (!keys.has(change.key)) {
-        throw new Error('只能配置已经声明在真实节点上的处理器')
+        throw new Error("只能配置已经声明在真实节点上的处理器")
       }
       framework.config.defaults.extensions.priorities[change.key] = change.priority
       framework.config.defaults.extensions.disabled[change.key] = change.disabled
     }
     await this.editor.framework.save(framework.version, framework.config, async () => {
       if ((await this.read()).revision !== input.revision) {
-        throw new SettingsEditError('流程或插件配置已变化，未覆盖', 409)
+        throw new SettingsEditError("流程或插件配置已变化，未覆盖", 409)
       }
     })
     return this.read()

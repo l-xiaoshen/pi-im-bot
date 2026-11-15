@@ -1,19 +1,19 @@
-import type { AgentMessage } from '@earendil-works/pi-agent-core'
-import { z } from 'zod'
-import type { PluginService } from '../service'
-import type { PluginInvocation } from '../invocation'
-import { collectPluginPoint } from './dispatch'
-import { historyProjectionNode } from './points'
-import { pluginHookId, pluginToolName, pluginOperationId } from '../identity'
+import type { AgentMessage } from "@earendil-works/pi-agent-core"
+import { z } from "zod"
+import type { PluginService } from "../service"
+import type { PluginInvocation } from "../invocation"
+import { collectPluginPoint } from "./dispatch"
+import { historyProjectionNode } from "./points"
+import { pluginHookId, pluginToolName, pluginOperationId } from "../identity"
 const JobCallSchema = z
   .object({
-    kind: z.literal('tool').optional(),
+    kind: z.literal("tool").optional(),
     capability: z.string(),
     arguments: z.record(z.string(), z.unknown())
   })
   .passthrough()
 const HiddenArguments = {
-  modelProjection: 'arguments withheld by this scope prompt-history policy; immutable audit retained'
+  modelProjection: "arguments withheld by this scope prompt-history policy; immutable audit retained"
 }
 export async function projectPluginHistory<T extends AgentMessage>(
   service: PluginService | undefined,
@@ -31,9 +31,7 @@ export async function projectPluginHistory<T extends AgentMessage>(
       origin: invocation.input.source
     })
     .filter((entry) => {
-      return invocation.input.context.authority.capabilities.includes(
-        pluginHookId(entry.instanceId, entry.hook.id)
-      )
+      return invocation.input.context.authority.capabilities.includes(pluginHookId(entry.instanceId, entry.hook.id))
     })
   if (!entries.length) {
     return [...messages]
@@ -51,7 +49,7 @@ export async function projectPluginHistory<T extends AgentMessage>(
           registry,
           entry,
           value,
-          'model-projection:' + invocation.input.receivedAt,
+          "model-projection:" + invocation.input.receivedAt,
           signal
         )
       }
@@ -61,7 +59,7 @@ export async function projectPluginHistory<T extends AgentMessage>(
   const names = new Set<string>()
   const capabilities = new Set<string>()
   for (const choice of choices) {
-    const instance = choice.handler.split('/')[0]
+    const instance = choice.handler.split("/")[0]
     const binding = registry.bindings.get(instance)
     for (const operation of choice.output.hideArguments) {
       if (
@@ -78,19 +76,19 @@ export async function projectPluginHistory<T extends AgentMessage>(
     return [...messages]
   }
   return messages.map((message) => {
-    if (message.role !== 'assistant') {
+    if (message.role !== "assistant") {
       return message
     }
     let changed = false
     const content = message.content.map((part) => {
-      if (part.type !== 'toolCall') {
+      if (part.type !== "toolCall") {
         return part
       }
       if (names.has(part.name)) {
         changed = true
         return { ...part, arguments: { ...HiddenArguments } }
       }
-      if (part.name === 'start_job') {
+      if (part.name === "start_job") {
         const spec = JobCallSchema.safeParse(part.arguments)
         if (spec.success && capabilities.has(spec.data.capability)) {
           changed = true

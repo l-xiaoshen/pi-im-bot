@@ -62,26 +62,26 @@ try {
 
 type FileRequest =
   | {
-      operation: 'resolve' | 'mkdir' | 'stat' | 'list'
+      operation: "resolve" | "mkdir" | "stat" | "list"
       path: string
     }
   | {
-      operation: 'read'
+      operation: "read"
       path: string
       maxBytes: number
     }
   | {
-      operation: 'write'
+      operation: "write"
       path: string
       source: string
     }
 
 export function fileCommand(input: FileRequest) {
   return (
-    'node --input-type=module -e ' +
+    "node --input-type=module -e " +
     shellQuote(SCRIPT) +
-    ' ' +
-    shellQuote(Buffer.from(JSON.stringify(input)).toString('base64'))
+    " " +
+    shellQuote(Buffer.from(JSON.stringify(input)).toString("base64"))
   )
 }
 

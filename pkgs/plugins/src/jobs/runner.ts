@@ -1,24 +1,24 @@
-import { BACKGROUND_CONTEXT, type Context } from '@earendil-works/chord/context'
-import type { JobService } from '@pi-im-bot/jobs/service'
-import type { ActiveJobTask, JobTaskRuntime, JobTaskInput } from '@pi-im-bot/jobs/task'
-import type { JobRevision } from '@pi-im-bot/jobs/schema'
-import { jobSummary, jobTerminal } from '@pi-im-bot/jobs/schema'
-import { claimExternal, finishExternal, releaseExternal } from '@pi-im-bot/jobs/external/state'
-import type { ExternalCancellation } from '@pi-im-bot/jobs/external/cancel'
-import { externalKey } from '@pi-im-bot/jobs/external/documents'
-import { PluginExecutions, PluginExecutionSchema } from './documents'
+import { BACKGROUND_CONTEXT, type Context } from "@earendil-works/chord/context"
+import type { JobService } from "@pi-im-bot/jobs/service"
+import type { ActiveJobTask, JobTaskRuntime, JobTaskInput } from "@pi-im-bot/jobs/task"
+import type { JobRevision } from "@pi-im-bot/jobs/schema"
+import { jobSummary, jobTerminal } from "@pi-im-bot/jobs/schema"
+import { claimExternal, finishExternal, releaseExternal } from "@pi-im-bot/jobs/external/state"
+import type { ExternalCancellation } from "@pi-im-bot/jobs/external/cancel"
+import { externalKey } from "@pi-im-bot/jobs/external/documents"
+import { PluginExecutions, PluginExecutionSchema } from "./documents"
 import {
   pluginJobContext,
   savePluginExecution,
   pluginJobError,
   type CreateJobInvocation,
   type PluginJobContext
-} from './context'
-import { pluginJobOutcome } from './outcome'
-import type { PluginOperationOutcome } from '../rpc/protocol'
-import { PluginInvocationError } from '../rpc/peer'
-import { mergeExternalOutcome } from '@pi-im-bot/jobs/external/outcome'
-import { deadlineScope } from '@pi-im-bot/support/deadline'
+} from "./context"
+import { pluginJobOutcome } from "./outcome"
+import type { PluginOperationOutcome } from "../rpc/protocol"
+import { PluginInvocationError } from "../rpc/peer"
+import { mergeExternalOutcome } from "@pi-im-bot/jobs/external/outcome"
+import { deadlineScope } from "@pi-im-bot/support/deadline"
 
 export class PluginJobRunner {
   constructor(
@@ -27,7 +27,7 @@ export class PluginJobRunner {
   ) {}
 
   supports(value: JobRevision) {
-    return value.spec.kind === 'tool' && value.spec.capability.startsWith('plugin:')
+    return value.spec.kind === "tool" && value.spec.capability.startsWith("plugin:")
   }
 
   private load(input: JobTaskInput, retained = false) {
@@ -53,33 +53,29 @@ export class PluginJobRunner {
         !(await claimExternal(
           this.service,
           task,
-          'plugin:' + value.entry.instance.id,
+          "plugin:" + value.entry.instance.id,
           value.plugins.manager.config.maxOutstandingJobs,
           context
         ))
       ) {
         await runtime.commit(async (tx) => {
           await this.service.repository.change(tx, value.job.id, value.value.revision, (current) => {
-            current.state = 'queued'
-            current.external = { status: 'waiting_capacity', attempts: 0, hasReceipt: false }
+            current.state = "queued"
+            current.external = { status: "waiting_capacity", attempts: 0, hasReceipt: false }
           })
           return undefined
         }, context)
         this.service.changed(await this.service.repository.get(value.job.id))
-        await runtime.sleepUntil(
-          Math.min(Date.now() + 1000, value.value.deadlineAt),
-          { phase: 'work' },
-          context
-        )
+        await runtime.sleepUntil(Math.min(Date.now() + 1000, value.value.deadlineAt), { phase: "work" }, context)
         return
       }
       await runtime.commit(async (tx) => {
         await savePluginExecution(tx, value.key, value.execution)
         await this.service.repository.change(tx, value.job.id, value.value.revision, (current) => {
-          current.state = 'waiting_external'
-          current.external = { status: 'submitting', attempts: 0, hasReceipt: false }
+          current.state = "waiting_external"
+          current.external = { status: "submitting", attempts: 0, hasReceipt: false }
         })
-        return { status: 'running', checkpoint: { phase: 'dispatching' } }
+        return { status: "running", checkpoint: { phase: "dispatching" } }
       }, context)
       dispatched = true
       const outcome = await value.plugins.execute(
@@ -97,9 +93,9 @@ export class PluginJobRunner {
       if (dispatched && value.entry.operation.recover && (await this.recover(task, runtime, context))) {
         return
       }
-      let state: 'failed' | 'outcome_unknown' = 'failed'
-      if (dispatched && !(error instanceof PluginInvocationError && error.failure.code === 'validation')) {
-        state = 'outcome_unknown'
+      let state: "failed" | "outcome_unknown" = "failed"
+      if (dispatched && !(error instanceof PluginInvocationError && error.failure.code === "validation")) {
+        state = "outcome_unknown"
       }
       await finishExternal(this.service, task, runtime, context, {
         state,
@@ -117,12 +113,12 @@ export class PluginJobRunner {
     value: PluginJobContext,
     outcome: PluginOperationOutcome
   ) {
-    if (outcome.status !== 'pending') {
+    if (outcome.status !== "pending") {
       await finishExternal(this.service, task, runtime, context, await pluginJobOutcome(value, outcome))
       return
     }
     if (!value.entry.operation.poll) {
-      throw new Error('插件返回了等待句柄但没有声明 poll；未重新提交')
+      throw new Error("插件返回了等待句柄但没有声明 poll；未重新提交")
     }
     value.execution.handle = outcome.handle
     value.execution.failures = 0
@@ -130,18 +126,18 @@ export class PluginJobRunner {
     await runtime.commit(async (tx) => {
       await savePluginExecution(tx, value.key, value.execution)
       await this.service.repository.change(tx, value.job.id, value.value.revision, (current) => {
-        current.state = 'waiting_external'
+        current.state = "waiting_external"
         current.external = {
-          status: 'working',
+          status: "working",
           hasReceipt: true,
           attempts: (current.external?.attempts ?? 0) + 1,
           nextPollAt
         }
       })
-      return { status: 'running', checkpoint: { phase: 'poll' } }
+      return { status: "running", checkpoint: { phase: "poll" } }
     }, context)
     this.service.changed(await this.service.repository.get(value.job.id))
-    await runtime.sleepUntil(nextPollAt, { phase: 'poll' }, context)
+    await runtime.sleepUntil(nextPollAt, { phase: "poll" }, context)
   }
 
   async recover(task: ActiveJobTask, runtime: JobTaskRuntime, context: Context) {
@@ -159,14 +155,14 @@ export class PluginJobRunner {
         value.invocation,
         value.entry.capabilityId,
         { input: value.spec.arguments, handle: value.execution.handle ?? null },
-        value.key + ':recover',
+        value.key + ":recover",
         runtime.signal,
-        'recover'
+        "recover"
       )
       await this.remember(task, runtime, context, value, outcome)
     } catch (error) {
       await finishExternal(this.service, task, runtime, context, {
-        state: 'outcome_unknown',
+        state: "outcome_unknown",
         error: pluginJobError(error, value.execution)
       })
     }
@@ -180,7 +176,7 @@ export class PluginJobRunner {
     try {
       value = await this.load(task.input, true)
       if (!value.plugins.available()) {
-        throw new Error('插件执行后端已关闭')
+        throw new Error("插件执行后端已关闭")
       }
       value.invocation.services.authorize(value.entry.capabilityId)
       for (const action of value.entry.operation.actions) {
@@ -196,7 +192,7 @@ export class PluginJobRunner {
         if (value.entry.operation.recover && (await this.recover(task, runtime, context))) {
           return
         }
-        throw new Error('插件任务句柄缺失，未重新提交')
+        throw new Error("插件任务句柄缺失，未重新提交")
       }
       if (Date.now() >= value.value.deadlineAt) {
         const cancelled = await this.cancel(task.input, context)
@@ -205,7 +201,7 @@ export class PluginJobRunner {
           task,
           runtime,
           context,
-          cancelled?.outcome ?? { state: 'outcome_unknown', error: '插件等待期限已到，结果未确认' }
+          cancelled?.outcome ?? { state: "outcome_unknown", error: "插件等待期限已到，结果未确认" }
         )
         return
       }
@@ -214,9 +210,9 @@ export class PluginJobRunner {
         value.invocation,
         value.entry.capabilityId,
         { handle: value.execution.handle },
-        value.key + ':poll',
+        value.key + ":poll",
         deadline.signal,
-        'poll'
+        "poll"
       )
       await this.remember(task, runtime, context, value, outcome)
     } catch (error) {
@@ -238,7 +234,7 @@ export class PluginJobRunner {
           await savePluginExecution(tx, value!.key, value!.execution)
           await this.service.repository.change(tx, task.input.jobId, task.input.revision, (current) => {
             current.external = {
-              status: 'retrying_poll',
+              status: "retrying_poll",
               hasReceipt: true,
               attempts: (current.external?.attempts ?? 0) + 1,
               nextPollAt
@@ -246,7 +242,7 @@ export class PluginJobRunner {
           })
           return undefined
         }, context)
-        await runtime.sleepUntil(nextPollAt, { phase: 'poll' }, context)
+        await runtime.sleepUntil(nextPollAt, { phase: "poll" }, context)
         return
       }
       if (!authorized) {
@@ -257,21 +253,17 @@ export class PluginJobRunner {
           return undefined
         }, context)
       }
-      let message = '插件任务无法继续查询，结果未确认'
+      let message = "插件任务无法继续查询，结果未确认"
       if (value) {
         message = pluginJobError(error, value.execution)
       }
-      await finishExternal(this.service, task, runtime, context, { state: 'outcome_unknown', error: message })
+      await finishExternal(this.service, task, runtime, context, { state: "outcome_unknown", error: message })
     } finally {
       deadline?.close()
     }
   }
 
-  async cancel(
-    input: JobTaskInput,
-    context: Context,
-    retry = false
-  ): Promise<ExternalCancellation | undefined> {
+  async cancel(input: JobTaskInput, context: Context, retry = false): Promise<ExternalCancellation | undefined> {
     const stored = await this.service.runtime.native.snapshot(
       PluginExecutions,
       externalKey(input.jobId, input.revision),
@@ -280,9 +272,9 @@ export class PluginJobRunner {
     if (!stored?.value) {
       return undefined
     }
-    let outcome: ExternalCancellation['outcome'] = {
-      state: 'outcome_unknown',
-      error: '已停止等待，插件取消尚未确认'
+    let outcome: ExternalCancellation["outcome"] = {
+      state: "outcome_unknown",
+      error: "已停止等待，插件取消尚未确认"
     }
     try {
       const value = await this.load(input, true)
@@ -290,10 +282,10 @@ export class PluginJobRunner {
         const result = await value.plugins.execute(
           value.invocation,
           value.entry.capabilityId,
-          { input: value.spec.arguments, handle: null, intent: 'cancel' },
-          value.key + ':recover-cancel',
+          { input: value.spec.arguments, handle: null, intent: "cancel" },
+          value.key + ":recover-cancel",
           AbortSignal.timeout(10000),
-          'recover'
+          "recover"
         )
         outcome = await pluginJobOutcome(value, result)
       } else if (value.execution.handle !== undefined) {
@@ -301,7 +293,7 @@ export class PluginJobRunner {
           context.abortSignal ?? new AbortController().signal,
           AbortSignal.timeout(10000)
         ])
-        let phase: 'poll' | 'cancel' = 'poll'
+        let phase: "poll" | "cancel" = "poll"
         if (value.entry.operation.cancel) {
           const dispatch = await this.service.runtime.native.commit(async (tx) => {
             const doc = await tx.doc(PluginExecutions, value.key, null)
@@ -314,14 +306,14 @@ export class PluginJobRunner {
             return true
           }, context)
           if (dispatch) {
-            phase = 'cancel'
+            phase = "cancel"
           }
         }
         const result = await value.plugins.execute(
           value.invocation,
           value.entry.capabilityId,
           { handle: value.execution.handle },
-          value.key + ':' + phase,
+          value.key + ":" + phase,
           signal,
           phase
         )
@@ -337,31 +329,31 @@ export class PluginJobRunner {
     const job = await this.service.repository.get(jobId, roomId)
     const revision = job.currentRevision
     const value = job.revisions[String(revision)]
-    if (!jobTerminal(value.state) || value.delivery === 'pending') {
-      throw new Error('任务仍在执行，请先停止或等待收尾')
+    if (!jobTerminal(value.state) || value.delivery === "pending") {
+      throw new Error("任务仍在执行，请先停止或等待收尾")
     }
-    if (value.state !== 'outcome_unknown') {
+    if (value.state !== "outcome_unknown") {
       return jobSummary(job)
     }
     if (!value.external?.hasReceipt) {
-      throw new Error('没有插件任务回执，不能核对，也不会重新提交')
+      throw new Error("没有插件任务回执，不能核对，也不会重新提交")
     }
-    let outcome: ExternalCancellation['outcome']
+    let outcome: ExternalCancellation["outcome"]
     if (cancel) {
       outcome = (await this.cancel({ jobId, revision }, BACKGROUND_CONTEXT, true))!.outcome
     } else {
       const current = await this.load({ jobId, revision }, true)
       let argumentsValue: Record<string, unknown> = { handle: current.execution.handle }
-      let phase: 'recover' | 'reconcile' = 'reconcile'
+      let phase: "recover" | "reconcile" = "reconcile"
       if (current.execution.handle === undefined) {
-        argumentsValue = { input: current.spec.arguments, handle: null, intent: 'reconcile' }
-        phase = 'recover'
+        argumentsValue = { input: current.spec.arguments, handle: null, intent: "reconcile" }
+        phase = "recover"
       }
       const result = await current.plugins.execute(
         current.invocation,
         current.entry.capabilityId,
         argumentsValue,
-        current.key + ':reconcile',
+        current.key + ":reconcile",
         AbortSignal.timeout(30000),
         phase
       )
@@ -369,8 +361,8 @@ export class PluginJobRunner {
     }
     await this.service.runtime.native.commit(async (tx) => {
       await this.service.repository.change(tx, jobId, revision, (current) => {
-        if (current.state !== 'outcome_unknown' || current.delivery === 'pending') {
-          throw new Error('任务状态已变化')
+        if (current.state !== "outcome_unknown" || current.delivery === "pending") {
+          throw new Error("任务状态已变化")
         }
         outcome = mergeExternalOutcome(current.result, outcome)
         current.state = outcome.state

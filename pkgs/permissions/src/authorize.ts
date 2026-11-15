@@ -1,60 +1,57 @@
-import type { BotTool } from '@pi-im-bot/capabilities/tool'
-import type { EffectiveSettings, PermissionPolicy, Settings } from '@pi-im-bot/settings/schema'
-import type { Authority, TriggerIdentity } from './identity'
-import { capabilityIds, isActionCapability } from './catalog'
+import type { BotTool } from "@pi-im-bot/capabilities/tool"
+import type { EffectiveSettings, PermissionPolicy, Settings } from "@pi-im-bot/settings/schema"
+import type { Authority, TriggerIdentity } from "./identity"
+import { capabilityIds, isActionCapability } from "./catalog"
 
-function subjectMatches(
-  subject: PermissionPolicy['rules'][number]['subjects'][number],
-  identity: TriggerIdentity
-) {
-  if (subject.kind === 'everyone') {
+function subjectMatches(subject: PermissionPolicy["rules"][number]["subjects"][number], identity: TriggerIdentity) {
+  if (subject.kind === "everyone") {
     return true
   }
-  if (subject.kind === 'local' || subject.kind === 'mock') {
+  if (subject.kind === "local" || subject.kind === "mock") {
     return subject.kind === identity.origin
   }
   if (
-    identity.origin !== 'platform' ||
+    identity.origin !== "platform" ||
     subject.channel !== identity.channel ||
     subject.accountId !== identity.accountId
   ) {
     return false
   }
-  if (subject.kind === 'platform-user') {
+  if (subject.kind === "platform-user") {
     return subject.actorId === identity.actorId
   }
   return subject.role === identity.role
 }
 
 export function isAllowed(settings: Settings, identity: TriggerIdentity, capability: string) {
-  if (identity.origin === 'legacy') {
+  if (identity.origin === "legacy") {
     return false
   }
   const selection = settings.resources.tools
   if (
-    !capability.startsWith('command:') &&
-    !capability.startsWith('hook:') &&
+    !capability.startsWith("command:") &&
+    !capability.startsWith("hook:") &&
     !isActionCapability(capability) &&
-    capability !== 'tool_search' &&
-    selection.mode === 'selected' &&
+    capability !== "tool_search" &&
+    selection.mode === "selected" &&
     !selection.ids.includes(capability)
   ) {
     return false
   }
-  if (capability === 'chat_send' && !settings.behavior.allowProactive) {
+  if (capability === "chat_send" && !settings.behavior.allowProactive) {
     return false
   }
   const matching = settings.permissions.rules.filter((rule) => {
     return (
       rule.capabilities.some((pattern) => {
         return (
-          pattern === '*' ||
+          pattern === "*" ||
           pattern === capability ||
-          ((pattern.startsWith('mcp:') ||
-            pattern.startsWith('plugin:') ||
-            pattern.startsWith('hook:plugin:') ||
-            pattern.startsWith('command:plugin:')) &&
-            pattern.endsWith('/*') &&
+          ((pattern.startsWith("mcp:") ||
+            pattern.startsWith("plugin:") ||
+            pattern.startsWith("hook:plugin:") ||
+            pattern.startsWith("command:plugin:")) &&
+            pattern.endsWith("/*") &&
             capability.startsWith(pattern.slice(0, -1)))
         )
       }) &&
@@ -65,23 +62,23 @@ export function isAllowed(settings: Settings, identity: TriggerIdentity, capabil
   })
   if (
     matching.some((rule) => {
-      return rule.effect === 'deny'
+      return rule.effect === "deny"
     })
   ) {
     return false
   }
-  if (capability === 'comfy_manage') {
+  if (capability === "comfy_manage") {
     return (
-      identity.origin !== 'mock' &&
+      identity.origin !== "mock" &&
       matching.some((rule) => {
-        return rule.effect === 'allow' && rule.capabilities.includes('comfy_manage')
+        return rule.effect === "allow" && rule.capabilities.includes("comfy_manage")
       })
     )
   }
   return (
-    settings.permissions.default === 'allow' ||
+    settings.permissions.default === "allow" ||
     matching.some((rule) => {
-      return rule.effect === 'allow'
+      return rule.effect === "allow"
     })
   )
 }
@@ -93,7 +90,7 @@ export function captureAuthority(
   registered: readonly string[] = capabilityIds()
 ): Authority {
   if (identities.length === 0) {
-    throw new Error('任务缺少可信触发来源')
+    throw new Error("任务缺少可信触发来源")
   }
   const capabilities = registered.filter((id) => {
     return (
@@ -132,7 +129,7 @@ export function authorizedTools(
     .map((tool) => {
       return {
         ...tool,
-        async execute(...args: Parameters<BotTool['execute']>) {
+        async execute(...args: Parameters<BotTool["execute"]>) {
           check(capabilityFor(tool.name))
           return tool.execute(...args)
         }

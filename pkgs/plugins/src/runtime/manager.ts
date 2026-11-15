@@ -1,23 +1,23 @@
-import { mkdir, chmod, rm } from 'node:fs/promises'
-import { join } from 'node:path'
-import { createHash } from 'node:crypto'
-import { RunLimiter } from '@pi-im-bot/support/limiter'
-import { deadlineScope } from '@pi-im-bot/support/deadline'
-import type { PluginBinding } from '../registry'
-import { pluginPackageRoot, verifyPlugin } from '../package'
-import { PluginPeer, PluginInvocationError } from '../rpc/peer'
-import type { PluginAction, PluginInvocationView } from '../rpc/protocol'
-import { PluginRuntimeSchema, pluginPaths, hostPluginPath, type PluginRuntimeConfig } from './config'
-import { DockerPluginBackend, type PluginContainerBackend } from './docker'
-import { pluginContainerSpec, workerScopeKey } from './container-spec'
-import { buildPluginRunner } from './runner-bundle'
-import { BACKGROUND_CONTEXT, awaitWithContext, withAbortSignal } from '@earendil-works/chord/context'
-import { ManagedPluginVolumes } from '../storage/volumes'
-import type { PluginVolumes, PluginVolumeLease } from '../storage/contracts'
-import { openPluginDataFile } from '../storage/files'
+import { mkdir, chmod, rm } from "node:fs/promises"
+import { join } from "node:path"
+import { createHash } from "node:crypto"
+import { RunLimiter } from "@pi-im-bot/support/limiter"
+import { deadlineScope } from "@pi-im-bot/support/deadline"
+import type { PluginBinding } from "../registry"
+import { pluginPackageRoot, verifyPlugin } from "../package"
+import { PluginPeer, PluginInvocationError } from "../rpc/peer"
+import type { PluginAction, PluginInvocationView } from "../rpc/protocol"
+import { PluginRuntimeSchema, pluginPaths, hostPluginPath, type PluginRuntimeConfig } from "./config"
+import { DockerPluginBackend, type PluginContainerBackend } from "./docker"
+import { pluginContainerSpec, workerScopeKey } from "./container-spec"
+import { buildPluginRunner } from "./runner-bundle"
+import { BACKGROUND_CONTEXT, awaitWithContext, withAbortSignal } from "@earendil-works/chord/context"
+import { ManagedPluginVolumes } from "../storage/volumes"
+import type { PluginVolumes, PluginVolumeLease } from "../storage/contracts"
+import { openPluginDataFile } from "../storage/files"
 
 interface Worker {
-  mode: 'plugin' | 'validator' | 'stateless'
+  mode: "plugin" | "validator" | "stateless"
   key: string
   instanceId: string
   scopeKey: string
@@ -80,9 +80,9 @@ export class PluginWorkerManager {
   ) {
     this.config = PluginRuntimeSchema.parse(configuration)
     this.paths = pluginPaths(projectDir, this.config)
-    this.owner = createHash('sha256')
+    this.owner = createHash("sha256")
       .update(JSON.stringify([deployment, this.paths.hostRuntimeDir]))
-      .digest('hex')
+      .digest("hex")
       .slice(0, 16)
     this.backend = backend ?? new DockerPluginBackend(this.config.socketPath)
     this.slots = new RunLimiter(this.config.maxWorkers)
@@ -144,7 +144,7 @@ export class PluginWorkerManager {
   openDataFile(instance: string, generation: string, scope: string, relative: string) {
     const worker = this.workers.get(workerScopeKey(instance, generation, scope))
     if (!worker || worker.stopping || !worker.busy) {
-      throw new Error('插件数据文件只能在绑定的活动调用中发布')
+      throw new Error("插件数据文件只能在绑定的活动调用中发布")
     }
     return openPluginDataFile(worker.volume.path, relative)
   }
@@ -155,69 +155,63 @@ export class PluginWorkerManager {
     context: PluginInvocationView,
     input: unknown,
     signal: AbortSignal,
-    host: Parameters<PluginPeer['invoke']>[4],
+    host: Parameters<PluginPeer["invoke"]>[4],
     chain: readonly string[] = [],
     beforeDispatch?: () => void,
-    mode: 'plugin' | 'validator' | 'stateless' = 'plugin',
-    execution: 'foreground' | 'background' = 'foreground'
+    mode: "plugin" | "validator" | "stateless" = "plugin",
+    execution: "foreground" | "background" = "foreground"
   ) {
     if (!this.config.enabled) {
-      throw new Error('插件执行后端尚未启用，插件代码不会在 Bot 宿主运行')
+      throw new Error("插件执行后端尚未启用，插件代码不会在 Bot 宿主运行")
     }
     if (this.closed) {
-      throw new Error('插件运行时已关闭')
+      throw new Error("插件运行时已关闭")
     }
-    const backgroundStateless = mode === 'stateless' && execution === 'background'
+    const backgroundStateless = mode === "stateless" && execution === "background"
     if (backgroundStateless && this.config.maxWorkers < 2) {
-      throw new Error('无数据后台操作需要至少 2 个业务 Worker，保留一个前台容量')
+      throw new Error("无数据后台操作需要至少 2 个业务 Worker，保留一个前台容量")
     }
     if (context.instanceId !== binding.instance.id || context.generation !== binding.bundle.revision) {
-      throw new Error('插件调用与固定版本不匹配')
+      throw new Error("插件调用与固定版本不匹配")
     }
     const remaining = context.deadlineAt - Date.now()
     if (remaining <= 0) {
-      throw new Error('插件调用期限已到')
+      throw new Error("插件调用期限已到")
     }
     signal = AbortSignal.any([signal, this.shutdown.signal])
-    const key = workerScopeKey(
-      binding.instance.id,
-      binding.bundle.revision,
-      context.scope.id,
-      mode,
-      execution
-    )
-    const scopeKey = workerScopeKey(binding.instance.id, 'persistent-data', context.scope.id, mode, execution)
+    const key = workerScopeKey(binding.instance.id, binding.bundle.revision, context.scope.id, mode, execution)
+    const scopeKey = workerScopeKey(binding.instance.id, "persistent-data", context.scope.id, mode, execution)
     if (chain.includes(key)) {
-      throw new Error('插件调用形成重入环路：' + binding.instance.id)
+      throw new Error("插件调用形成重入环路：" + binding.instance.id)
     }
     if (chain.length >= 8) {
-      throw new Error('插件嵌套调用超过深度预算')
+      throw new Error("插件嵌套调用超过深度预算")
     }
     const problem = this.faults.get(key)
     if (problem && problem.retryAt > Date.now()) {
-      throw new Error('此插件 Worker 暂时熔断：' + problem.message)
+      throw new Error("此插件 Worker 暂时熔断：" + problem.message)
     }
     let lock = this.locks.get(scopeKey)
     let calls = this.invocations - this.validationCalls
     let maximum = this.config.maxWorkers
-    if (mode === 'validator') {
+    if (mode === "validator") {
       calls = this.validationCalls
       maximum = this.config.maxValidators
     }
     if (calls >= maximum + this.config.maxPending) {
-      throw new Error('插件调用等待队列已满')
+      throw new Error("插件调用等待队列已满")
     }
     if (
       backgroundStateless &&
       this.backgroundStatelessCalls >= this.config.maxWorkers - 1 + Math.max(0, this.config.maxPending - 1)
     ) {
-      throw new Error('无数据后台操作等待队列已满，保留前台受理容量')
+      throw new Error("无数据后台操作等待队列已满，保留前台受理容量")
     }
     this.invocations += 1
     if (backgroundStateless) {
       this.backgroundStatelessCalls += 1
     }
-    if (mode === 'validator') {
+    if (mode === "validator") {
       this.validationCalls += 1
     }
     if (!lock) {
@@ -235,7 +229,7 @@ export class PluginWorkerManager {
         if (chain.length > 0) {
           releaseStateless = this.backgroundStatelessSlots.tryAcquire()
           if (!releaseStateless) {
-            throw new Error('嵌套无数据操作没有后台容量，未持锁等待')
+            throw new Error("嵌套无数据操作没有后台容量，未持锁等待")
           }
         } else {
           releaseStateless = await this.backgroundStatelessSlots.acquire(signal)
@@ -244,20 +238,12 @@ export class PluginWorkerManager {
       if (chain.length > 0) {
         release = lock.limiter.tryAcquire()
         if (!release) {
-          throw new Error('嵌套插件调用的 Worker 正忙，未持锁等待')
+          throw new Error("嵌套插件调用的 Worker 正忙，未持锁等待")
         }
       } else {
         release = await lock.limiter.acquire(signal)
       }
-      const starting = this.getWorker(
-        key,
-        scopeKey,
-        binding,
-        context.scope.id,
-        signal,
-        chain.length > 0,
-        mode
-      )
+      const starting = this.getWorker(key, scopeKey, binding, context.scope.id, signal, chain.length > 0, mode)
       this.starting.add(starting)
       try {
         worker = await starting
@@ -303,7 +289,7 @@ export class PluginWorkerManager {
       if (backgroundStateless) {
         this.backgroundStatelessCalls -= 1
       }
-      if (mode === 'validator') {
+      if (mode === "validator") {
         this.validationCalls -= 1
       }
     }
@@ -316,7 +302,7 @@ export class PluginWorkerManager {
     scopeId: string,
     signal: AbortSignal,
     nested: boolean,
-    mode: 'plugin' | 'validator' | 'stateless'
+    mode: "plugin" | "validator" | "stateless"
   ) {
     for (const previous of this.workers.values()) {
       if (previous.scopeKey === scopeKey && previous.key !== key) {
@@ -330,16 +316,16 @@ export class PluginWorkerManager {
     }
     if (existing && (existing.stopping || existing.cleanupError)) {
       if (nested) {
-        throw new Error('嵌套插件调用的 Worker 正在回收，未持锁等待')
+        throw new Error("嵌套插件调用的 Worker 正在回收，未持锁等待")
       }
       await awaitWithContext(this.stopWorker(existing), withAbortSignal(signal, BACKGROUND_CONTEXT))
     }
     const workers = [...this.workers.values()].filter((worker) => {
-      return (worker.mode === 'validator') === (mode === 'validator')
+      return (worker.mode === "validator") === (mode === "validator")
     })
     let maximum = this.config.maxWorkers
     let slots = this.slots
-    if (mode === 'validator') {
+    if (mode === "validator") {
       maximum = this.config.maxValidators
       slots = this.validators
     }
@@ -359,7 +345,7 @@ export class PluginWorkerManager {
       if (nested) {
         const available = slots.tryAcquire()
         if (!available) {
-          throw new Error('嵌套插件调用没有空闲 Worker 名额，未持锁等待')
+          throw new Error("嵌套插件调用没有空闲 Worker 名额，未持锁等待")
         }
         release = available
       } else {
@@ -369,11 +355,7 @@ export class PluginWorkerManager {
       this.waiting -= 1
     }
     const controller = new AbortController()
-    const startup = AbortSignal.any([
-      signal,
-      controller.signal,
-      AbortSignal.timeout(this.config.startTimeoutMs)
-    ])
+    const startup = AbortSignal.any([signal, controller.signal, AbortSignal.timeout(this.config.startTimeoutMs)])
     let worker: Worker | undefined
     let volume: PluginVolumeLease | undefined
     try {
@@ -395,15 +377,15 @@ export class PluginWorkerManager {
         Promise.all([this.runner, this.image]),
         withAbortSignal(startup, BACKGROUND_CONTEXT)
       )
-      let data = ''
-      if (mode === 'plugin') {
+      let data = ""
+      if (mode === "plugin") {
         volume = await this.volumes.acquire(binding.instance.id, scopeId, startup)
         data = volume.path
       }
       const rpc = join(this.paths.runtimeDir, this.owner.slice(0, 8), key)
-      const socket = join(rpc, 'core.sock')
+      const socket = join(rpc, "core.sock")
       if (Buffer.byteLength(socket) > 100) {
-        throw new Error('插件 RPC 路径过长，请配置较短的 runtimeDir')
+        throw new Error("插件 RPC 路径过长，请配置较短的 runtimeDir")
       }
       await mkdir(rpc, { recursive: true, mode: 0o700 })
       if (volume) {
@@ -411,7 +393,7 @@ export class PluginWorkerManager {
       }
       await rm(socket, { force: true })
       const token = crypto.randomUUID() + crypto.randomUUID()
-      const name = 'pi-im-plugin-' + this.owner.slice(0, 8) + '-' + key
+      const name = "pi-im-plugin-" + this.owner.slice(0, 8) + "-" + key
       const peer = new PluginPeer(socket, token, this.config.maxRpcCalls, () => {
         if (worker && !worker.stopping) {
           void this.stopWorker(worker).catch(() => {})
@@ -429,11 +411,11 @@ export class PluginWorkerManager {
         lastUsed: Date.now(),
         release,
         controller,
-        volume: volume ?? { path: '', bindPath: '', async release() {} }
+        volume: volume ?? { path: "", bindPath: "", async release() {} }
       }
       this.workers.set(key, worker)
       await peer.listen()
-      let dataPath = ''
+      let dataPath = ""
       if (volume) {
         dataPath = hostPluginPath(this.paths.dataDir, this.paths.hostDataDir, volume.bindPath)
       }
@@ -475,7 +457,7 @@ export class PluginWorkerManager {
 
   private stopWorker(worker: Worker) {
     worker.stopping ??= (async () => {
-      worker.controller.abort(new Error('插件 Worker 正在回收'))
+      worker.controller.abort(new Error("插件 Worker 正在回收"))
       await worker.peer.close()
       const id = await worker.creating?.catch(() => {
         return undefined
@@ -509,7 +491,7 @@ export class PluginWorkerManager {
   }
   async close() {
     this.closed = true
-    this.shutdown.abort(new Error('插件运行时已关闭'))
+    this.shutdown.abort(new Error("插件运行时已关闭"))
     if (this.housekeeping) {
       clearInterval(this.housekeeping)
     }

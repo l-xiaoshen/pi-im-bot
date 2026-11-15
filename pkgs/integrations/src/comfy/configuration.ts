@@ -1,7 +1,7 @@
-import { z } from 'zod'
-import { ComfyServiceSchema, WorkflowSchema, workflowDigest, type ComfyService } from './resources'
-const Placeholder = '__PI_IM_BOT_SECRET_PRESERVED__'
-export const ComfyDraftSchema = ComfyServiceSchema.omit({ url: true }).extend({ url: z.string().default('') })
+import { z } from "zod"
+import { ComfyServiceSchema, WorkflowSchema, workflowDigest, type ComfyService } from "./resources"
+const Placeholder = "__PI_IM_BOT_SECRET_PRESERVED__"
+export const ComfyDraftSchema = ComfyServiceSchema.omit({ url: true }).extend({ url: z.string().default("") })
 export const ComfyViewSchema = ComfyServiceSchema.omit({ url: true }).extend({ endpoint: z.string() })
 export const SaveComfySchema = z.object({ revision: z.string(), service: ComfyDraftSchema }).strict()
 export const SaveWorkflowSchema = z.object({ revision: z.string(), workflow: WorkflowSchema }).strict()
@@ -38,7 +38,7 @@ export function comfyFromDraft(draft: z.infer<typeof ComfyDraftSchema>, previous
         return key.toLowerCase() === name.toLowerCase()
       })
       if (!old) {
-        throw new Error('Header占位没有可保留的值')
+        throw new Error("Header占位没有可保留的值")
       }
       return [name, old[1]]
     })

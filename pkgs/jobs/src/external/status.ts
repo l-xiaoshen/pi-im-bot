@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from "zod"
 
 export const ExternalStatusSchema = z.object({
   status: z.string(),

@@ -1,5 +1,5 @@
-import { z } from 'zod'
-import { HookModeSchema } from '../manifest'
+import { z } from "zod"
+import { HookModeSchema } from "../manifest"
 
 export const PipelineViewSchema = z.object({
   revision: z.string(),
@@ -8,7 +8,7 @@ export const PipelineViewSchema = z.object({
       id: z.string(),
       title: z.string(),
       stage: z.string(),
-      position: z.enum(['before', 'after']),
+      position: z.enum(["before", "after"]),
       mode: HookModeSchema,
       summary: z.string(),
       flow: z.string(),

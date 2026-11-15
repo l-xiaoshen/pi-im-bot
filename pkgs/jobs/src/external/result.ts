@@ -1,8 +1,8 @@
-import type { CallToolResult } from '@earendil-works/pi-mcp'
-import { ArtifactStore } from '@pi-im-bot/artifacts/store'
-import { projectMcpResult } from '@pi-im-bot/resources/mcp/result'
-import type { McpServer } from '@pi-im-bot/resources/mcp/schema'
-import type { Job } from '../schema'
+import type { CallToolResult } from "@earendil-works/pi-mcp"
+import { ArtifactStore } from "@pi-im-bot/artifacts/store"
+import { projectMcpResult } from "@pi-im-bot/resources/mcp/result"
+import type { McpServer } from "@pi-im-bot/resources/mcp/schema"
+import type { Job } from "../schema"
 
 export async function externalResult(
   result: CallToolResult,

@@ -1,24 +1,19 @@
-import { join } from 'node:path'
-import { mkdir, rename, unlink } from 'node:fs/promises'
-import { McpCatalogFileSchema, type McpManifest } from './mcp/schema'
-import { ResourcesConfigSchema, type ResourcesConfig } from './schema'
-import { mcpCapabilityId, mcpServerRevision, mcpToolName, mcpToolRevision } from './mcp/identity'
-import { builtinCapabilities } from '@pi-im-bot/permissions/catalog'
-import type { Settings } from '@pi-im-bot/settings/schema'
-import { SkillCatalogFileSchema, type SkillManifest } from './skills/schema'
-import { skillConfigRevision, skillCapabilityId } from './skills/package'
-import { revision } from '@pi-im-bot/settings/resolve'
-import { mcpToolAvailable } from './mcp/tasks'
-import { PluginCatalogSchema, type PluginPackage } from '@pi-im-bot/plugins/config'
-import {
-  pluginSourceRevision,
-  pluginOperationId,
-  pluginCommandId,
-  pluginHookId
-} from '@pi-im-bot/plugins/identity'
-import { PluginRegistry } from '@pi-im-bot/plugins/registry'
-import { gsviWorkerDefinition } from '@pi-im-bot/integrations/gsvi/plugin-config/definition'
-import { pluginIssues } from '@pi-im-bot/plugins/management'
+import { join } from "node:path"
+import { mkdir, rename, unlink } from "node:fs/promises"
+import { McpCatalogFileSchema, type McpManifest } from "./mcp/schema"
+import { ResourcesConfigSchema, type ResourcesConfig } from "./schema"
+import { mcpCapabilityId, mcpServerRevision, mcpToolName, mcpToolRevision } from "./mcp/identity"
+import { builtinCapabilities } from "@pi-im-bot/permissions/catalog"
+import type { Settings } from "@pi-im-bot/settings/schema"
+import { SkillCatalogFileSchema, type SkillManifest } from "./skills/schema"
+import { skillConfigRevision, skillCapabilityId } from "./skills/package"
+import { revision } from "@pi-im-bot/settings/resolve"
+import { mcpToolAvailable } from "./mcp/tasks"
+import { PluginCatalogSchema, type PluginPackage } from "@pi-im-bot/plugins/config"
+import { pluginSourceRevision, pluginOperationId, pluginCommandId, pluginHookId } from "@pi-im-bot/plugins/identity"
+import { PluginRegistry } from "@pi-im-bot/plugins/registry"
+import { gsviWorkerDefinition } from "@pi-im-bot/integrations/gsvi/plugin-config/definition"
+import { pluginIssues } from "@pi-im-bot/plugins/management"
 
 export class ResourceLibrary {
   constructor(
@@ -33,17 +28,17 @@ export class ResourceLibrary {
   }
 
   static async load(config: ResourcesConfig, dataDir: string) {
-    const file = Bun.file(join(dataDir, 'resources/mcp-catalog.json'))
+    const file = Bun.file(join(dataDir, "resources/mcp-catalog.json"))
     let manifests: McpManifest[] = []
     if (await file.exists()) {
       manifests = McpCatalogFileSchema.parse(await file.json()).manifests
     }
-    const skills = Bun.file(join(dataDir, 'resources/skill-catalog.json'))
+    const skills = Bun.file(join(dataDir, "resources/skill-catalog.json"))
     let skillManifests: SkillManifest[] = []
     if (await skills.exists()) {
       skillManifests = SkillCatalogFileSchema.parse(await skills.json()).manifests
     }
-    const plugins = Bun.file(join(dataDir, 'resources/plugin-catalog.json'))
+    const plugins = Bun.file(join(dataDir, "resources/plugin-catalog.json"))
     let pluginPackages: PluginPackage[] = []
     if (await plugins.exists()) {
       pluginPackages = PluginCatalogSchema.parse(await plugins.json()).packages
@@ -68,7 +63,7 @@ export class ResourceLibrary {
       if (!server.enabled) {
         return []
       }
-      if (settings?.resources.mcp.mode === 'selected' && !settings.resources.mcp.ids.includes(server.id)) {
+      if (settings?.resources.mcp.mode === "selected" && !settings.resources.mcp.ids.includes(server.id)) {
         return []
       }
       return (this.manifest(server.id)?.tools ?? [])
@@ -107,7 +102,7 @@ export class ResourceLibrary {
           }),
           ...bundle.manifest.hooks
             .filter((hook) => {
-              return !settings?.extensions.disabled[instance.id + '/' + hook.id]
+              return !settings?.extensions.disabled[instance.id + "/" + hook.id]
             })
             .map((hook) => {
               return pluginHookId(instance.id, hook.id)
@@ -149,12 +144,12 @@ export class ResourceLibrary {
       }),
       manifest
     ]
-    const directory = join(dataDir, 'resources')
+    const directory = join(dataDir, "resources")
     await mkdir(directory, { recursive: true })
-    const path = join(directory, 'mcp-catalog.json')
-    const temporary = path + '.' + crypto.randomUUID() + '.tmp'
+    const path = join(directory, "mcp-catalog.json")
+    const temporary = path + "." + crypto.randomUUID() + ".tmp"
     try {
-      await Bun.write(temporary, JSON.stringify({ manifests }, null, 2) + '\n')
+      await Bun.write(temporary, JSON.stringify({ manifests }, null, 2) + "\n")
       await rename(temporary, path)
     } finally {
       await unlink(temporary).catch(() => {})
@@ -199,12 +194,12 @@ export class ResourceLibrary {
         return {
           id: mcpCapabilityId(server.id, tool.name),
           name: `${server.name} / ${tool.title ?? tool.name}`,
-          kind: 'tool' as const
+          kind: "tool" as const
         }
       })
     })
     const skills = this.config.skills.map((skill) => {
-      return { id: skillCapabilityId(skill.id), name: skill.name, kind: 'tool' as const }
+      return { id: skillCapabilityId(skill.id), name: skill.name, kind: "tool" as const }
     })
     const plugins = this.config.plugins.flatMap((instance) => {
       const bundle = this.pluginPackage(instance.id)
@@ -215,22 +210,22 @@ export class ResourceLibrary {
         ...bundle.manifest.operations.map((operation) => {
           return {
             id: pluginOperationId(instance.id, operation.id),
-            name: instance.name + ' / ' + operation.title,
-            kind: 'tool' as const
+            name: instance.name + " / " + operation.title,
+            kind: "tool" as const
           }
         }),
         ...bundle.manifest.commands.map((command) => {
           return {
             id: pluginCommandId(instance.id, command.id),
-            name: instance.name + ' / ' + command.names.join('、'),
-            kind: 'command' as const
+            name: instance.name + " / " + command.names.join("、"),
+            kind: "command" as const
           }
         }),
         ...bundle.manifest.hooks.map((hook) => {
           return {
             id: pluginHookId(instance.id, hook.id),
-            name: instance.name + ' / ' + hook.id + ' → ' + hook.point,
-            kind: 'hook' as const
+            name: instance.name + " / " + hook.id + " → " + hook.point,
+            kind: "hook" as const
           }
         })
       ]
@@ -255,10 +250,7 @@ export class ResourceLibrary {
       if (!config.enabled) {
         return []
       }
-      if (
-        settings?.resources.skills.mode === 'selected' &&
-        !settings.resources.skills.ids.includes(config.id)
-      ) {
+      if (settings?.resources.skills.mode === "selected" && !settings.resources.skills.ids.includes(config.id)) {
         return []
       }
       const manifest = this.skillManifest(config.id)
@@ -276,12 +268,12 @@ export class ResourceLibrary {
       }),
       manifest
     ]
-    const directory = join(dataDir, 'resources')
+    const directory = join(dataDir, "resources")
     await mkdir(directory, { recursive: true })
-    const path = join(directory, 'skill-catalog.json')
-    const temporary = path + '.' + crypto.randomUUID() + '.tmp'
+    const path = join(directory, "skill-catalog.json")
+    const temporary = path + "." + crypto.randomUUID() + ".tmp"
     try {
-      await Bun.write(temporary, JSON.stringify({ manifests }, null, 2) + '\n')
+      await Bun.write(temporary, JSON.stringify({ manifests }, null, 2) + "\n")
       await rename(temporary, path)
     } finally {
       await unlink(temporary).catch(() => {})
@@ -308,10 +300,7 @@ export class ResourceLibrary {
       if (!instance.enabled) {
         return []
       }
-      if (
-        settings?.resources.plugins.mode === 'selected' &&
-        !settings.resources.plugins.ids.includes(instance.id)
-      ) {
+      if (settings?.resources.plugins.mode === "selected" && !settings.resources.plugins.ids.includes(instance.id)) {
         return []
       }
       const bundle = this.pluginPackage(instance.id)
@@ -346,12 +335,12 @@ export class ResourceLibrary {
       }),
       bundle
     ]
-    const directory = join(dataDir, 'resources')
+    const directory = join(dataDir, "resources")
     await mkdir(directory, { recursive: true })
-    const path = join(directory, 'plugin-catalog.json')
-    const temporary = path + '.' + crypto.randomUUID() + '.tmp'
+    const path = join(directory, "plugin-catalog.json")
+    const temporary = path + "." + crypto.randomUUID() + ".tmp"
     try {
-      await Bun.write(temporary, JSON.stringify({ packages }, null, 2) + '\n', { mode: 0o600 })
+      await Bun.write(temporary, JSON.stringify({ packages }, null, 2) + "\n", { mode: 0o600 })
       await rename(temporary, path)
     } finally {
       await unlink(temporary).catch(() => {})

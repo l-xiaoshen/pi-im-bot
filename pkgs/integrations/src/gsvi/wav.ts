@@ -3,26 +3,26 @@ export function validateWav(bytes: Uint8Array) {
   const data = Buffer.from(bytes)
   if (
     data.length < 44 ||
-    data.toString('ascii', 0, 4) !== 'RIFF' ||
-    data.toString('ascii', 8, 12) !== 'WAVE' ||
+    data.toString("ascii", 0, 4) !== "RIFF" ||
+    data.toString("ascii", 8, 12) !== "WAVE" ||
     data.readUInt32LE(4) + 8 !== data.length
   ) {
-    throw new Error('无效的 WAV')
+    throw new Error("无效的 WAV")
   }
   let format = false
   let audio = false
   let blockAlign = 0
   let offset = 12
   while (offset + 8 <= data.length) {
-    const name = data.toString('ascii', offset, offset + 4)
+    const name = data.toString("ascii", offset, offset + 4)
     const size = data.readUInt32LE(offset + 4)
     const start = offset + 8
     if (start + size > data.length) {
-      throw new Error('WAV 内容截断')
+      throw new Error("WAV 内容截断")
     }
-    if (name === 'fmt ') {
+    if (name === "fmt ") {
       if (size < 16 || format) {
-        throw new Error('WAV 格式错误')
+        throw new Error("WAV 格式错误")
       }
       const code = data.readUInt16LE(start)
       const channels = data.readUInt16LE(start + 2)
@@ -40,19 +40,19 @@ export function validateWav(bytes: Uint8Array) {
         blockAlign !== (channels * bits) / 8 ||
         data.readUInt32LE(start + 8) !== rate * blockAlign
       ) {
-        throw new Error('不支持的 WAV 格式')
+        throw new Error("不支持的 WAV 格式")
       }
       format = true
     }
-    if (name === 'data') {
+    if (name === "data") {
       if (!format || !size || size % blockAlign !== 0 || audio) {
-        throw new Error('WAV 音频数据错误')
+        throw new Error("WAV 音频数据错误")
       }
       audio = true
     }
     offset = start + size + (size % 2)
   }
   if (!format || !audio || offset !== data.length) {
-    throw new Error('WAV 缺少完整音频')
+    throw new Error("WAV 缺少完整音频")
   }
 }

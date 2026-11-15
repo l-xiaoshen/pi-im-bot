@@ -1,30 +1,24 @@
-import type { Configuration } from '@pi-im-bot/config/load'
-import type { Room } from '@pi-im-bot/contracts/message'
-import type { PreparedRunInput } from '@pi-im-bot/contracts/run'
-import type { HostToolServices } from '@pi-im-bot/agent/host-tools'
-import type { PluginOperationEntry, PluginBinding } from './registry'
-import { pluginOperationId, pluginToolName } from './identity'
-import { revision } from '@pi-im-bot/settings/resolve'
-import { PluginInvocationViewSchema, type PluginInvocationView } from './rpc/protocol'
-import { mergeConfig, validateConfig } from './configuration/values'
-import {
-  gsviWorkerDefinition,
-  gsviBusinessValues
-} from '@pi-im-bot/integrations/gsvi/plugin-config/definition'
+import type { Configuration } from "@pi-im-bot/config/load"
+import type { Room } from "@pi-im-bot/contracts/message"
+import type { PreparedRunInput } from "@pi-im-bot/contracts/run"
+import type { HostToolServices } from "@pi-im-bot/agent/host-tools"
+import type { PluginOperationEntry, PluginBinding } from "./registry"
+import { pluginOperationId, pluginToolName } from "./identity"
+import { revision } from "@pi-im-bot/settings/resolve"
+import { PluginInvocationViewSchema, type PluginInvocationView } from "./rpc/protocol"
+import { mergeConfig, validateConfig } from "./configuration/values"
+import { gsviWorkerDefinition, gsviBusinessValues } from "@pi-im-bot/integrations/gsvi/plugin-config/definition"
 
 export interface PluginInvocation {
   deadlineAt?: number
   readOnly?: boolean
-  origin?: PluginInvocationView['origin']
+  origin?: PluginInvocationView["origin"]
   config: Configuration
   room: Room
   input: PreparedRunInput
-  services: Pick<
-    HostToolServices,
-    'authorize' | 'history' | 'send' | 'assertActive' | 'recall' | 'mediaSources'
-  > & {
+  services: Pick<HostToolServices, "authorize" | "history" | "send" | "assertActive" | "recall" | "mediaSources"> & {
     media?: {
-      content: NonNullable<HostToolServices['media']>['content']
+      content: NonNullable<HostToolServices["media"]>["content"]
       require(id: string): unknown
     }
   }

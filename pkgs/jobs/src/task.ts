@@ -1,15 +1,11 @@
-import { defineTask, type RunningTask, type TaskRuntime } from '@earendil-works/pi-durable'
-import type { Context } from '@earendil-works/chord/context'
+import { defineTask, type RunningTask, type TaskRuntime } from "@earendil-works/pi-durable"
+import type { Context } from "@earendil-works/chord/context"
 
 export interface JobTaskInput {
   jobId: string
   revision: number
 }
-export type JobCheckpoint =
-  | { phase: 'work' }
-  | { phase: 'dispatching' }
-  | { phase: 'poll' }
-  | { phase: 'report' }
+export type JobCheckpoint = { phase: "work" } | { phase: "dispatching" } | { phase: "poll" } | { phase: "report" }
 export type JobReceipt = { jobId: string; revision: number }
 export type JobTaskRuntime = TaskRuntime<JobTaskInput, JobCheckpoint, JobReceipt, object>
 export type ActiveJobTask = RunningTask<JobTaskInput, JobCheckpoint, JobReceipt>
@@ -24,9 +20,9 @@ export interface JobTaskHandlers {
 
 export function createJobTask(handlers: JobTaskHandlers) {
   return defineTask<JobTaskInput, JobCheckpoint, JobReceipt>({
-    name: 'bot.job',
+    name: "bot.job",
     version: 1,
-    initial: () => ({ phase: 'work' }),
+    initial: () => ({ phase: "work" }),
     phases: {
       work: handlers.work,
       dispatching: handlers.unknown,

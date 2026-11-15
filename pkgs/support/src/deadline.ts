@@ -5,17 +5,17 @@ export function deadlineScope(parent: AbortSignal, deadlineAt: number) {
   function expire() {
     const remaining = deadlineAt - Date.now()
     if (remaining <= 0) {
-      controller.abort(new Error('执行期限已到'))
+      controller.abort(new Error("执行期限已到"))
       return
     }
     timer = setTimeout(expire, Math.min(remaining, 2147483647))
   }
   function close() {
     clearTimeout(timer)
-    parent.removeEventListener('abort', close)
+    parent.removeEventListener("abort", close)
   }
   expire()
-  parent.addEventListener('abort', close, { once: true })
+  parent.addEventListener("abort", close, { once: true })
   if (parent.aborted) {
     close()
   }

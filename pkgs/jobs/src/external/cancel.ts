@@ -1,15 +1,15 @@
-import { McpError } from '@earendil-works/pi-mcp'
-import { BACKGROUND_CONTEXT, type Context } from '@earendil-works/chord/context'
-import type { JobService } from '../service'
-import type { JobTaskInput } from '../task'
-import { connectMcp } from '@pi-im-bot/resources/mcp/client'
-import { McpRemoteTaskSchema } from '@pi-im-bot/resources/mcp/task-schema'
-import { McpCallResultSchema } from '@pi-im-bot/resources/mcp/tasks'
-import { ExternalExecutions, externalKey, ExternalExecutionSchema } from './documents'
-import { externalContext, externalError, resultRedactionServer } from './context'
-import { saveExternal, type ExternalOutcome } from './state'
-import { externalResult } from './result'
-import { openExternalStatus } from './connection'
+import { McpError } from "@earendil-works/pi-mcp"
+import { BACKGROUND_CONTEXT, type Context } from "@earendil-works/chord/context"
+import type { JobService } from "../service"
+import type { JobTaskInput } from "../task"
+import { connectMcp } from "@pi-im-bot/resources/mcp/client"
+import { McpRemoteTaskSchema } from "@pi-im-bot/resources/mcp/task-schema"
+import { McpCallResultSchema } from "@pi-im-bot/resources/mcp/tasks"
+import { ExternalExecutions, externalKey, ExternalExecutionSchema } from "./documents"
+import { externalContext, externalError, resultRedactionServer } from "./context"
+import { saveExternal, type ExternalOutcome } from "./state"
+import { externalResult } from "./result"
+import { openExternalStatus } from "./connection"
 
 export interface ExternalCancellation {
   outcome: ExternalOutcome
@@ -33,7 +33,7 @@ export async function cancelExternal(
   const value = await externalContext(service, input)
   let connection: Awaited<ReturnType<typeof connectMcp>> | undefined
   let terminal = false
-  let outcome: ExternalOutcome = { state: 'outcome_unknown', error: '已停止等待，远端取消尚未确认' }
+  let outcome: ExternalOutcome = { state: "outcome_unknown", error: "已停止等待，远端取消尚未确认" }
   const remote = value.execution.remote
   try {
     if (remote && value.execution.session) {
@@ -46,7 +46,7 @@ export async function cancelExternal(
       connection = opened.connection
       let current = opened.current
       if (
-        ['working', 'input_required'].includes(current.status) &&
+        ["working", "input_required"].includes(current.status) &&
         connection.initialization.capabilities.tasks?.cancel
       ) {
         const dispatch = await service.runtime.native.commit(async (tx) => {
@@ -64,18 +64,18 @@ export async function cancelExternal(
         if (dispatch) {
           try {
             current = McpRemoteTaskSchema.parse(
-              await connection.client.request('tasks/cancel', { taskId: remote.taskId }, { signal })
+              await connection.client.request("tasks/cancel", { taskId: remote.taskId }, { signal })
             )
           } catch (error) {
             if (!(error instanceof McpError) || error.code !== -32602) {
               throw error
             }
             current = McpRemoteTaskSchema.parse(
-              await connection.client.request('tasks/get', { taskId: remote.taskId }, { signal })
+              await connection.client.request("tasks/get", { taskId: remote.taskId }, { signal })
             )
           }
           if (current.taskId !== remote.taskId) {
-            throw new Error('远端取消回执不匹配')
+            throw new Error("远端取消回执不匹配")
           }
         }
       }
@@ -87,12 +87,12 @@ export async function cancelExternal(
         state.remote = current
         await saveExternal(tx, value.key, state)
       }, context)
-      if (current.status === 'cancelled') {
-        outcome = { state: 'cancelled', error: '远端已确认取消' }
+      if (current.status === "cancelled") {
+        outcome = { state: "cancelled", error: "远端已确认取消" }
         terminal = true
-      } else if (current.status === 'completed' || current.status === 'failed') {
+      } else if (current.status === "completed" || current.status === "failed") {
         const result = McpCallResultSchema.parse(
-          await connection.client.request('tasks/result', { taskId: remote.taskId }, { signal })
+          await connection.client.request("tasks/result", { taskId: remote.taskId }, { signal })
         )
         const projected = await externalResult(
           result,
@@ -102,9 +102,9 @@ export async function cancelExternal(
           value.job,
           value.value.revision
         )
-        let state: 'succeeded' | 'failed' = 'succeeded'
-        if (current.status === 'failed' || result.isError) {
-          state = 'failed'
+        let state: "succeeded" | "failed" = "succeeded"
+        if (current.status === "failed" || result.isError) {
+          state = "failed"
         }
         outcome = { state, result: projected }
         terminal = true
@@ -115,9 +115,9 @@ export async function cancelExternal(
       await connection?.close()
       throw error
     }
-    outcome = { state: 'outcome_unknown', error: externalError(error, value.entry.server, value.execution) }
-    if (value.execution.remote?.status === 'failed' && error instanceof McpError) {
-      outcome.state = 'failed'
+    outcome = { state: "outcome_unknown", error: externalError(error, value.entry.server, value.execution) }
+    if (value.execution.remote?.status === "failed" && error instanceof McpError) {
+      outcome.state = "failed"
       terminal = true
     }
   }

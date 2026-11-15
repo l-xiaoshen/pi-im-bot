@@ -1,17 +1,17 @@
-import { z } from 'zod'
-import type { ExecutionContext } from '@pi-im-bot/contracts/run'
-import type { ArtifactStore } from '@pi-im-bot/artifacts/store'
-import { PluginResultSchema, type PluginResult, type PluginOperationOutcome } from './rpc/protocol'
+import { z } from "zod"
+import type { ExecutionContext } from "@pi-im-bot/contracts/run"
+import type { ArtifactStore } from "@pi-im-bot/artifacts/store"
+import { PluginResultSchema, type PluginResult, type PluginOperationOutcome } from "./rpc/protocol"
 
 export function completedPluginResult(outcome: PluginOperationOutcome) {
-  if (outcome.status === 'failed') {
+  if (outcome.status === "failed") {
     throw new Error(outcome.error)
   }
-  if (outcome.status === 'cancelled') {
-    throw new Error(outcome.message ?? '插件操作已取消')
+  if (outcome.status === "cancelled") {
+    throw new Error(outcome.message ?? "插件操作已取消")
   }
-  if (outcome.status === 'pending') {
-    throw new Error('插件返回等待句柄，需要通过后台 Job 执行，未重新提交')
+  if (outcome.status === "pending") {
+    throw new Error("插件返回等待句柄，需要通过后台 Job 执行，未重新提交")
   }
   return outcome.result
 }
@@ -25,26 +25,26 @@ export async function projectPluginResult(raw: PluginResult, capability: string,
   let text = result.text
   if (result.value !== undefined) {
     if (text) {
-      text += '\n'
+      text += "\n"
     }
     text += JSON.stringify(result.value)
   }
   if (text.length > 12000) {
-    const artifact = await artifacts.save('plugin-result.txt', 'text/plain', capability, text)
+    const artifact = await artifacts.save("plugin-result.txt", "text/plain", capability, text)
     artifactIds.push(artifact.id)
-    text = text.slice(0, 12000) + '\n完整结果产物：' + artifact.id
+    text = text.slice(0, 12000) + "\n完整结果产物：" + artifact.id
   }
   if (!text && artifactIds.length > 0 && !result.suppressText) {
-    text = '已生成产物。'
+    text = "已生成产物。"
   }
   const projected: {
     summary: string
     artifactIds: string[]
-    format?: PluginResult['format']
+    format?: PluginResult["format"]
     itemized?: boolean
-    businessStatus?: PluginResult['businessStatus']
+    businessStatus?: PluginResult["businessStatus"]
     factsComplete?: boolean
-    items?: PluginResult['items']
+    items?: PluginResult["items"]
   } = { summary: text, artifactIds }
   if (result.format !== undefined) {
     projected.format = result.format
@@ -64,7 +64,7 @@ export async function projectPluginResult(raw: PluginResult, capability: string,
   return projected
 }
 
-export function pluginArtifactStoreOwner(invocation: Pick<ExecutionContext, 'jobId' | 'jobRevision'>) {
+export function pluginArtifactStoreOwner(invocation: Pick<ExecutionContext, "jobId" | "jobRevision">) {
   if (invocation.jobId) {
     return `job:${invocation.jobId}:${invocation.jobRevision}`
   }

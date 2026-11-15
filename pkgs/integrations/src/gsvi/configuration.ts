@@ -1,22 +1,21 @@
-import { z } from 'zod'
-import { GsviServiceSchema, type GsviService } from './schema'
-const ResourceSecretPlaceholder = '__PI_IM_BOT_SECRET_PRESERVED__'
+import { z } from "zod"
+import { GsviServiceSchema, type GsviService } from "./schema"
+const ResourceSecretPlaceholder = "__PI_IM_BOT_SECRET_PRESERVED__"
 
-export const GsviDraftSchema = GsviServiceSchema.omit({ url: true }).extend({ url: z.string().default('') })
+export const GsviDraftSchema = GsviServiceSchema.omit({ url: true }).extend({ url: z.string().default("") })
 export const GsviViewSchema = GsviServiceSchema.omit({ url: true }).extend({
   endpoint: z.string(),
-  state: z.enum(['disabled', 'configured'])
+  state: z.enum(["disabled", "configured"])
 })
 export const SaveGsviSchema = z.object({ revision: z.string(), service: GsviDraftSchema }).strict()
 export type GsviDraft = z.infer<typeof GsviDraftSchema>
 export type GsviView = z.infer<typeof GsviViewSchema>
 
 export function gsviPublic(service: GsviService): GsviView {
-  const { url, headers, downloadHeaders, apiKey, nativeRequestHeaders, nativeDownloadHeaders, ...rest } =
-    service
-  let state: GsviView['state'] = 'configured'
+  const { url, headers, downloadHeaders, apiKey, nativeRequestHeaders, nativeDownloadHeaders, ...rest } = service
+  let state: GsviView["state"] = "configured"
   if (!service.enabled) {
-    state = 'disabled'
+    state = "disabled"
   }
   function hidden(values: Record<string, string>) {
     return Object.fromEntries(
@@ -58,7 +57,7 @@ export function gsviFromDraft(draft: GsviDraft, previous?: GsviService) {
           return name.toLowerCase() === key.toLowerCase()
         })
         if (!old) {
-          throw new Error('Header 占位没有可保留的值')
+          throw new Error("Header 占位没有可保留的值")
         }
         return [key, old[1]]
       })
@@ -71,8 +70,8 @@ export function gsviFromDraft(draft: GsviDraft, previous?: GsviService) {
   if (apiKey === undefined) {
     apiKey = previous?.apiKey
   }
-  let nativeRequestHeaders: GsviService['nativeRequestHeaders']
-  let nativeDownloadHeaders: GsviService['nativeDownloadHeaders']
+  let nativeRequestHeaders: GsviService["nativeRequestHeaders"]
+  let nativeDownloadHeaders: GsviService["nativeDownloadHeaders"]
   if (draft.nativeRequestHeaders !== undefined || previous?.nativeRequestHeaders !== undefined) {
     nativeRequestHeaders = restore(
       draft.nativeRequestHeaders ?? previous?.nativeRequestHeaders ?? {},

@@ -1,5 +1,5 @@
-import { z } from 'zod'
-import { PluginIdSchema } from '../manifest'
+import { z } from "zod"
+import { PluginIdSchema } from "../manifest"
 
 export const VolumeSchema = z
   .object({
@@ -8,7 +8,7 @@ export const VolumeSchema = z
     scopeKey: z.string().regex(/^[a-f0-9]{20}$/u),
     uuid: z.uuid(),
     bytes: z.number().int().positive(),
-    state: z.enum(['creating', 'ready', 'quarantined']),
+    state: z.enum(["creating", "ready", "quarantined"]),
     createdAt: z.number(),
     lastUsedAt: z.number(),
     usedBytes: z.number().int().nonnegative().optional(),
@@ -25,10 +25,10 @@ export const VolumeCatalogSchema = z
       return volume.id
     })
     const paths = value.volumes.map((volume) => {
-      return volume.instanceId + '/' + volume.scopeKey
+      return volume.instanceId + "/" + volume.scopeKey
     })
     if (new Set(ids).size !== ids.length || new Set(paths).size !== paths.length) {
-      context.addIssue({ code: 'custom', message: '插件卷目录包含重复标识' })
+      context.addIssue({ code: "custom", message: "插件卷目录包含重复标识" })
     }
   })
 export const StorageStatusSchema = z.object({

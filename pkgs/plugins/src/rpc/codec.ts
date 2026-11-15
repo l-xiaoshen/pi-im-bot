@@ -3,7 +3,7 @@ export const maximumPluginFrameBytes = 512 * 1024
 export function encodePluginFrame(value: unknown) {
   const body = Buffer.from(JSON.stringify(value))
   if (body.length > maximumPluginFrameBytes) {
-    throw new Error('插件 RPC 帧超过 512 KiB')
+    throw new Error("插件 RPC 帧超过 512 KiB")
   }
   const header = Buffer.alloc(4)
   header.writeUInt32BE(body.length)
@@ -29,7 +29,7 @@ export class PluginFrameReader {
         }
         const length = this.header.readUInt32BE(0)
         if (length < 2 || length > maximumPluginFrameBytes) {
-          throw new Error('插件 RPC 帧长度无效')
+          throw new Error("插件 RPC 帧长度无效")
         }
         this.body = Buffer.alloc(length)
       }
@@ -38,7 +38,7 @@ export class PluginFrameReader {
       this.bodyBytes += count
       offset += count
       if (this.bodyBytes === this.body.length) {
-        const text = this.body.toString('utf8')
+        const text = this.body.toString("utf8")
         const bytes = this.body.length + 4
         this.body = undefined
         this.bodyBytes = 0

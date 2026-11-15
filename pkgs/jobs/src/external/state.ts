@@ -1,16 +1,16 @@
-import { BACKGROUND_CONTEXT, type Context } from '@earendil-works/chord/context'
-import type { Tx } from '@earendil-works/pi-durable'
-import type { JobService } from '../service'
-import type { ActiveJobTask, JobTaskRuntime } from '../task'
+import { BACKGROUND_CONTEXT, type Context } from "@earendil-works/chord/context"
+import type { Tx } from "@earendil-works/pi-durable"
+import type { JobService } from "../service"
+import type { ActiveJobTask, JobTaskRuntime } from "../task"
 import {
   ExternalExecutions,
   ExternalSlots,
   ExternalExecutionSchema,
   externalKey,
   type ExternalExecution
-} from './documents'
-import type { JobRevision } from '../schema'
-import { mergeExternalOutcome } from './outcome'
+} from "./documents"
+import type { JobRevision } from "../schema"
+import { mergeExternalOutcome } from "./outcome"
 
 export async function saveExternal(tx: Tx, key: string, value: ExternalExecution) {
   const document = await tx.doc(ExternalExecutions, key, null)
@@ -46,8 +46,8 @@ export async function claimExternal(
 }
 
 export interface ExternalOutcome {
-  state: 'succeeded' | 'failed' | 'cancelled' | 'outcome_unknown'
-  result?: JobRevision['result']
+  state: "succeeded" | "failed" | "cancelled" | "outcome_unknown"
+  result?: JobRevision["result"]
   error?: string
 }
 
@@ -64,8 +64,8 @@ export async function finishExternal(
       value.state = outcome.state
       value.result = outcome.result
       value.error = outcome.error
-      if (outcome.state === 'failed' && !value.error) {
-        value.error = outcome.result?.summary ?? '远端操作失败'
+      if (outcome.state === "failed" && !value.error) {
+        value.error = outcome.result?.summary ?? "远端操作失败"
       }
       value.finishedAt = Date.now()
       if (value.external) {
@@ -75,7 +75,7 @@ export async function finishExternal(
       }
     })
     await releaseExternal(tx, externalKey(task.input.jobId, task.input.revision))
-    return { status: 'running', checkpoint: { phase: 'report' } }
+    return { status: "running", checkpoint: { phase: "report" } }
   }, context)
   service.changed(await service.repository.get(task.input.jobId))
 }

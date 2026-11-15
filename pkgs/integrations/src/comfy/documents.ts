@@ -1,7 +1,7 @@
-import { defineDoc, defineDocFamily } from '@earendil-works/pi-durable'
-import { z } from 'zod'
-import { ComfyServiceSchema } from './resources'
-import { ComfyItemSchema } from './protocol'
+import { defineDoc, defineDocFamily } from "@earendil-works/pi-durable"
+import { z } from "zod"
+import { ComfyServiceSchema } from "./resources"
+import { ComfyItemSchema } from "./protocol"
 export const ReceiptSchema = z.object({
   key: z.string(),
   instance: z.string(),
@@ -27,17 +27,17 @@ export const ReceiptSchema = z.object({
 })
 export type Receipt = z.infer<typeof ReceiptSchema>
 export const ComfyReceipts = defineDocFamily<{ value: Receipt | null }, null>({
-  kind: 'bot.comfy-receipt',
+  kind: "bot.comfy-receipt",
   version: 1,
-  scope: 'session',
+  scope: "session",
   family: true,
   initial: () => ({ value: null }),
   checkpointWhen: () => false
 })
 export const ComfyActive = defineDoc<{ owners: Record<string, { room: string; instance: string }> }>({
-  kind: 'bot.comfy-active',
+  kind: "bot.comfy-active",
   version: 1,
-  scope: 'session',
+  scope: "session",
   initial: () => ({ owners: {} }),
   checkpointWhen: () => true
 })

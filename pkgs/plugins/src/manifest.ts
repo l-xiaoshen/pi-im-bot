@@ -1,5 +1,5 @@
-import { z } from 'zod'
-import { PatchPathSchema } from './hooks/path'
+import { z } from "zod"
+import { PatchPathSchema } from "./hooks/path"
 
 export const PluginIdSchema = z.string().regex(/^[a-z][a-z0-9_-]{0,31}$/u)
 export const PluginLocalIdSchema = z.string().regex(/^[a-z][a-z0-9_-]{0,47}$/u)
@@ -9,16 +9,16 @@ export const PluginPathSchema = z
   .max(240)
   .refine((path) => {
     return (
-      !path.startsWith('/') &&
-      !path.includes('\\') &&
-      !path.includes('\0') &&
-      path.split('/').every((part) => {
-        return part !== '' && part !== '.' && part !== '..'
+      !path.startsWith("/") &&
+      !path.includes("\\") &&
+      !path.includes("\0") &&
+      path.split("/").every((part) => {
+        return part !== "" && part !== "." && part !== ".."
       })
     )
-  }, '插件文件路径必须在包内')
+  }, "插件文件路径必须在包内")
 export const PluginJsonSchema = z
-  .object({ type: z.literal('object'), properties: z.record(z.string(), z.json()).default({}) })
+  .object({ type: z.literal("object"), properties: z.record(z.string(), z.json()).default({}) })
   .catchall(z.json())
 export const PluginGrantSchema = z
   .string()
@@ -32,10 +32,10 @@ export const PluginOperationSchema = z.object({
   inputSchema: PluginJsonSchema,
   outputSchema: z.record(z.string(), z.json()).optional(),
   tool: z.boolean().default(true),
-  execution: z.enum(['foreground', 'background']).default('foreground'),
-  data: z.enum(['scope', 'none']).default('scope'),
+  execution: z.enum(["foreground", "background"]).default("foreground"),
+  data: z.enum(["scope", "none"]).default("scope"),
   actions: z
-    .array(z.enum(['tts_voices', 'tts_synthesize', 'comfy_catalog', 'comfy_generate', 'comfy_manage']))
+    .array(z.enum(["tts_voices", "tts_synthesize", "comfy_catalog", "comfy_generate", "comfy_manage"]))
     .max(5)
     .default([]),
   timeoutMs: z.number().int().min(100).max(300000).default(30000),
@@ -58,20 +58,18 @@ export const PluginCommandSchema = z.object({
     .max(8),
   operation: PluginLocalIdSchema,
   description: z.string().max(300),
-  arguments: z.enum(['json', 'text', 'none']).default('text'),
+  arguments: z.enum(["json", "text", "none"]).default("text"),
   textField: z
     .string()
     .regex(/^[a-zA-Z][a-zA-Z0-9_]{0,47}$/u)
-    .default('text'),
+    .default("text"),
   parser: PluginLocalIdSchema.optional()
 })
-export const HookModeSchema = z.enum(['transform', 'collect', 'select', 'policy', 'exclusive', 'observe'])
+export const HookModeSchema = z.enum(["transform", "collect", "select", "policy", "exclusive", "observe"])
 export const HookSelectorSchema = z.object({
   channels: z.array(z.string().min(1)).max(20).optional(),
-  origins: z.array(z.enum(['im', 'command', 'schedule', 'job', 'tool', 'admin'])).optional(),
-  phases: z
-    .array(z.enum(['final', 'intermediate', 'progress', 'tool-direct', 'notification', 'control']))
-    .optional()
+  origins: z.array(z.enum(["im", "command", "schedule", "job", "tool", "admin"])).optional(),
+  phases: z.array(z.enum(["final", "intermediate", "progress", "tool-direct", "notification", "control"])).optional()
 })
 export const PluginHookSchema = z.object({
   id: PluginLocalIdSchema,
@@ -92,15 +90,12 @@ export const PluginHookSchema = z.object({
     .default([]),
   selector: HookSelectorSchema.prefault({}),
   timeoutMs: z.number().int().min(50).max(30000).default(1000),
-  onError: z.enum(['skip', 'fail']).default('skip'),
+  onError: z.enum(["skip", "fail"]).default("skip"),
   grants: z.array(PluginGrantSchema).max(32).default([]),
   writes: z.array(PatchPathSchema).max(30).optional(),
   inspectCapabilities: z
     .array(
-      z.union([
-        z.enum(['tts_voices', 'tts_synthesize']),
-        z.string().regex(/^plugin:self\/[a-z][a-z0-9_-]{0,47}$/u)
-      ])
+      z.union([z.enum(["tts_voices", "tts_synthesize"]), z.string().regex(/^plugin:self\/[a-z][a-z0-9_-]{0,47}$/u)])
     )
     .max(16)
     .default([])
@@ -117,10 +112,10 @@ export const PluginConnectionSchema = z
   .object({
     alias: PluginIdSchema,
     title: z.string().min(1).max(100),
-    kind: z.enum(['mcp', 'plugin', 'service']),
-    service: z.enum(['gsvi@1', 'comfy@1']).optional(),
+    kind: z.enum(["mcp", "plugin", "service"]),
+    service: z.enum(["gsvi@1", "comfy@1"]).optional(),
     required: z.boolean().default(true),
-    description: z.string().max(1000).default(''),
+    description: z.string().max(1000).default(""),
     setting: PluginLocalIdSchema.optional()
   })
   .strict()
@@ -131,11 +126,11 @@ export const PluginManifestSchema = z
     name: z.string().min(1).max(100),
     version: z.string().regex(/^\d+\.\d+\.\d+(?:-[a-zA-Z0-9.-]+)?$/u),
     description: z.string().max(2000),
-    author: z.string().max(100).default(''),
+    author: z.string().max(100).default(""),
     repository: z
       .url()
       .refine((value) => {
-        return ['http:', 'https:'].includes(new URL(value).protocol)
+        return ["http:", "https:"].includes(new URL(value).protocol)
       })
       .optional(),
     license: z.string().max(100).optional(),
@@ -145,7 +140,7 @@ export const PluginManifestSchema = z
     entry: PluginPathSchema,
     files: z.array(PluginPathSchema).min(1).max(2000),
     configSchema: PluginJsonSchema.optional(),
-    configurationProjection: z.literal('gsvi@1').optional(),
+    configurationProjection: z.literal("gsvi@1").optional(),
     operations: z.array(PluginOperationSchema).max(100).default([]),
     commands: z.array(PluginCommandSchema).max(100).default([]),
     hooks: z.array(PluginHookSchema).max(100).default([]),
@@ -156,95 +151,92 @@ export const PluginManifestSchema = z
     for (const operation of value.operations) {
       if (
         operation.serviceTimeout &&
-        (value.configurationProjection !== 'gsvi@1' ||
-          operation.execution !== 'background' ||
-          !operation.actions.includes('tts_synthesize') ||
+        (value.configurationProjection !== "gsvi@1" ||
+          operation.execution !== "background" ||
+          !operation.actions.includes("tts_synthesize") ||
           operation.grants.some(
-            (grant) =>
-              !['service:' + operation.serviceTimeout, 'storage.read', 'artifact.write'].includes(grant)
+            (grant) => !["service:" + operation.serviceTimeout, "storage.read", "artifact.write"].includes(grant)
           ) ||
-          !operation.grants.includes('service:' + operation.serviceTimeout) ||
-          !value.connections.some(
-            (entry) => entry.alias === operation.serviceTimeout && entry.service === 'gsvi@1'
-          ))
+          !operation.grants.includes("service:" + operation.serviceTimeout) ||
+          !value.connections.some((entry) => entry.alias === operation.serviceTimeout && entry.service === "gsvi@1"))
       ) {
-        context.addIssue({ code: 'custom', message: '服务期限仅允许原生GSVI的已声明后台服务操作' })
+        context.addIssue({ code: "custom", message: "服务期限仅允许原生GSVI的已声明后台服务操作" })
       }
     }
     if (
       value.configurationProjection &&
       !value.connections.some(
-        (entry) => entry.kind === 'service' && entry.alias === 'speech' && entry.service === 'gsvi@1'
+        (entry) => entry.kind === "service" && entry.alias === "speech" && entry.service === "gsvi@1"
       )
     ) {
-      context.addIssue({ code: 'custom', message: 'GSVI配置投影必须声明speech:gsvi@1服务' })
+      context.addIssue({ code: "custom", message: "GSVI配置投影必须声明speech:gsvi@1服务" })
     }
     for (const [name, ids] of [
-      ['files', value.files],
+      ["files", value.files],
       [
-        'connections',
+        "connections",
         value.connections.map((entry) => {
           return entry.alias
         })
       ],
       [
-        'operations',
+        "operations",
         value.operations.map((entry) => {
           return entry.id
         })
       ],
       [
-        'commands',
+        "commands",
         value.commands.map((entry) => {
           return entry.id
         })
       ],
       [
-        'hooks',
+        "hooks",
         value.hooks.map((entry) => {
           return entry.id
         })
       ],
       [
-        'points',
+        "points",
         value.points.map((entry) => {
           return entry.id
         })
       ]
     ] as const) {
       if (new Set(ids).size !== ids.length) {
-        context.addIssue({ code: 'custom', message: name + ' 中的标识不可重复' })
+        context.addIssue({ code: "custom", message: name + " 中的标识不可重复" })
       }
     }
     if (!value.files.includes(value.entry)) {
-      context.addIssue({ code: 'custom', message: '入口文件必须包含在 files 中' })
+      context.addIssue({ code: "custom", message: "入口文件必须包含在 files 中" })
     }
     if (
       value.files.some((file) => {
-        return file === 'package-index.json' || file.startsWith('package-index.json/')
+        return file === "package-index.json" || file.startsWith("package-index.json/")
       })
     ) {
-      context.addIssue({ code: 'custom', message: 'package-index.json 是框架保留路径' })
+      context.addIssue({ code: "custom", message: "package-index.json 是框架保留路径" })
     }
     for (const connection of value.connections) {
-      if (connection.kind === 'service' && !['gsvi@1', 'comfy@1'].includes(connection.service ?? '')) {
-        context.addIssue({ code: 'custom', message: '具名服务必须声明已支持的服务契约' })
+      if (connection.kind === "service" && !["gsvi@1", "comfy@1"].includes(connection.service ?? "")) {
+        context.addIssue({ code: "custom", message: "具名服务必须声明已支持的服务契约" })
       }
       if (
-        (connection.service && connection.kind !== 'service') ||
-        (connection.kind === 'service' && connection.setting)
+        (connection.service && connection.kind !== "service") ||
+        (connection.kind === "service" && connection.setting)
       ) {
-        context.addIssue({ code: 'custom', message: '具名服务使用独立实例绑定，不使用业务 setting' })
+        context.addIssue({ code: "custom", message: "具名服务使用独立实例绑定，不使用业务 setting" })
       }
     }
     for (const operation of value.operations) {
       if (
-        operation.data === 'none' &&
+        operation.data === "none" &&
         operation.grants.some((grant) => {
-          return grant.startsWith('storage.') || grant === 'artifact.publish'
+          return grant.startsWith("storage.") || grant === "artifact.publish"
         })
       ) {
-        context.addIssue({ code: 'custom', message: '无数据操作不能声明私有存储能力' })
+        context.addIssue({ code: "custom", message: "无数据操作不能声明私有存储能力" })
       }
     }
     for (const command of value.commands) {
@@ -253,12 +245,12 @@ export const PluginManifestSchema = z
           return operation.id === command.operation
         })
       ) {
-        context.addIssue({ code: 'custom', message: '指令引用了不存在的操作：' + command.id })
+        context.addIssue({ code: "custom", message: "指令引用了不存在的操作：" + command.id })
       }
     }
     for (const hook of value.hooks) {
-      if (hook.inspectCapabilities.length > 0 && hook.point !== 'delivery.presentation@1') {
-        context.addIssue({ code: 'custom', message: '能力诊断仅用于 delivery.presentation@1 的短时选择' })
+      if (hook.inspectCapabilities.length > 0 && hook.point !== "delivery.presentation@1") {
+        context.addIssue({ code: "custom", message: "能力诊断仅用于 delivery.presentation@1 的短时选择" })
       }
     }
   })

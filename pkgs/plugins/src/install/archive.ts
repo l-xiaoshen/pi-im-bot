@@ -1,8 +1,8 @@
-import { inflateRawSync } from 'node:zlib'
-import { mkdir, writeFile } from 'node:fs/promises'
-import { join, dirname } from 'node:path'
-import { PluginPathSchema } from '../manifest'
-import { assertSharePath } from '@pi-im-bot/support/share-path'
+import { inflateRawSync } from "node:zlib"
+import { mkdir, writeFile } from "node:fs/promises"
+import { join, dirname } from "node:path"
+import { PluginPathSchema } from "../manifest"
+import { assertSharePath } from "@pi-im-bot/support/share-path"
 
 export const maxArchiveBytes = 32 * 1024 * 1024
 const maxFileBytes = 16 * 1024 * 1024
@@ -19,20 +19,17 @@ interface ZipEntry {
 
 function entries(data: Buffer) {
   if (data.length > maxArchiveBytes) {
-    throw new Error('发布包超过 32 MiB')
+    throw new Error("发布包超过 32 MiB")
   }
   let end = -1
   for (let index = data.length - 22; index >= Math.max(0, data.length - 65557); index--) {
-    if (
-      data.readUInt32LE(index) === 0x06054b50 &&
-      index + 22 + data.readUInt16LE(index + 20) === data.length
-    ) {
+    if (data.readUInt32LE(index) === 0x06054b50 && index + 22 + data.readUInt16LE(index + 20) === data.length) {
       end = index
       break
     }
   }
   if (end < 0) {
-    throw new Error('ZIP 目录不完整')
+    throw new Error("ZIP 目录不完整")
   }
   const count = data.readUInt16LE(end + 10)
   if (
@@ -41,11 +38,11 @@ function entries(data: Buffer) {
     data.readUInt16LE(end + 8) !== count ||
     count > 2004
   ) {
-    throw new Error('不支持分卷、ZIP64 或超过数量预算的 ZIP')
+    throw new Error("不支持分卷、ZIP64 或超过数量预算的 ZIP")
   }
   const start = data.readUInt32LE(end + 16)
   if (start + data.readUInt32LE(end + 12) !== end) {
-    throw new Error('ZIP 目录偏移无效')
+    throw new Error("ZIP 目录偏移无效")
   }
   let cursor = start
   let bytes = 0
@@ -53,29 +50,27 @@ function entries(data: Buffer) {
   const result: ZipEntry[] = []
   for (let index = 0; index < count; index++) {
     if (cursor + 46 > end || data.readUInt32LE(cursor) !== 0x02014b50) {
-      throw new Error('ZIP 目录条目损坏')
+      throw new Error("ZIP 目录条目损坏")
     }
     const nameLength = data.readUInt16LE(cursor + 28)
     const extraLength = data.readUInt16LE(cursor + 30)
     const commentLength = data.readUInt16LE(cursor + 32)
     const next = cursor + 46 + nameLength + extraLength + commentLength
     if (next > end) {
-      throw new Error('ZIP 名称越界')
+      throw new Error("ZIP 名称越界")
     }
-    const name = new TextDecoder('utf-8', { fatal: true }).decode(
-      data.subarray(cursor + 46, cursor + 46 + nameLength)
-    )
+    const name = new TextDecoder("utf-8", { fatal: true }).decode(data.subarray(cursor + 46, cursor + 46 + nameLength))
     let checked = name
-    if (name.endsWith('/')) {
+    if (name.endsWith("/")) {
       checked = name.slice(0, -1)
     }
     PluginPathSchema.parse(checked)
     const mode = (data.readUInt32LE(cursor + 38) >>> 16) & 0xf000
-    if (![0, 0x8000, 0x4000].includes(mode) || (mode === 0x4000 && !name.endsWith('/'))) {
-      throw new Error('ZIP 不接受链接或特殊文件')
+    if (![0, 0x8000, 0x4000].includes(mode) || (mode === 0x4000 && !name.endsWith("/"))) {
+      throw new Error("ZIP 不接受链接或特殊文件")
     }
     if (names.has(checked)) {
-      throw new Error('ZIP 中存在重复路径')
+      throw new Error("ZIP 中存在重复路径")
     }
     names.add(checked)
     const entry = {
@@ -94,34 +89,34 @@ function entries(data: Buffer) {
       entry.compressed > maxArchiveBytes ||
       entry.offset + 30 > start
     ) {
-      throw new Error('ZIP 加密、压缩方式或文件大小不支持')
+      throw new Error("ZIP 加密、压缩方式或文件大小不支持")
     }
     bytes += entry.size
     if (bytes > maxTotalBytes) {
-      throw new Error('发布包展开后超过 64 MiB')
+      throw new Error("发布包展开后超过 64 MiB")
     }
     if (
       data.readUInt32LE(entry.offset) !== 0x04034b50 ||
       data.readUInt16LE(entry.offset + 8) !== entry.method ||
       data.readUInt16LE(entry.offset + 6) !== entry.flags
     ) {
-      throw new Error('ZIP 文件头与目录不一致')
+      throw new Error("ZIP 文件头与目录不一致")
     }
     const localNameLength = data.readUInt16LE(entry.offset + 26)
     const payload = entry.offset + 30 + localNameLength + data.readUInt16LE(entry.offset + 28)
     if (
       payload + entry.compressed > start ||
-      new TextDecoder('utf-8', { fatal: true }).decode(
+      new TextDecoder("utf-8", { fatal: true }).decode(
         data.subarray(entry.offset + 30, entry.offset + 30 + localNameLength)
       ) !== name
     ) {
-      throw new Error('ZIP 文件内容越界')
+      throw new Error("ZIP 文件内容越界")
     }
     result.push({ ...entry, offset: payload })
     cursor = next
   }
   if (cursor !== end) {
-    throw new Error('ZIP 目录长度不一致')
+    throw new Error("ZIP 目录长度不一致")
   }
   return result
 }
@@ -133,55 +128,55 @@ export async function unpackPluginArchive(
 ) {
   const buffer = Buffer.from(data)
   let files = entries(buffer)
-  let prefix = ''
+  let prefix = ""
   if (selectedDirectory !== undefined) {
     if (selectedDirectory) {
       PluginPathSchema.parse(selectedDirectory)
     }
-    const root = files[0]?.name.split('/')[0]
+    const root = files[0]?.name.split("/")[0]
     if (
       !root ||
       files.some((entry) => {
-        return !entry.name.startsWith(root + '/')
+        return !entry.name.startsWith(root + "/")
       })
     ) {
-      throw new Error('GitHub 源码包须包含单一仓库根目录')
+      throw new Error("GitHub 源码包须包含单一仓库根目录")
     }
-    prefix = root + '/'
+    prefix = root + "/"
     if (selectedDirectory) {
-      prefix += selectedDirectory + '/'
+      prefix += selectedDirectory + "/"
     }
     if (
       !files.some((entry) => {
-        return entry.name === prefix + 'plugin.json'
+        return entry.name === prefix + "plugin.json"
       })
     ) {
-      throw new Error('所选 GitHub 目录没有 plugin.json；请提供本框架插件的仓库或具体插件目录链接')
+      throw new Error("所选 GitHub 目录没有 plugin.json；请提供本框架插件的仓库或具体插件目录链接")
     }
     files = files.filter((entry) => {
       return entry.name.startsWith(prefix)
     })
   } else {
     const manifests = files.filter((entry) => {
-      return entry.name === 'plugin.json' || entry.name.endsWith('/plugin.json')
+      return entry.name === "plugin.json" || entry.name.endsWith("/plugin.json")
     })
     if (manifests.length !== 1) {
-      throw new Error('发布包须包含唯一的 plugin.json')
+      throw new Error("发布包须包含唯一的 plugin.json")
     }
-    prefix = manifests[0].name.slice(0, -'plugin.json'.length)
+    prefix = manifests[0].name.slice(0, -"plugin.json".length)
     if (
       files.some((entry) => {
-        return !entry.name.startsWith(prefix) && entry.name + '/' !== prefix
+        return !entry.name.startsWith(prefix) && entry.name + "/" !== prefix
       })
     ) {
-      throw new Error('发布包须使用单一插件根目录')
+      throw new Error("发布包须使用单一插件根目录")
     }
   }
   let total = 0
   await mkdir(directory, { recursive: true, mode: 0o700 })
   for (const entry of files) {
     signal.throwIfAborted()
-    if (entry.name.endsWith('/')) {
+    if (entry.name.endsWith("/")) {
       continue
     }
     const relative = PluginPathSchema.parse(entry.name.slice(prefix.length))
@@ -191,15 +186,15 @@ export async function unpackPluginArchive(
       content = inflateRawSync(compressed, { maxOutputLength: maxFileBytes })
     }
     if (content.length !== entry.size || Bun.hash.crc32(content) >>> 0 !== entry.crc) {
-      throw new Error('ZIP 文件长度或校验失败')
+      throw new Error("ZIP 文件长度或校验失败")
     }
     total += content.length
     if (total > maxTotalBytes) {
-      throw new Error('解包超过存储预算')
+      throw new Error("解包超过存储预算")
     }
     const path = join(directory, relative)
     await mkdir(dirname(path), { recursive: true, mode: 0o700 })
-    await writeFile(path, content, { flag: 'wx', mode: 0o600 })
+    await writeFile(path, content, { flag: "wx", mode: 0o600 })
   }
 }
 

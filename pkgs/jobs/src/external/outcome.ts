@@ -1,9 +1,9 @@
-import type { JobRevision } from '../schema'
-import type { ExternalOutcome } from './state'
-type JobResult = NonNullable<JobRevision['result']>
-type ResultItem = NonNullable<JobResult['items']>[number]
+import type { JobRevision } from "../schema"
+import type { ExternalOutcome } from "./state"
+type JobResult = NonNullable<JobRevision["result"]>
+type ResultItem = NonNullable<JobResult["items"]>[number]
 function confirmed(item: ResultItem) {
-  return ['succeeded', 'failed', 'cancelled'].includes(item.status)
+  return ["succeeded", "failed", "cancelled"].includes(item.status)
 }
 
 /** A query may add facts; a missing result or unresolved item cannot retract confirmed evidence. */
@@ -47,12 +47,12 @@ export function mergeJobResult(previous: JobResult | undefined, incoming: JobRes
       result.factsComplete = false
     }
     const successes = result.items.filter((item) => {
-      return item.status === 'succeeded'
+      return item.status === "succeeded"
     }).length
     if (successes) {
-      result.businessStatus = 'partial'
+      result.businessStatus = "partial"
       if (successes === result.items.length && result.factsComplete !== false) {
-        result.businessStatus = 'succeeded'
+        result.businessStatus = "succeeded"
       }
     }
   }
@@ -70,14 +70,11 @@ export function mergeJobResult(previous: JobResult | undefined, incoming: JobRes
   return result
 }
 
-export function mergeExternalOutcome(
-  previous: JobResult | undefined,
-  incoming: ExternalOutcome
-): ExternalOutcome {
+export function mergeExternalOutcome(previous: JobResult | undefined, incoming: ExternalOutcome): ExternalOutcome {
   const result = mergeJobResult(previous, incoming.result)
   const outcome = { ...incoming, result }
   if (result?.factsComplete === false) {
-    outcome.state = 'outcome_unknown'
+    outcome.state = "outcome_unknown"
   }
   return outcome
 }

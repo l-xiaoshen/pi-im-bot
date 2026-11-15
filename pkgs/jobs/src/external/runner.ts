@@ -1,48 +1,40 @@
-import { z } from 'zod'
-import { compile } from '@earendil-works/pi-schema'
-import { McpError, McpHttpError } from '@earendil-works/pi-mcp'
-import type { Context } from '@earendil-works/chord/context'
-import type { JobService } from '../service'
-import type { ActiveJobTask, JobTaskRuntime } from '../task'
-import type { Configuration } from '@pi-im-bot/config/load'
-import type { JobRevision } from '../schema'
-import { connectMcp } from '@pi-im-bot/resources/mcp/client'
-import { usesMcpTask, CreateMcpTaskResultSchema, McpCallResultSchema } from '@pi-im-bot/resources/mcp/tasks'
-import { McpRemoteTaskSchema, type McpRemoteTask } from '@pi-im-bot/resources/mcp/task-schema'
-import { McpToolSchema } from '@pi-im-bot/resources/mcp/schema'
-import { mcpToolRevision } from '@pi-im-bot/resources/mcp/identity'
-import {
-  externalContext,
-  externalError,
-  resultRedactionServer,
-  rememberSession,
-  type ExternalContext
-} from './context'
-import { claimExternal, saveExternal, finishExternal } from './state'
-import { externalResult } from './result'
-import { cancelExternal } from './cancel'
-import { openExternalStatus } from './connection'
+import { z } from "zod"
+import { compile } from "@earendil-works/pi-schema"
+import { McpError, McpHttpError } from "@earendil-works/pi-mcp"
+import type { Context } from "@earendil-works/chord/context"
+import type { JobService } from "../service"
+import type { ActiveJobTask, JobTaskRuntime } from "../task"
+import type { Configuration } from "@pi-im-bot/config/load"
+import type { JobRevision } from "../schema"
+import { connectMcp } from "@pi-im-bot/resources/mcp/client"
+import { usesMcpTask, CreateMcpTaskResultSchema, McpCallResultSchema } from "@pi-im-bot/resources/mcp/tasks"
+import { McpRemoteTaskSchema, type McpRemoteTask } from "@pi-im-bot/resources/mcp/task-schema"
+import { McpToolSchema } from "@pi-im-bot/resources/mcp/schema"
+import { mcpToolRevision } from "@pi-im-bot/resources/mcp/identity"
+import { externalContext, externalError, resultRedactionServer, rememberSession, type ExternalContext } from "./context"
+import { claimExternal, saveExternal, finishExternal } from "./state"
+import { externalResult } from "./result"
+import { cancelExternal } from "./cancel"
+import { openExternalStatus } from "./connection"
 
 export class ExternalJobRunner {
   constructor(readonly service: JobService) {}
 
   supports(config: Configuration, value: JobRevision) {
-    if (value.spec.kind !== 'tool') {
+    if (value.spec.kind !== "tool") {
       return false
     }
     const capability = value.spec.capability
     const entry = config.resources.mcpTools(value.context.effective.settings).find((entry) => {
       return entry.id === capability
     })
-    return Boolean(
-      entry && usesMcpTask(entry.server, entry.tool, config.resources.manifest(entry.server.id), true)
-    )
+    return Boolean(entry && usesMcpTask(entry.server, entry.tool, config.resources.manifest(entry.server.id), true))
   }
 
   private authorize(value: ExternalContext, signal: AbortSignal, submitted: boolean) {
     signal.throwIfAborted()
     if (value.job.currentRevision !== value.value.revision || value.value.cancelRequested) {
-      throw new Error('外部任务版本已停止')
+      throw new Error("外部任务版本已停止")
     }
     if (submitted) {
       this.service.coordinator.authorizeExternalContext(
@@ -53,12 +45,7 @@ export class ExternalJobRunner {
         value.entry.server.id
       )
     } else {
-      this.service.coordinator.authorizeContext(
-        value.job.roomId,
-        value.value.mode,
-        value.value.context,
-        value.entry.id
-      )
+      this.service.coordinator.authorizeContext(value.job.roomId, value.value.mode, value.value.context, value.entry.id)
     }
   }
 
@@ -74,7 +61,7 @@ export class ExternalJobRunner {
     try {
       this.authorize(value, signal, false)
       if (!compile(value.entry.tool.inputSchema).check(value.spec.arguments)) {
-        throw new Error('后台操作参数与登记的 schema 不匹配')
+        throw new Error("后台操作参数与登记的 schema 不匹配")
       }
       if (
         !(await claimExternal(
@@ -87,23 +74,19 @@ export class ExternalJobRunner {
       ) {
         await runtime.commit(async (tx) => {
           await this.service.repository.change(tx, value.job.id, value.value.revision, (revision) => {
-            revision.state = 'queued'
-            revision.external = { status: 'waiting_capacity', attempts: 0, hasReceipt: false }
+            revision.state = "queued"
+            revision.external = { status: "waiting_capacity", attempts: 0, hasReceipt: false }
           })
           return undefined
         }, context)
         this.service.changed(await this.service.repository.get(value.job.id))
-        await runtime.sleepUntil(
-          Math.min(value.value.deadlineAt, Date.now() + 1000),
-          { phase: 'work' },
-          context
-        )
+        await runtime.sleepUntil(Math.min(value.value.deadlineAt, Date.now() + 1000), { phase: "work" }, context)
         return
       }
       connection = await connectMcp(server, signal, { persistent: true })
       rememberSession(value.execution, connection.snapshot())
       if (!connection.initialization.capabilities.tasks?.requests?.tools?.call) {
-        throw new Error('服务没有声明 tools/call 的 MCP Tasks 能力，请刷新目录')
+        throw new Error("服务没有声明 tools/call 的 MCP Tasks 能力，请刷新目录")
       }
       const current = McpToolSchema.array()
         .parse(await connection.client.listTools({ signal }))
@@ -111,23 +94,23 @@ export class ExternalJobRunner {
           return tool.name === value.entry.tool.name
         })
       if (!current || mcpToolRevision(current) !== mcpToolRevision(value.entry.tool)) {
-        throw new Error('MCP 工具定义已变化，请刷新目录')
+        throw new Error("MCP 工具定义已变化，请刷新目录")
       }
       rememberSession(value.execution, connection.snapshot())
       value.execution.submittedAt = Date.now()
       await runtime.commit(async (tx) => {
         await saveExternal(tx, value.key, value.execution)
         await this.service.repository.change(tx, value.job.id, value.value.revision, (revision) => {
-          revision.state = 'waiting_external'
-          revision.external = { status: 'submitting', attempts: 0, hasReceipt: false }
+          revision.state = "waiting_external"
+          revision.external = { status: "submitting", attempts: 0, hasReceipt: false }
         })
-        return { status: 'running', checkpoint: { phase: 'dispatching' } }
+        return { status: "running", checkpoint: { phase: "dispatching" } }
       }, context)
       this.authorize(value, signal, false)
       dispatched = true
       const result = CreateMcpTaskResultSchema.parse(
         await connection.client.request(
-          'tools/call',
+          "tools/call",
           {
             name: value.entry.tool.name,
             arguments: value.spec.arguments,
@@ -141,9 +124,9 @@ export class ExternalJobRunner {
       if (runtime.signal.aborted) {
         throw error
       }
-      let state: 'failed' | 'outcome_unknown' = 'failed'
+      let state: "failed" | "outcome_unknown" = "failed"
       if (dispatched && !(error instanceof McpError)) {
-        state = 'outcome_unknown'
+        state = "outcome_unknown"
       }
       await finishExternal(this.service, task, runtime, context, {
         state,
@@ -162,7 +145,7 @@ export class ExternalJobRunner {
     remote: McpRemoteTask
   ) {
     if (value.execution.remote && value.execution.remote.taskId !== remote.taskId) {
-      throw new Error('远端返回了不同的任务 ID')
+      throw new Error("远端返回了不同的任务 ID")
     }
     value.execution.remote = remote
     value.execution.failures = 0
@@ -171,7 +154,7 @@ export class ExternalJobRunner {
     }
     const interval = remote.pollInterval ?? value.entry.server.tasks.pollIntervalMs
     let nextPollAt = Date.now() + Math.max(250, interval)
-    if (['completed', 'failed', 'cancelled'].includes(remote.status)) {
+    if (["completed", "failed", "cancelled"].includes(remote.status)) {
       nextPollAt = Date.now()
     }
     nextPollAt = Math.min(nextPollAt, value.value.deadlineAt)
@@ -181,22 +164,22 @@ export class ExternalJobRunner {
     await runtime.commit(async (tx) => {
       await saveExternal(tx, value.key, value.execution)
       await this.service.repository.change(tx, value.job.id, value.value.revision, (revision) => {
-        revision.state = 'waiting_external'
-        if (remote.status === 'input_required') {
-          revision.state = 'waiting_input'
+        revision.state = "waiting_external"
+        if (remote.status === "input_required") {
+          revision.state = "waiting_input"
         }
         revision.external = {
           status: remote.status,
-          message: externalError(remote.statusMessage ?? '', value.entry.server, value.execution),
+          message: externalError(remote.statusMessage ?? "", value.entry.server, value.execution),
           nextPollAt,
           attempts: (revision.external?.attempts ?? 0) + 1,
           hasReceipt: true
         }
       })
-      return { status: 'running', checkpoint: { phase: 'poll' } }
+      return { status: "running", checkpoint: { phase: "poll" } }
     }, context)
     this.service.changed(await this.service.repository.get(value.job.id))
-    await runtime.sleepUntil(nextPollAt, { phase: 'poll' }, context)
+    await runtime.sleepUntil(nextPollAt, { phase: "poll" }, context)
   }
 
   async poll(task: ActiveJobTask, runtime: JobTaskRuntime, context: Context) {
@@ -205,8 +188,8 @@ export class ExternalJobRunner {
     const remote = value.execution.remote
     if (!remote || !value.execution.session) {
       await finishExternal(this.service, task, runtime, context, {
-        state: 'outcome_unknown',
-        error: '外部任务回执缺失，未重新提交'
+        state: "outcome_unknown",
+        error: "外部任务回执缺失，未重新提交"
       })
       return
     }
@@ -224,7 +207,7 @@ export class ExternalJobRunner {
             task,
             runtime,
             context,
-            cancelled?.outcome ?? { state: 'outcome_unknown', error: '已超过等待期限；远端状态无法确认' }
+            cancelled?.outcome ?? { state: "outcome_unknown", error: "已超过等待期限；远端状态无法确认" }
           )
           committed = true
         } finally {
@@ -242,21 +225,21 @@ export class ExternalJobRunner {
         }, context)
       }
       if (current.taskId !== remote.taskId) {
-        throw new Error('远端任务 ID 不匹配')
+        throw new Error("远端任务 ID 不匹配")
       }
       value.execution.remote = current
-      if (current.status === 'working') {
+      if (current.status === "working") {
         await this.remember(task, runtime, context, value, current)
         return
       }
-      if (current.status === 'input_required') {
+      if (current.status === "input_required") {
         await runtime.commit(async (tx) => {
           await saveExternal(tx, value.key, value.execution)
           await this.service.repository.change(tx, value.job.id, value.value.revision, (revision) => {
-            revision.state = 'waiting_input'
+            revision.state = "waiting_input"
             revision.external = {
               status: current.status,
-              message: '远端需要输入；当前连接未声明采样或交互确认能力',
+              message: "远端需要输入；当前连接未声明采样或交互确认能力",
               attempts: (revision.external?.attempts ?? 0) + 1,
               hasReceipt: true
             }
@@ -265,16 +248,16 @@ export class ExternalJobRunner {
         }, context)
         this.service.changed(await this.service.repository.get(value.job.id))
       }
-      if (current.status === 'cancelled') {
+      if (current.status === "cancelled") {
         await finishExternal(this.service, task, runtime, context, {
-          state: 'cancelled',
-          error: '远端任务已取消'
+          state: "cancelled",
+          error: "远端任务已取消"
         })
         terminal = true
         return
       }
       // input_required may deliver reverse requests over this result stream. We do not advertise sampling/elicitation.
-      const raw = await connection.client.request('tasks/result', { taskId: remote.taskId }, { signal })
+      const raw = await connection.client.request("tasks/result", { taskId: remote.taskId }, { signal })
       const result = McpCallResultSchema.parse(raw)
       this.authorize(value, signal, true)
       const projected = await externalResult(
@@ -285,9 +268,9 @@ export class ExternalJobRunner {
         value.job,
         value.value.revision
       )
-      let state: 'succeeded' | 'failed' = 'succeeded'
-      if (result.isError || current.status === 'failed') {
-        state = 'failed'
+      let state: "succeeded" | "failed" = "succeeded"
+      if (result.isError || current.status === "failed") {
+        state = "failed"
       }
       await finishExternal(this.service, task, runtime, context, { state, result: projected })
       terminal = true
@@ -296,16 +279,15 @@ export class ExternalJobRunner {
         throw error
       }
       value.execution.failures += 1
-      if (value.execution.remote?.status === 'failed' && error instanceof McpError) {
+      if (value.execution.remote?.status === "failed" && error instanceof McpError) {
         await finishExternal(this.service, task, runtime, context, {
-          state: 'failed',
+          state: "failed",
           error: externalError(error, server, value.execution)
         })
         terminal = true
         return
       }
-      let retry =
-        Date.now() < value.value.deadlineAt && value.execution.failures < server.tasks.maxPollFailures
+      let retry = Date.now() < value.value.deadlineAt && value.execution.failures < server.tasks.maxPollFailures
       if (
         (error instanceof McpHttpError && [401, 403, 404].includes(error.status)) ||
         (error instanceof McpError && [-32601, -32602].includes(error.code))
@@ -334,7 +316,7 @@ export class ExternalJobRunner {
             task,
             runtime,
             context,
-            cancelled?.outcome ?? { state: 'outcome_unknown', error: '调用权限已撤销，远端状态无法确认' }
+            cancelled?.outcome ?? { state: "outcome_unknown", error: "调用权限已撤销，远端状态无法确认" }
           )
           committed = true
         } finally {
@@ -344,12 +326,12 @@ export class ExternalJobRunner {
       }
       const message = externalError(error, server, value.execution)
       if (!retry) {
-        let state: 'failed' | 'outcome_unknown' = 'outcome_unknown'
-        if (value.execution.remote?.status === 'failed' && error instanceof McpError) {
-          state = 'failed'
+        let state: "failed" | "outcome_unknown" = "outcome_unknown"
+        if (value.execution.remote?.status === "failed" && error instanceof McpError) {
+          state = "failed"
         }
         await finishExternal(this.service, task, runtime, context, { state, error: message })
-        if (state === 'failed') {
+        if (state === "failed") {
           terminal = true
         }
         return
@@ -373,7 +355,7 @@ export class ExternalJobRunner {
         return undefined
       }, context)
       this.service.changed(await this.service.repository.get(value.job.id))
-      await runtime.sleepUntil(nextPollAt, { phase: 'poll' }, context)
+      await runtime.sleepUntil(nextPollAt, { phase: "poll" }, context)
     } finally {
       await connection?.close(terminal)
     }

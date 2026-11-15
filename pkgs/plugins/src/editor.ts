@@ -1,34 +1,34 @@
-import { readFile, writeFile, rename, unlink, mkdir } from 'node:fs/promises'
-import { join } from 'node:path'
-import type { Configuration } from '@pi-im-bot/config/load'
-import type { ConfigurationMutations } from '@pi-im-bot/config/mutations'
-import { ResourcesConfigSchema, type ResourcesConfig } from '@pi-im-bot/resources/schema'
-import { ResourceLibrary } from '@pi-im-bot/resources/library'
-import { revision } from '@pi-im-bot/settings/resolve'
-import { SettingsEditError } from '@pi-im-bot/settings/editor'
-import { PluginInstanceSchema, type PluginInstance } from './config'
+import { readFile, writeFile, rename, unlink, mkdir } from "node:fs/promises"
+import { join } from "node:path"
+import type { Configuration } from "@pi-im-bot/config/load"
+import type { ConfigurationMutations } from "@pi-im-bot/config/mutations"
+import { ResourcesConfigSchema, type ResourcesConfig } from "@pi-im-bot/resources/schema"
+import { ResourceLibrary } from "@pi-im-bot/resources/library"
+import { revision } from "@pi-im-bot/settings/resolve"
+import { SettingsEditError } from "@pi-im-bot/settings/editor"
+import { PluginInstanceSchema, type PluginInstance } from "./config"
 import {
   PluginManagementPatchSchema,
   PluginSettingPlaceholder,
   type PluginEditorView,
   type PluginView
-} from './contracts'
-import { importPlugin } from './package'
-import { pluginPaths } from './runtime/config'
-import type { PluginPackage } from './config'
-import { fillConfigDefaults } from './configuration/values'
-import { pluginIssues, resolvePluginConnections } from './management'
-import type { ManagePluginSchema } from './contracts'
+} from "./contracts"
+import { importPlugin } from "./package"
+import { pluginPaths } from "./runtime/config"
+import type { PluginPackage } from "./config"
+import { fillConfigDefaults } from "./configuration/values"
+import { pluginIssues, resolvePluginConnections } from "./management"
+import type { ManagePluginSchema } from "./contracts"
 import {
   gsviBusinessValues,
   gsviCoreFields,
   migrateGsviFlat,
   restoreGsviFlat,
   usesGsviConfiguration
-} from '@pi-im-bot/integrations/gsvi/plugin-config/definition'
-import { GsviConfigurationRefresh } from '@pi-im-bot/integrations/gsvi/plugin-config/refresh'
-import { gsviPageValues, saveGsviPage } from '@pi-im-bot/integrations/gsvi/plugin-config/values'
-import type { z } from 'zod'
+} from "@pi-im-bot/integrations/gsvi/plugin-config/definition"
+import { GsviConfigurationRefresh } from "@pi-im-bot/integrations/gsvi/plugin-config/refresh"
+import { gsviPageValues, saveGsviPage } from "@pi-im-bot/integrations/gsvi/plugin-config/values"
+import type { z } from "zod"
 
 export class PluginEditor {
   readonly gsviRefresh: GsviConfigurationRefresh
@@ -43,7 +43,7 @@ export class PluginEditor {
   }
 
   private async file() {
-    const text = await readFile(join(this.configuration().configDir, 'resources.json'), 'utf8')
+    const text = await readFile(join(this.configuration().configDir, "resources.json"), "utf8")
     return {
       revision: revision({ file: revision(text), packages: this.configuration().resources.pluginPackages }),
       config: ResourcesConfigSchema.parse(JSON.parse(text))
@@ -65,21 +65,21 @@ export class PluginEditor {
       runtimeEnabled,
       plugins: file.config.plugins.map((instance) => {
         const bundle = library.pluginPackage(instance.id)
-        let state: PluginView['state'] = 'configured'
+        let state: PluginView["state"] = "configured"
         if (!runtimeEnabled) {
-          state = 'runtime-disabled'
+          state = "runtime-disabled"
         }
         if (!bundle) {
-          state = 'unimported'
+          state = "unimported"
         }
         if (!instance.enabled) {
-          state = 'disabled'
+          state = "disabled"
         }
         let issues: Array<{ path: string; message: string }> = []
         if (bundle) {
           issues = pluginIssues(instance, bundle, library)
           if (issues.length) {
-            state = 'needs-configuration'
+            state = "needs-configuration"
           }
         }
         return {
@@ -103,10 +103,10 @@ export class PluginEditor {
         return instance.id === input.id
       })
       if (previousId && (!previous || previousId !== input.id)) {
-        throw new SettingsEditError('插件实例不存在或 ID 已变化')
+        throw new SettingsEditError("插件实例不存在或 ID 已变化")
       }
       if (!previousId && previous) {
-        throw new SettingsEditError('插件实例 ID 已存在')
+        throw new SettingsEditError("插件实例 ID 已存在")
       }
       const settings = Object.fromEntries(
         Object.entries(input.settings).map(([key, value]) => {
@@ -114,7 +114,7 @@ export class PluginEditor {
             return [key, value]
           }
           if (!previous || !Object.hasOwn(previous.settings, key)) {
-            throw new SettingsEditError('插件设置占位没有可保留的值')
+            throw new SettingsEditError("插件设置占位没有可保留的值")
           }
           return [key, previous.settings[key]]
         })
@@ -126,13 +126,10 @@ export class PluginEditor {
         usesGsviConfiguration(bundle) &&
         gsviCoreFields.some((key) => Object.hasOwn(instance.settings, key))
       ) {
-        throw new Error('GSVI连接配置只通过实例configuration入口保存')
+        throw new Error("GSVI连接配置只通过实例configuration入口保存")
       }
       if (bundle?.configuration) {
-        instance.settings = gsviBusinessValues(
-          bundle,
-          fillConfigDefaults(bundle.configuration, instance.settings)
-        )
+        instance.settings = gsviBusinessValues(bundle, fillConfigDefaults(bundle.configuration, instance.settings))
       }
       if (bundle) {
         resolvePluginConnections(instance, bundle)
@@ -146,7 +143,7 @@ export class PluginEditor {
     })
   }
 
-  manage(expected: string, id: string, patch: z.infer<typeof ManagePluginSchema>['patch']) {
+  manage(expected: string, id: string, patch: z.infer<typeof ManagePluginSchema>["patch"]) {
     const update = Object.fromEntries(
       Object.entries(PluginManagementPatchSchema.parse(patch)).filter(([_key, value]) => {
         return value !== undefined
@@ -157,7 +154,7 @@ export class PluginEditor {
         return entry.id === id
       })
       if (!instance) {
-        throw new Error('插件实例不存在')
+        throw new Error("插件实例不存在")
       }
       Object.assign(instance, update)
       const bundle = this.configuration().resources.pluginPackage(id)
@@ -190,11 +187,11 @@ export class PluginEditor {
       const usage = this.usage(id)
       for (const instance of config.plugins) {
         if (instance.id !== id && Object.values(instance.dependencies).includes(id)) {
-          usage.push('插件 ' + instance.id + ' 的依赖')
+          usage.push("插件 " + instance.id + " 的依赖")
         }
       }
       if (usage.length > 0) {
-        throw new SettingsEditError('插件仍被引用：' + usage.join('、') + '。可先停用或清除引用。')
+        throw new SettingsEditError("插件仍被引用：" + usage.join("、") + "。可先停用或清除引用。")
       }
       config.plugins = config.plugins.filter((item) => {
         return item.id !== id
@@ -212,13 +209,13 @@ export class PluginEditor {
   async import(expected: string, id: string) {
     const file = await this.file()
     if (file.revision !== expected) {
-      throw new SettingsEditError('资源配置已变化，请刷新后重试', 409)
+      throw new SettingsEditError("资源配置已变化，请刷新后重试", 409)
     }
     const instance = file.config.plugins.find((item) => {
       return item.id === id
     })
     if (!instance) {
-      throw new SettingsEditError('插件实例不存在')
+      throw new SettingsEditError("插件实例不存在")
     }
     const current = this.configuration()
     const bundle = await importPlugin(
@@ -241,7 +238,7 @@ export class PluginEditor {
           return entry.id === id
         })
         if (!instance) {
-          throw new Error('插件实例不存在')
+          throw new Error("插件实例不存在")
         }
         instance.release = bundle.revision
         if (sourceDir) {
@@ -278,15 +275,11 @@ export class PluginEditor {
     return operation
   }
 
-  mutate(
-    expected: string,
-    change: (config: ResourcesConfig) => void | Promise<void>,
-    bundle?: PluginPackage
-  ) {
+  mutate(expected: string, change: (config: ResourcesConfig) => void | Promise<void>, bundle?: PluginPackage) {
     return this.mutations.exclusive(async () => {
       const file = await this.file()
       if (file.revision !== expected) {
-        throw new SettingsEditError('资源配置已变化，请刷新后重试', 409)
+        throw new SettingsEditError("资源配置已变化，请刷新后重试", 409)
       }
       const previous = new Map(
         file.config.plugins.map((instance) => {
@@ -313,9 +306,9 @@ export class PluginEditor {
             throw new SettingsEditError(
               issues
                 .map((issue) => {
-                  return issue.path + '：' + issue.message
+                  return issue.path + "：" + issue.message
                 })
-                .join('；')
+                .join("；")
             )
           }
         }
@@ -326,24 +319,22 @@ export class PluginEditor {
           return instance.id === old.id
         })
         if (!next || old.release !== next.release) {
-          const directory = join(this.configuration().dataDir, 'plugin-config-history', old.id)
+          const directory = join(this.configuration().dataDir, "plugin-config-history", old.id)
           await mkdir(directory, { recursive: true, mode: 0o700 })
-          await writeFile(
-            join(directory, Date.now() + '-' + crypto.randomUUID() + '.json'),
-            JSON.stringify(old),
-            { mode: 0o600 }
-          )
+          await writeFile(join(directory, Date.now() + "-" + crypto.randomUUID() + ".json"), JSON.stringify(old), {
+            mode: 0o600
+          })
         }
       }
       if (bundle) {
         library = await library.withPlugin(bundle, this.configuration().dataDir)
       }
-      const path = join(this.configuration().configDir, 'resources.json')
-      const temporary = path + '.' + crypto.randomUUID() + '.tmp'
+      const path = join(this.configuration().configDir, "resources.json")
+      const temporary = path + "." + crypto.randomUUID() + ".tmp"
       try {
-        await writeFile(temporary, JSON.stringify(config, null, 2) + '\n', { mode: 0o600 })
+        await writeFile(temporary, JSON.stringify(config, null, 2) + "\n", { mode: 0o600 })
         if ((await this.file()).revision !== expected) {
-          throw new SettingsEditError('资源文件已变化，未覆盖当前内容', 409)
+          throw new SettingsEditError("资源文件已变化，未覆盖当前内容", 409)
         }
         this.validate(library)
         await rename(temporary, path)

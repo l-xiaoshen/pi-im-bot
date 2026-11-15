@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from "zod"
 
 export const PlatformMediaRefSchema = z.object({
   id: z.string().max(1024 * 1024),
@@ -6,7 +6,7 @@ export const PlatformMediaRefSchema = z.object({
 })
 export type PlatformMediaRef = z.infer<typeof PlatformMediaRefSchema>
 export const IncomingMediaSchema = z.object({
-  type: z.enum(['image', 'audio', 'video', 'file']),
+  type: z.enum(["image", "audio", "video", "file"]),
   name: z.string().max(200),
   mimeType: z.string().max(100).optional(),
   reference: PlatformMediaRefSchema
@@ -37,5 +37,5 @@ export const ReplyReferenceSchema = z
   })
   .refine((reference) => {
     return Boolean(reference.messageId || reference.platformMessageId)
-  }, '引用缺少消息 ID')
+  }, "引用缺少消息 ID")
 export type ReplyReference = z.infer<typeof ReplyReferenceSchema>

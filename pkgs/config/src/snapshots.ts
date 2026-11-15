@@ -1,18 +1,18 @@
-import { mkdirSync, existsSync, renameSync, writeFileSync } from 'node:fs'
-import { join } from 'node:path'
-import { z } from 'zod'
-import type { Configuration } from './load'
-import { BotConfigSchema } from './schema'
-import { ProvidersConfigSchema } from '@pi-im-bot/providers/schema'
-import { ProviderCatalog } from '@pi-im-bot/providers/catalog'
-import { FrameworkConfigSchema } from '@pi-im-bot/settings/schema'
-import { revision } from '@pi-im-bot/settings/resolve'
-import { ResourcesConfigSchema } from '@pi-im-bot/resources/schema'
-import { McpManifestSchema } from '@pi-im-bot/resources/mcp/schema'
-import { SkillManifestSchema } from '@pi-im-bot/resources/skills/schema'
-import { ResourceLibrary } from '@pi-im-bot/resources/library'
-import { PluginPackageSchema } from '@pi-im-bot/plugins/config'
-import { BoundedCache } from '@pi-im-bot/support/bounded-cache'
+import { mkdirSync, existsSync, renameSync, writeFileSync } from "node:fs"
+import { join } from "node:path"
+import { z } from "zod"
+import type { Configuration } from "./load"
+import { BotConfigSchema } from "./schema"
+import { ProvidersConfigSchema } from "@pi-im-bot/providers/schema"
+import { ProviderCatalog } from "@pi-im-bot/providers/catalog"
+import { FrameworkConfigSchema } from "@pi-im-bot/settings/schema"
+import { revision } from "@pi-im-bot/settings/resolve"
+import { ResourcesConfigSchema } from "@pi-im-bot/resources/schema"
+import { McpManifestSchema } from "@pi-im-bot/resources/mcp/schema"
+import { SkillManifestSchema } from "@pi-im-bot/resources/skills/schema"
+import { ResourceLibrary } from "@pi-im-bot/resources/library"
+import { PluginPackageSchema } from "@pi-im-bot/plugins/config"
+import { BoundedCache } from "@pi-im-bot/support/bounded-cache"
 
 const ReferenceSchema = z.string().regex(/^[a-f0-9]{64}$/)
 const ConfigurationSnapshotSchema = z.object({
@@ -33,7 +33,7 @@ export class ConfigurationSnapshots {
   private readonly directory: string
 
   constructor(private readonly current: () => Configuration) {
-    this.directory = join(current().dataDir, 'configuration-snapshots')
+    this.directory = join(current().dataDir, "configuration-snapshots")
     mkdirSync(this.directory, { recursive: true, mode: 0o700 })
   }
 
@@ -52,10 +52,10 @@ export class ConfigurationSnapshots {
     if (this.known.get(id)) {
       return id
     }
-    const path = join(this.directory, id + '.json')
+    const path = join(this.directory, id + ".json")
     if (!existsSync(path)) {
-      const temporary = path + '.' + crypto.randomUUID() + '.tmp'
-      writeFileSync(temporary, JSON.stringify(value) + '\n', { mode: 0o600 })
+      const temporary = path + "." + crypto.randomUUID() + ".tmp"
+      writeFileSync(temporary, JSON.stringify(value) + "\n", { mode: 0o600 })
       renameSync(temporary, path)
     }
     this.known.set(id, true)
@@ -79,9 +79,9 @@ export class ConfigurationSnapshots {
   }
 
   private async restore(id: string): Promise<Configuration> {
-    const raw: unknown = await Bun.file(join(this.directory, id + '.json')).json()
+    const raw: unknown = await Bun.file(join(this.directory, id + ".json")).json()
     if (revision(raw) !== id) {
-      throw new Error('固定配置快照已被修改，任务不能按原配置恢复')
+      throw new Error("固定配置快照已被修改，任务不能按原配置恢复")
     }
     const snapshot = ConfigurationSnapshotSchema.parse(raw)
     const current = this.current()

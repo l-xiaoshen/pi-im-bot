@@ -1,8 +1,8 @@
-import type { ChatMessage, Room } from '@pi-im-bot/contracts/message'
-import type { Settings } from '@pi-im-bot/settings/schema'
-import type { RunInput } from '@pi-im-bot/contracts/run'
-import { attachmentReferences, type ImageReference } from '@pi-im-bot/media/provenance'
-import { quoteReference } from '@pi-im-bot/media/projection'
+import type { ChatMessage, Room } from "@pi-im-bot/contracts/message"
+import type { Settings } from "@pi-im-bot/settings/schema"
+import type { RunInput } from "@pi-im-bot/contracts/run"
+import { attachmentReferences, type ImageReference } from "@pi-im-bot/media/provenance"
+import { quoteReference } from "@pi-im-bot/media/projection"
 
 export function projectInput(room: Room, input: RunInput, settings: Settings) {
   const metadata: Record<string, string> = { scope: room.id, room: room.name, source: input.source }
@@ -61,13 +61,13 @@ export function projectHistory(messages: ChatMessage[], settings: Settings) {
     }
     let text = message.text
     if (message.recalled) {
-      text = '[消息已撤回]'
+      text = "[消息已撤回]"
     }
     text = text.slice(0, remaining)
     remaining -= text.length
     const item: {
       id: string
-      role: ChatMessage['role']
+      role: ChatMessage["role"]
       text: string
       sender?: string
       actorId?: string

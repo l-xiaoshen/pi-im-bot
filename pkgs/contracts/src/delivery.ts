@@ -1,7 +1,7 @@
-import { MessageFormatSchema } from './message-format'
-import { z } from 'zod'
-import { AttachmentSchema } from './message'
-import { RenderAdmissionSchema, RenderPlanSchema, RenderRejectionSchema } from './rendering'
+import { MessageFormatSchema } from "./message-format"
+import { z } from "zod"
+import { AttachmentSchema } from "./message"
+import { RenderAdmissionSchema, RenderPlanSchema, RenderRejectionSchema } from "./rendering"
 
 export const OutboundSchema = z.object({
   id: z.string(),
@@ -24,21 +24,21 @@ export const OutboundSchema = z.object({
   render: RenderPlanSchema.optional(),
   renderAdmission: RenderAdmissionSchema.optional(),
   renderJobId: z.string().optional(),
-  inlineRender: z.enum(['planned', 'started', 'complete', 'fallback', 'unknown']).optional(),
+  inlineRender: z.enum(["planned", "started", "complete", "fallback", "unknown"]).optional(),
   renderFallback: RenderRejectionSchema.optional(),
   cancelRequested: z.boolean().default(false),
-  uncertaintyStage: z.enum(['presentation', 'transport']).optional(),
-  role: z.enum(['assistant', 'system']),
+  uncertaintyStage: z.enum(["presentation", "transport"]).optional(),
+  role: z.enum(["assistant", "system"]),
   state: z.enum([
-    'preparing',
-    'rendering',
-    'prepared',
-    'suppressed',
-    'failed',
-    'sending',
-    'sent',
-    'unknown',
-    'cancelled'
+    "preparing",
+    "rendering",
+    "prepared",
+    "suppressed",
+    "failed",
+    "sending",
+    "sent",
+    "unknown",
+    "cancelled"
   ]),
   messageId: z.string(),
   platformMessageIds: z.array(z.string()).default([]),

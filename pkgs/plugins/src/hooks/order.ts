@@ -1,4 +1,4 @@
-import type { PluginHook } from '../manifest'
+import type { PluginHook } from "../manifest"
 
 export interface OrderedHook {
   key: string
@@ -16,7 +16,7 @@ export function orderHooks(handlers: readonly OrderedHook[]) {
     })
   )
   if (entries.size !== handlers.length) {
-    throw new Error('切入点处理器 ID 重复')
+    throw new Error("切入点处理器 ID 重复")
   }
   const outgoing = new Map<string, Set<string>>()
   const degree = new Map(
@@ -73,7 +73,7 @@ export function orderHooks(handlers: readonly OrderedHook[]) {
       })
     const entry = eligible[0]
     if (!entry) {
-      throw new Error('切入点顺序存在环路：' + [...remaining].join(' → '))
+      throw new Error("切入点顺序存在环路：" + [...remaining].join(" → "))
     }
     result.push(entry)
     remaining.delete(entry.key)

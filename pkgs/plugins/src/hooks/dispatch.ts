@@ -1,9 +1,9 @@
-import { z } from 'zod'
-import { BACKGROUND_CONTEXT, awaitWithContext, withAbortSignal } from '@earendil-works/chord/context'
-import { RunLimiter } from '@pi-im-bot/support/limiter'
-import { revision } from '@pi-im-bot/settings/resolve'
-import type { OrderedHook } from './order'
-import type { HookInvoker, PluginHookTrace } from './transform'
+import { z } from "zod"
+import { BACKGROUND_CONTEXT, awaitWithContext, withAbortSignal } from "@earendil-works/chord/context"
+import { RunLimiter } from "@pi-im-bot/support/limiter"
+import { revision } from "@pi-im-bot/settings/resolve"
+import type { OrderedHook } from "./order"
+import type { HookInvoker, PluginHookTrace } from "./transform"
 
 export interface HookDispatch {
   invoke: HookInvoker
@@ -30,7 +30,7 @@ async function callHook<Schema extends z.ZodType>(
     dispatch.report({
       point: entry.hook.point,
       handler: entry.key,
-      outcome: 'applied',
+      outcome: "applied",
       elapsedMs: performance.now() - started
     })
     return { success: true as const, output }
@@ -39,11 +39,11 @@ async function callHook<Schema extends z.ZodType>(
     dispatch.report({
       point: entry.hook.point,
       handler: entry.key,
-      outcome: 'skipped',
+      outcome: "skipped",
       elapsedMs: performance.now() - started,
       error: String(error).slice(0, 500)
     })
-    if (entry.hook.onError === 'fail' || entry.hook.mode === 'policy') {
+    if (entry.hook.onError === "fail" || entry.hook.mode === "policy") {
       throw error
     }
     return { success: false as const }
@@ -56,7 +56,7 @@ function dependencies(entry: OrderedHook, successful: ReadonlySet<string>) {
       return !successful.has(key)
     })
   ) {
-    throw new Error('必需处理器未成功：' + entry.key)
+    throw new Error("必需处理器未成功：" + entry.key)
   }
 }
 
@@ -72,13 +72,13 @@ export async function decidePluginPoint<Schema extends z.ZodType>(
     try {
       dependencies(entry, successful)
     } catch (error) {
-      if (entry.hook.onError === 'fail' || entry.hook.mode === 'policy') {
+      if (entry.hook.onError === "fail" || entry.hook.mode === "policy") {
         throw error
       }
       dispatch.report({
         point: entry.hook.point,
         handler: entry.key,
-        outcome: 'skipped',
+        outcome: "skipped",
         elapsedMs: 0,
         error: String(error)
       })
@@ -116,15 +116,15 @@ export async function collectPluginPoint<Schema extends z.ZodType>(
           return !result?.success
         })
       ) {
-        if (entry.hook.onError === 'fail') {
-          throw new Error('必需上下文来源未成功：' + entry.key)
+        if (entry.hook.onError === "fail") {
+          throw new Error("必需上下文来源未成功：" + entry.key)
         }
         dispatch.report({
           point: entry.hook.point,
           handler: entry.key,
-          outcome: 'skipped',
+          outcome: "skipped",
           elapsedMs: 0,
-          error: '必需上下文来源未成功'
+          error: "必需上下文来源未成功"
         })
         return { success: false as const }
       }

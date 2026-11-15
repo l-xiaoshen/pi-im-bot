@@ -1,21 +1,21 @@
-import { z } from 'zod'
+import { z } from "zod"
 
 export function patchPathSegments(path: string) {
-  if (!path.startsWith('/') || /~(?![01])/u.test(path)) {
-    throw new Error('插件 patch 路径不是有效的 JSON Pointer')
+  if (!path.startsWith("/") || /~(?![01])/u.test(path)) {
+    throw new Error("插件 patch 路径不是有效的 JSON Pointer")
   }
   const parts = path
     .slice(1)
-    .split('/')
+    .split("/")
     .map((part) => {
-      return part.replaceAll('~1', '/').replaceAll('~0', '~')
+      return part.replaceAll("~1", "/").replaceAll("~0", "~")
     })
   if (
     parts.some((part) => {
-      return !part || ['__proto__', 'constructor', 'prototype'].includes(part)
+      return !part || ["__proto__", "constructor", "prototype"].includes(part)
     })
   ) {
-    throw new Error('插件 patch 路径不可写')
+    throw new Error("插件 patch 路径不可写")
   }
   return parts
 }
@@ -27,7 +27,7 @@ export const PatchPathSchema = z
     try {
       patchPathSegments(path)
     } catch (error) {
-      context.addIssue({ code: 'custom', message: String(error) })
+      context.addIssue({ code: "custom", message: String(error) })
     }
   })
 

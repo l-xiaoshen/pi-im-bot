@@ -1,7 +1,7 @@
-import { z } from 'zod'
-import { ExecutionContextSchema } from '@pi-im-bot/contracts/run'
-import { RunInputSchema } from '@pi-im-bot/contracts/run-input'
-import { PluginOriginSchema } from '../rpc/protocol'
+import { z } from "zod"
+import { ExecutionContextSchema } from "@pi-im-bot/contracts/run"
+import { RunInputSchema } from "@pi-im-bot/contracts/run-input"
+import { PluginOriginSchema } from "../rpc/protocol"
 
 export const ObservationSchema = z.object({
   id: z.string(),
@@ -12,21 +12,13 @@ export const ObservationSchema = z.object({
   origin: PluginOriginSchema,
   point: z.string().regex(/^[a-z][a-z0-9_.-]{0,160}@\d+$/u),
   configSnapshot: z.string(),
-  mode: z.enum(['demo', 'live']),
+  mode: z.enum(["demo", "live"]),
   input: RunInputSchema.extend({ context: ExecutionContextSchema }),
   payload: z.record(z.string(), z.json()),
   handlers: z.array(z.string()).max(64)
 })
 export type Observation = z.infer<typeof ObservationSchema>
-export const ObservationStateSchema = z.enum([
-  'queued',
-  'running',
-  'done',
-  'failed',
-  'unknown',
-  'expired',
-  'cancelled'
-])
+export const ObservationStateSchema = z.enum(["queued", "running", "done", "failed", "unknown", "expired", "cancelled"])
 export const ObserverRecordSchema = z.object({
   taskId: z.number().int(),
   key: z.string(),

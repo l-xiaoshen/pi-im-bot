@@ -1,6 +1,6 @@
-import { defineDoc, defineDocFamily } from '@earendil-works/pi-durable'
-import { z } from 'zod'
-import { McpSessionSnapshotSchema, McpRemoteTaskSchema } from '@pi-im-bot/resources/mcp/task-schema'
+import { defineDoc, defineDocFamily } from "@earendil-works/pi-durable"
+import { z } from "zod"
+import { McpSessionSnapshotSchema, McpRemoteTaskSchema } from "@pi-im-bot/resources/mcp/task-schema"
 
 export const ExternalExecutionSchema = z.object({
   serverId: z.string(),
@@ -16,17 +16,17 @@ export type ExternalExecution = z.infer<typeof ExternalExecutionSchema>
 
 // Contains transport session IDs. Never serialize these documents through public Job APIs.
 export const ExternalExecutions = defineDocFamily<{ value: ExternalExecution | null }, null>({
-  kind: 'bot.external-execution',
+  kind: "bot.external-execution",
   version: 1,
-  scope: 'session',
+  scope: "session",
   family: true,
   initial: () => ({ value: null }),
   checkpointWhen: () => false
 })
 export const ExternalSlots = defineDoc<{ owners: Record<string, { jobId: string; serverId: string }> }>({
-  kind: 'bot.external-slots',
+  kind: "bot.external-slots",
   version: 1,
-  scope: 'session',
+  scope: "session",
   initial: () => ({ owners: {} }),
   checkpointWhen: () => false
 })

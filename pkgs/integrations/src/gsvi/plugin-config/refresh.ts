@@ -1,6 +1,6 @@
-import type { Configuration } from '@pi-im-bot/config/load'
-import { usesGsviConfiguration } from './definition'
-import { refreshGsviChoices } from './cache'
+import type { Configuration } from "@pi-im-bot/config/load"
+import { usesGsviConfiguration } from "./definition"
+import { refreshGsviChoices } from "./cache"
 
 /** Core-owned, bounded cache GET maintenance; never a business/render Job or an import task. */
 export class GsviConfigurationRefresh {
@@ -15,13 +15,7 @@ export class GsviConfigurationRefresh {
     const config = this.configuration()
     const instance = config.resources.config.plugins.find((entry) => entry.id === id)
     const bundle = config.resources.pluginPackage(id)
-    if (
-      this.closed ||
-      !config.bot.plugins.enabled ||
-      !instance?.enabled ||
-      !bundle ||
-      !usesGsviConfiguration(bundle)
-    ) {
+    if (this.closed || !config.bot.plugins.enabled || !instance?.enabled || !bundle || !usesGsviConfiguration(bundle)) {
       return
     }
     const controller = new AbortController()

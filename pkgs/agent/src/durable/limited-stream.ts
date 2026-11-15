@@ -1,6 +1,6 @@
-import type { AssistantMessageEventStream, Model, Api } from '@earendil-works/pi-ai'
-import { createAssistantMessageEventStream } from '@earendil-works/pi-ai/utils/event-stream'
-import { fauxAssistantMessage } from '@earendil-works/pi-ai/providers/faux'
+import type { AssistantMessageEventStream, Model, Api } from "@earendil-works/pi-ai"
+import { createAssistantMessageEventStream } from "@earendil-works/pi-ai/utils/event-stream"
+import { fauxAssistantMessage } from "@earendil-works/pi-ai/providers/faux"
 
 export type ModelPermit = (signal?: AbortSignal) => Promise<() => void>
 
@@ -27,17 +27,17 @@ export function limitedStream(
       release()
     }
   })().catch((error) => {
-    let reason: 'error' | 'aborted' = 'error'
+    let reason: "error" | "aborted" = "error"
     if (signal?.aborted) {
-      reason = 'aborted'
+      reason = "aborted"
     }
     const result = {
-      ...fauxAssistantMessage('', { stopReason: reason, errorMessage: String(error) }),
+      ...fauxAssistantMessage("", { stopReason: reason, errorMessage: String(error) }),
       api: model.api,
       model: model.id,
       provider: model.provider
     }
-    output.push({ type: 'error', reason, error: result })
+    output.push({ type: "error", reason, error: result })
     output.end(result)
   })
   return output

@@ -1,5 +1,5 @@
-import { z } from 'zod'
-import { OutboundSchema } from '@pi-im-bot/contracts/delivery'
+import { z } from "zod"
+import { OutboundSchema } from "@pi-im-bot/contracts/delivery"
 export const JobDeliveryViewSchema = z.object({
   delivery: OutboundSchema.pick({
     state: true,

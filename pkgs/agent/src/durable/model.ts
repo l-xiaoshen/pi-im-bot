@@ -1,13 +1,13 @@
-import type { Provider, Model, Api, AssistantMessageEventStream } from '@earendil-works/pi-ai'
-import { fauxAssistantMessage } from '@earendil-works/pi-ai/providers/faux'
-import { createAssistantMessageEventStream } from '@earendil-works/pi-ai/utils/event-stream'
-import type { Configuration } from '@pi-im-bot/config/load'
-import type { Room } from '@pi-im-bot/contracts/message'
-import type { PreparedRunInput } from '@pi-im-bot/contracts/run'
-import type { AgentCallbacks } from '../events'
-import { createResponsesStream } from '@pi-im-bot/providers/responses'
-import { createDemoProvider, prepareDemo } from '../demo'
-import { limitedStream, type ModelPermit } from './limited-stream'
+import type { Provider, Model, Api, AssistantMessageEventStream } from "@earendil-works/pi-ai"
+import { fauxAssistantMessage } from "@earendil-works/pi-ai/providers/faux"
+import { createAssistantMessageEventStream } from "@earendil-works/pi-ai/utils/event-stream"
+import type { Configuration } from "@pi-im-bot/config/load"
+import type { Room } from "@pi-im-bot/contracts/message"
+import type { PreparedRunInput } from "@pi-im-bot/contracts/run"
+import type { AgentCallbacks } from "../events"
+import { createResponsesStream } from "@pi-im-bot/providers/responses"
+import { createDemoProvider, prepareDemo } from "../demo"
+import { limitedStream, type ModelPermit } from "./limited-stream"
 
 export function runProvider(
   id: string,
@@ -19,16 +19,16 @@ export function runProvider(
   assertActive: () => void,
   spent = 0
 ): Provider {
-  if (room.mode === 'demo') {
+  if (room.mode === "demo") {
     const demo = createDemoProvider()
     prepareDemo(demo, input.text)
     const model: Model<Api> = { ...demo.getModel(), provider: id }
     function observe(native: AssistantMessageEventStream) {
       const output = createAssistantMessageEventStream()
       void (async () => {
-        let preview = ''
+        let preview = ""
         for await (const event of native) {
-          if (event.type === 'text_delta') {
+          if (event.type === "text_delta") {
             preview += event.delta
             callbacks.preview(preview)
           }
@@ -36,16 +36,16 @@ export function runProvider(
         }
         const result = await native.result()
         callbacks.provider({
-          provider: 'offline-demo',
+          provider: "offline-demo",
           model: result.model,
           attempt: 1,
-          status: 'completed',
+          status: "completed",
           usage: result.usage
         })
         output.end(result)
       })().catch((error) => {
-        const failure = fauxAssistantMessage('', { stopReason: 'error', errorMessage: String(error) })
-        output.push({ type: 'error', reason: 'error', error: failure })
+        const failure = fauxAssistantMessage("", { stopReason: "error", errorMessage: String(error) })
+        output.push({ type: "error", reason: "error", error: failure })
         output.end(failure)
       })
       return output
@@ -76,8 +76,8 @@ export function runProvider(
   const first = candidates[0].model
   const model: Model<Api> = {
     ...first,
-    input: ['text'],
-    id: 'agent',
+    input: ["text"],
+    id: "agent",
     provider: id,
     contextWindow: Math.min(
       ...candidates.map((candidate) => {
@@ -95,7 +95,7 @@ export function runProvider(
       return candidate.config.images
     })
   ) {
-    model.input.push('image')
+    model.input.push("image")
   }
   const stream = createResponsesStream(
     config.catalog,
@@ -105,12 +105,12 @@ export function runProvider(
   )
   return {
     id,
-    name: 'Bot model gateway',
+    name: "Bot model gateway",
     auth: {
       apiKey: {
-        name: 'Bot gateway',
+        name: "Bot gateway",
         async resolve() {
-          return { auth: { apiKey: 'internal-gateway' }, source: 'Bot configuration' }
+          return { auth: { apiKey: "internal-gateway" }, source: "Bot configuration" }
         }
       }
     },

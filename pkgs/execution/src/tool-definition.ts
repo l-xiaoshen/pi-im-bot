@@ -1,18 +1,18 @@
-import type { ToolDefinition } from '@earendil-works/pi-coding-agent'
-import { displayContainerPaths } from './path'
+import type { ToolDefinition } from "@earendil-works/pi-coding-agent"
+import { displayContainerPaths } from "./path"
 
 // The web Bot doesn't use Pi's TUI renderers. Keep the native declarations and
 // schemas, and adapt unknown RPC inputs before invoking their typed executors.
 type Declaration = Pick<
   ToolDefinition,
-  | 'name'
-  | 'label'
-  | 'description'
-  | 'parameters'
-  | 'outputSchema'
-  | 'promptSnippet'
-  | 'promptGuidelines'
-  | 'constrainedSampling'
+  | "name"
+  | "label"
+  | "description"
+  | "parameters"
+  | "outputSchema"
+  | "promptSnippet"
+  | "promptGuidelines"
+  | "constrainedSampling"
 >
 
 export function toolDeclaration(tool: Declaration): Declaration {
@@ -36,11 +36,11 @@ export async function guestErrors<T>(operation: () => Promise<T>): Promise<T> {
   }
 }
 
-export function guestDisplay(result: Awaited<ReturnType<ToolDefinition['execute']>>) {
+export function guestDisplay(result: Awaited<ReturnType<ToolDefinition["execute"]>>) {
   return {
     ...result,
     content: result.content.map((part) => {
-      if (part.type === 'text') {
+      if (part.type === "text") {
         return { ...part, text: displayContainerPaths(part.text) }
       }
       return part

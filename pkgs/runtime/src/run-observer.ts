@@ -1,8 +1,8 @@
-import type { Run, Trace } from '@pi-im-bot/contracts/run'
-import type { AgentCallbacks } from '@pi-im-bot/agent/events'
-import type { EventHub } from '@pi-im-bot/contracts/events'
+import type { Run, Trace } from "@pi-im-bot/contracts/run"
+import type { AgentCallbacks } from "@pi-im-bot/agent/events"
+import type { EventHub } from "@pi-im-bot/contracts/events"
 
-export type RunTrace = Omit<Trace, 'id' | 'at' | 'runId' | 'roomId'>
+export type RunTrace = Omit<Trace, "id" | "at" | "runId" | "roomId">
 
 export function runObserver(
   run: Run,
@@ -21,14 +21,14 @@ export function runObserver(
         return
       }
       lastPreview = Date.now()
-      events.emit({ type: 'preview', roomId: run.roomId, runId: run.id, text })
+      events.emit({ type: "preview", roomId: run.roomId, runId: run.id, text })
     },
     tool() {
       run.toolCalls += 1
       update()
     },
     provider(event) {
-      if (event.status === 'started' || run.mode === 'demo') {
+      if (event.status === "started" || run.mode === "demo") {
         run.modelCalls += 1
       }
       if (event.usage) {
@@ -39,9 +39,9 @@ export function runObserver(
       }
       update()
       trace({
-        kind: 'provider',
+        kind: "provider",
         title: `${event.provider} / ${event.model} · ${event.status}`,
-        detail: event.error ?? '',
+        detail: event.error ?? "",
         provider: event.provider,
         model: event.model,
         attempt: event.attempt,

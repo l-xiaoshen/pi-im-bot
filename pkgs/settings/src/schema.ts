@@ -1,34 +1,34 @@
-import { z } from 'zod'
-import { PluginOverridesSchema } from '@pi-im-bot/plugins/config'
+import { z } from "zod"
+import { PluginOverridesSchema } from "@pi-im-bot/plugins/config"
 
-export const ResourceSelectionSchema = z.discriminatedUnion('mode', [
-  z.object({ mode: z.literal('all') }),
-  z.object({ mode: z.literal('selected'), ids: z.array(z.string().min(1)).max(200) })
+export const ResourceSelectionSchema = z.discriminatedUnion("mode", [
+  z.object({ mode: z.literal("all") }),
+  z.object({ mode: z.literal("selected"), ids: z.array(z.string().min(1)).max(200) })
 ])
 
-export const PermissionSubjectSchema = z.discriminatedUnion('kind', [
-  z.object({ kind: z.literal('everyone') }),
-  z.object({ kind: z.literal('local') }),
-  z.object({ kind: z.literal('mock') }),
+export const PermissionSubjectSchema = z.discriminatedUnion("kind", [
+  z.object({ kind: z.literal("everyone") }),
+  z.object({ kind: z.literal("local") }),
+  z.object({ kind: z.literal("mock") }),
   z.object({
-    kind: z.literal('platform-user'),
+    kind: z.literal("platform-user"),
     channel: z.string().min(1),
     accountId: z.string().min(1),
     actorId: z.string().min(1)
   }),
   z.object({
-    kind: z.literal('platform-role'),
+    kind: z.literal("platform-role"),
     channel: z.string().min(1),
     accountId: z.string().min(1),
-    role: z.enum(['owner', 'admin', 'member'])
+    role: z.enum(["owner", "admin", "member"])
   })
 ])
 export const PermissionPolicySchema = z.object({
-  default: z.enum(['allow', 'deny']).default('allow'),
+  default: z.enum(["allow", "deny"]).default("allow"),
   rules: z
     .array(
       z.object({
-        effect: z.enum(['allow', 'deny']),
+        effect: z.enum(["allow", "deny"]),
         capabilities: z.array(z.string().min(1)).min(1),
         subjects: z.array(PermissionSubjectSchema).min(1)
       })
@@ -56,9 +56,9 @@ export const DataSettingsSchema = z.object({
   historyChars: z.number().int().min(500).max(100000).default(12000)
 })
 export const PreferenceSettingsSchema = z.object({
-  personaId: z.string().min(1).default('default'),
-  providerGroup: z.string().min(1).default('main'),
-  replyStyle: z.string().max(4000).default('')
+  personaId: z.string().min(1).default("default"),
+  providerGroup: z.string().min(1).default("main"),
+  replyStyle: z.string().max(4000).default("")
 })
 export const BehaviorSettingsSchema = z.object({
   maxJobsPerRun: z.number().int().min(1).max(10).default(3),
@@ -78,12 +78,12 @@ export const OutputSettingsSchema = z.object({
   trim: z.boolean().default(true)
 })
 export const ResourceSettingsSchema = z.object({
-  tools: ResourceSelectionSchema.prefault({ mode: 'all' }),
-  mcp: ResourceSelectionSchema.prefault({ mode: 'all' }),
-  skills: ResourceSelectionSchema.prefault({ mode: 'all' }),
-  plugins: ResourceSelectionSchema.prefault({ mode: 'all' }),
-  toolExposure: z.enum(['all', 'deferred']).default('all'),
-  permanentTools: z.array(z.string().min(1)).max(100).default(['chat_history', 'delegate_task', 'start_job'])
+  tools: ResourceSelectionSchema.prefault({ mode: "all" }),
+  mcp: ResourceSelectionSchema.prefault({ mode: "all" }),
+  skills: ResourceSelectionSchema.prefault({ mode: "all" }),
+  plugins: ResourceSelectionSchema.prefault({ mode: "all" }),
+  toolExposure: z.enum(["all", "deferred"]).default("all"),
+  permanentTools: z.array(z.string().min(1)).max(100).default(["chat_history", "delegate_task", "start_job"])
 })
 export const SettingsSchema = z.object({
   data: DataSettingsSchema.prefault({}),
@@ -185,7 +185,7 @@ export const FrameworkConfigSchema = z
       return JSON.stringify([account.channel, account.accountId])
     })
     if (new Set(ids).size !== ids.length || new Set(accounts).size !== accounts.length) {
-      ctx.addIssue({ code: 'custom', message: '人格 ID 与账号设置不可重复' })
+      ctx.addIssue({ code: "custom", message: "人格 ID 与账号设置不可重复" })
     }
   })
 export type FrameworkConfig = z.infer<typeof FrameworkConfigSchema>

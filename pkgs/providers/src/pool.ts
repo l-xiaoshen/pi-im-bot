@@ -1,11 +1,11 @@
-import type { Model } from '@earendil-works/pi-ai'
-import type { ModelConfig, ProviderConfig, ProviderGroup } from './schema'
+import type { Model } from "@earendil-works/pi-ai"
+import type { ModelConfig, ProviderConfig, ProviderGroup } from "./schema"
 
 export interface Candidate {
   key: string
   provider: ProviderConfig
   config: ModelConfig
-  model: Model<'openai-responses'>
+  model: Model<"openai-responses">
   apiKey: string
 }
 

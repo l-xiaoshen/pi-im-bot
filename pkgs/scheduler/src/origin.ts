@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from "zod"
 
 export const ScheduleOriginSchema = z.object({
   id: z.string(),
@@ -7,6 +7,6 @@ export const ScheduleOriginSchema = z.object({
   isolated: z.boolean(),
   entry: z.boolean(),
   epoch: z.number().int().nonnegative().default(0),
-  timezone: z.string().default('Asia/Shanghai')
+  timezone: z.string().default("Asia/Shanghai")
 })
 export type ScheduleOrigin = z.infer<typeof ScheduleOriginSchema>

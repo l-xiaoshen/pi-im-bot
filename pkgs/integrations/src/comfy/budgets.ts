@@ -1,6 +1,6 @@
-import { RunLimiter } from '@pi-im-bot/support/limiter'
-import type { ComfyService } from './resources'
-import { ComfyTransportError } from './errors'
+import { RunLimiter } from "@pi-im-bot/support/limiter"
+import type { ComfyService } from "./resources"
+import { ComfyTransportError } from "./errors"
 const requests = new RunLimiter(4)
 const downloads = new RunLimiter(2)
 const services = new Map<string, { slots: RunLimiter; users: number }>()
@@ -14,12 +14,12 @@ export async function withComfyHttp<T>(
 ): Promise<T> {
   if (requestUsers >= 64) {
     if (write) {
-      throw new ComfyTransportError('rejected')
+      throw new ComfyTransportError("rejected")
     }
-    throw new ComfyTransportError('read')
+    throw new ComfyTransportError("read")
   }
   requestUsers += 1
-  const key = service.id + '|' + service.url
+  const key = service.id + "|" + service.url
   let entry = services.get(key)
   if (!entry) {
     entry = { slots: new RunLimiter(2), users: 0 }
@@ -49,7 +49,7 @@ export async function withComfyDownload<T>(
   action: (bounded: AbortSignal) => Promise<T>
 ) {
   if (downloadUsers >= 34) {
-    throw new ComfyTransportError('read')
+    throw new ComfyTransportError("read")
   }
   downloadUsers += 1
   let release: (() => void) | undefined

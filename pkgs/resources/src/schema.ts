@@ -1,10 +1,10 @@
-import { ComfyServiceSchema, WorkflowSchema } from '@pi-im-bot/integrations/comfy/resources'
-import { z } from 'zod'
-import { GsviServiceSchema } from '@pi-im-bot/integrations/gsvi/schema'
-import { McpServerSchema } from './mcp/schema'
-import { SkillConfigSchema } from './skills/schema'
-import { PluginInstanceSchema } from '@pi-im-bot/plugins/config'
-import { PluginCatalogSourceSchema } from '@pi-im-bot/plugins/market/contracts'
+import { ComfyServiceSchema, WorkflowSchema } from "@pi-im-bot/integrations/comfy/resources"
+import { z } from "zod"
+import { GsviServiceSchema } from "@pi-im-bot/integrations/gsvi/schema"
+import { McpServerSchema } from "./mcp/schema"
+import { SkillConfigSchema } from "./skills/schema"
+import { PluginInstanceSchema } from "@pi-im-bot/plugins/config"
+import { PluginCatalogSourceSchema } from "@pi-im-bot/plugins/market/contracts"
 
 export const ResourcesConfigSchema = z
   .object({
@@ -28,7 +28,7 @@ export const ResourcesConfigSchema = z
           })
         })
       ) {
-        ctx.addIssue({ code: 'custom', message: 'Comfy服务引用了不存在或重复的模板' })
+        ctx.addIssue({ code: "custom", message: "Comfy服务引用了不存在或重复的模板" })
       }
     }
     if (
@@ -44,7 +44,7 @@ export const ResourcesConfigSchema = z
         })
       ).size !== value.workflows.length
     ) {
-      ctx.addIssue({ code: 'custom', message: '服务/工作流ID重复' })
+      ctx.addIssue({ code: "custom", message: "服务/工作流ID重复" })
     }
     if (
       new Set(
@@ -53,7 +53,7 @@ export const ResourcesConfigSchema = z
         })
       ).size !== value.services.length
     ) {
-      ctx.addIssue({ code: 'custom', message: '具名服务 ID 不可重复' })
+      ctx.addIssue({ code: "custom", message: "具名服务 ID 不可重复" })
     }
     if (
       new Set(
@@ -62,7 +62,7 @@ export const ResourcesConfigSchema = z
         })
       ).size !== value.pluginCatalogs.length
     ) {
-      ctx.addIssue({ code: 'custom', message: '插件目录源 ID 不可重复' })
+      ctx.addIssue({ code: "custom", message: "插件目录源 ID 不可重复" })
     }
     if (
       new Set(
@@ -71,7 +71,7 @@ export const ResourcesConfigSchema = z
         })
       ).size !== value.plugins.length
     ) {
-      ctx.addIssue({ code: 'custom', message: '插件实例 ID 不可重复' })
+      ctx.addIssue({ code: "custom", message: "插件实例 ID 不可重复" })
     }
     if (
       new Set(
@@ -80,7 +80,7 @@ export const ResourcesConfigSchema = z
         })
       ).size !== value.mcp.length
     ) {
-      ctx.addIssue({ code: 'custom', message: 'MCP 服务 ID 不可重复' })
+      ctx.addIssue({ code: "custom", message: "MCP 服务 ID 不可重复" })
     }
     if (
       new Set(
@@ -89,7 +89,7 @@ export const ResourcesConfigSchema = z
         })
       ).size !== value.skills.length
     ) {
-      ctx.addIssue({ code: 'custom', message: 'Skill ID 不可重复' })
+      ctx.addIssue({ code: "custom", message: "Skill ID 不可重复" })
     }
   })
 export type ResourcesConfig = z.infer<typeof ResourcesConfigSchema>

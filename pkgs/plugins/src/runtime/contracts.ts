@@ -1,5 +1,5 @@
-import { z } from 'zod'
-import { PluginRuntimeSchema } from './config'
+import { z } from "zod"
+import { PluginRuntimeSchema } from "./config"
 
 export const PluginEnvironmentInputSchema = z
   .object({
@@ -8,8 +8,8 @@ export const PluginEnvironmentInputSchema = z
       .string()
       .min(1)
       .refine((value) => {
-        return value.startsWith('/')
-      }, '请使用绝对路径')
+        return value.startsWith("/")
+      }, "请使用绝对路径")
   })
   .strict()
 export const SavePluginEnvironmentSchema = PluginEnvironmentInputSchema.extend({

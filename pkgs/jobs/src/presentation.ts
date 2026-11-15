@@ -1,18 +1,18 @@
-import type { JobService } from './service'
-import type { Job, JobRevision } from './schema'
+import type { JobService } from "./service"
+import type { Job, JobRevision } from "./schema"
 
-export function presentationDelivery(service: JobService, value: JobRevision): JobRevision['delivery'] {
+export function presentationDelivery(service: JobService, value: JobRevision): JobRevision["delivery"] {
   const outbound = service.coordinator.store.getOutbound(value.presentation!.outboundId)
-  if (outbound?.state === 'sent') {
-    return 'sent'
+  if (outbound?.state === "sent") {
+    return "sent"
   }
-  if (outbound?.state === 'sending' || outbound?.state === 'unknown') {
-    return 'unknown'
+  if (outbound?.state === "sending" || outbound?.state === "unknown") {
+    return "unknown"
   }
-  if (outbound?.state === 'cancelled' && outbound.platformMessageIds.length > 0) {
-    return 'partial'
+  if (outbound?.state === "cancelled" && outbound.platformMessageIds.length > 0) {
+    return "partial"
   }
-  return 'suppressed'
+  return "suppressed"
 }
 
 export function suppressPresentation(service: JobService, value: JobRevision) {
@@ -20,8 +20,8 @@ export function suppressPresentation(service: JobService, value: JobRevision) {
     return
   }
   const outbound = service.coordinator.store.getOutbound(value.presentation.outboundId)
-  if (outbound?.state === 'rendering') {
-    service.coordinator.store.saveOutbound({ ...outbound, state: 'suppressed', error: '待呈现回复已停止' })
+  if (outbound?.state === "rendering") {
+    service.coordinator.store.saveOutbound({ ...outbound, state: "suppressed", error: "待呈现回复已停止" })
   }
 }
 
@@ -34,7 +34,7 @@ export async function finishPresentation(
   const coordinator = service.coordinator
   const id = value.presentation!.outboundId
   let result: { text: string; artifactIds: string[] } | undefined
-  if (value.state === 'succeeded' && value.result) {
+  if (value.state === "succeeded" && value.result) {
     result = { text: value.result.summary, artifactIds: value.result.artifactIds }
   }
   const validate = async () => {
@@ -43,7 +43,7 @@ export async function finishPresentation(
       const parent = await service.repository.get(value.presentation.parentJobId)
       const revision = value.presentation.parentJobRevision!
       if (parent.currentRevision !== revision || parent.revisions[String(revision)].cancelRequested) {
-        throw new Error('原 Agent Job 已停止或切换版本')
+        throw new Error("原 Agent Job 已停止或切换版本")
       }
     }
   }

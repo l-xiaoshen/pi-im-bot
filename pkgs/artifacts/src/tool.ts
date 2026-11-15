@@ -1,7 +1,7 @@
-import type { BotTool } from '@pi-im-bot/capabilities/tool'
-import { z } from 'zod'
-import { obj, str, int, opt } from '@earendil-works/pi-schema'
-import type { ArtifactStore } from './store'
+import type { BotTool } from "@pi-im-bot/capabilities/tool"
+import { z } from "zod"
+import { obj, str, int, opt } from "@earendil-works/pi-schema"
+import type { ArtifactStore } from "./store"
 
 const ReadArtifactSchema = z.object({
   id: z.uuid(),
@@ -10,10 +10,10 @@ const ReadArtifactSchema = z.object({
 })
 export function artifactTool(store: ArtifactStore): BotTool {
   return {
-    name: 'artifact_read',
-    label: '读取会话产物',
+    name: "artifact_read",
+    label: "读取会话产物",
     description:
-      'Read a page of a text artifact returned by tools in this chat scope. Use the artifact ID, never a host file path. offset and limit count characters.',
+      "Read a page of a text artifact returned by tools in this chat scope. Use the artifact ID, never a host file path. offset and limit count characters.",
     parameters: obj({
       id: str(),
       offset: opt(int({ minimum: 0 })),
@@ -25,7 +25,7 @@ export function artifactTool(store: ArtifactStore): BotTool {
       const result = await store.readText(input.id, input.offset, input.limit)
       signal?.throwIfAborted()
       return {
-        content: [{ type: 'text', text: JSON.stringify(result) }],
+        content: [{ type: "text", text: JSON.stringify(result) }],
         details: { artifactId: result.artifact.id }
       }
     }

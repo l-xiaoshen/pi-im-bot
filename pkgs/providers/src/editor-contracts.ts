@@ -1,7 +1,7 @@
-import { z } from 'zod'
-import { ModelConfigSchema, ProviderConfigSchema, ProviderGroupSchema, CandidateSchema } from './schema'
+import { z } from "zod"
+import { ModelConfigSchema, ProviderConfigSchema, ProviderGroupSchema, CandidateSchema } from "./schema"
 
-export const SecretPlaceholder = '<已保存，保持不变>'
+export const SecretPlaceholder = "<已保存，保持不变>"
 export const ModelDraftSchema = ModelConfigSchema.extend({ originalId: z.string().optional() })
 export type ModelDraft = z.infer<typeof ModelDraftSchema>
 
@@ -40,7 +40,7 @@ export const ProviderProbeInputSchema = RevisionSchema.extend({
 export const RemoteModelsSchema = z.object({
   models: z.array(z.object({ id: z.string(), owner: z.string().optional() }))
 })
-export type RemoteModel = z.infer<typeof RemoteModelsSchema>['models'][number]
+export type RemoteModel = z.infer<typeof RemoteModelsSchema>["models"][number]
 export const ModelProbeResultSchema = z.object({
   ok: z.boolean(),
   model: z.string(),

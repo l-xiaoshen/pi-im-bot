@@ -1,10 +1,10 @@
-import { defineDoc, defineDocFamily } from '@earendil-works/pi-durable'
-import type { Job, JobSummary } from './schema'
+import { defineDoc, defineDocFamily } from "@earendil-works/pi-durable"
+import type { Job, JobSummary } from "./schema"
 
 export const Jobs = defineDocFamily<{ value: Job | null }, null>({
-  kind: 'bot.job',
+  kind: "bot.job",
   version: 1,
-  scope: 'session',
+  scope: "session",
   family: true,
   initial: () => ({ value: null }),
   checkpointWhen: () => false
@@ -14,9 +14,9 @@ export const JobIndex = defineDoc<{
   requests: Record<string, string>
   admissions: Record<string, number>
 }>({
-  kind: 'bot.job-index',
+  kind: "bot.job-index",
   version: 1,
-  scope: 'session',
+  scope: "session",
   initial: () => ({ jobs: {}, requests: {}, admissions: {} }),
   checkpointWhen: () => false
 })
@@ -30,11 +30,11 @@ export const JobFacts = defineDoc<{
     artifactIds: string[]
   }>
 }>({
-  kind: 'bot.job-facts',
+  kind: "bot.job-facts",
   version: 1,
-  scope: 'conversation',
-  history: 'latest',
-  fork: 'current',
+  scope: "conversation",
+  history: "latest",
+  fork: "current",
   initial: () => ({ results: [] }),
   checkpointWhen: () => false
 })

@@ -1,17 +1,17 @@
-import { McpClient, StreamableHttpTransport, type ClientCapabilities } from '@earendil-works/pi-mcp'
-import { compile } from '@earendil-works/pi-schema'
-import { McpManifestSchema, McpToolSchema, type McpServer, type McpManifest } from './schema'
-import { mcpServerRevision } from './identity'
-import { McpInitializationSchema, McpSessionSnapshotSchema, type McpSessionSnapshot } from './task-schema'
-import { PersistentMcpTransport } from './session-transport'
-import { boundedMcpFetch } from './fetch'
+import { McpClient, StreamableHttpTransport, type ClientCapabilities } from "@earendil-works/pi-mcp"
+import { compile } from "@earendil-works/pi-schema"
+import { McpManifestSchema, McpToolSchema, type McpServer, type McpManifest } from "./schema"
+import { mcpServerRevision } from "./identity"
+import { McpInitializationSchema, McpSessionSnapshotSchema, type McpSessionSnapshot } from "./task-schema"
+import { PersistentMcpTransport } from "./session-transport"
+import { boundedMcpFetch } from "./fetch"
 
 export function redactMcpText(value: string, server: McpServer) {
   let text = value
   const values = [
     ...Object.values(server.headers),
     ...Object.values(server.headerEnv).map((name) => {
-      return process.env[name] ?? ''
+      return process.env[name] ?? ""
     }),
     ...new URL(server.url).searchParams.values()
   ]
@@ -24,7 +24,7 @@ export function redactMcpText(value: string, server: McpServer) {
   })
   for (const value of credentials) {
     if (value) {
-      text = text.replaceAll(value, '[redacted]')
+      text = text.replaceAll(value, "[redacted]")
     }
   }
   return text
@@ -51,15 +51,15 @@ export async function connectMcp(
   if (
     options.persistent &&
     Object.keys(headers).some((name) => {
-      return name.toLowerCase() === 'mcp-session-id'
+      return name.toLowerCase() === "mcp-session-id"
     })
   ) {
-    throw new Error('MCP Tasks 的会话 ID 由运行时管理，不能配置在 Headers 中')
+    throw new Error("MCP Tasks 的会话 ID 由运行时管理，不能配置在 Headers 中")
   }
   const capabilities: ClientCapabilities & { tasks: Record<string, never> } = { tasks: {} }
   const client = new McpClient({
-    name: 'pi-im-bot',
-    version: '0.1.0',
+    name: "pi-im-bot",
+    version: "0.1.0",
     requestTimeoutMs: server.timeoutMs,
     capabilities
   })
@@ -93,18 +93,18 @@ export async function connectMcp(
     let message = redactMcp(error, server)
     const id = sessionId()
     if (id) {
-      message = message.replaceAll(id, '[session]')
+      message = message.replaceAll(id, "[session]")
     }
     return message
   }
-  signal.addEventListener('abort', abort, { once: true })
+  signal.addEventListener("abort", abort, { once: true })
   let initialization
   try {
     initialization = McpInitializationSchema.parse(await client.connect(transport))
     signal.throwIfAborted()
   } catch (error) {
     const message = redactConnection(error)
-    signal.removeEventListener('abort', abort)
+    signal.removeEventListener("abort", abort)
     if (!options.resume) {
       persistent?.terminateSession()
     }
@@ -120,7 +120,7 @@ export async function connectMcp(
       return McpSessionSnapshotSchema.parse({ sessionId: sessionId(), initialization: protocol })
     },
     async close(terminateSession = false) {
-      signal.removeEventListener('abort', abort)
+      signal.removeEventListener("abort", abort)
       if (terminateSession) {
         persistent?.terminateSession()
       }
@@ -143,7 +143,7 @@ export async function inspectMcp(server: McpServer, signal: AbortSignal): Promis
         })
       ).size !== tools.length
     ) {
-      throw new Error('MCP 返回重复工具名')
+      throw new Error("MCP 返回重复工具名")
     }
     for (const tool of tools) {
       compile(tool.inputSchema)
@@ -152,7 +152,7 @@ export async function inspectMcp(server: McpServer, signal: AbortSignal): Promis
       serverId: server.id,
       configRevision: mcpServerRevision(server),
       fetchedAt: Date.now(),
-      instructions: connection.client.instructions ?? '',
+      instructions: connection.client.instructions ?? "",
       tools,
       protocolVersion: connection.initialization.protocolVersion,
       taskCapabilities: connection.initialization.capabilities.tasks

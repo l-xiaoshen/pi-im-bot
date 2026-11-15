@@ -1,5 +1,5 @@
-import { z } from 'zod'
-import type { ChatMessage } from '@pi-im-bot/contracts/message'
+import { z } from "zod"
+import type { ChatMessage } from "@pi-im-bot/contracts/message"
 
 export const RecallRecordSchema = z.object({
   id: z.string(),

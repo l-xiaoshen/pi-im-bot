@@ -3,41 +3,36 @@ import {
   comfyFromDraft,
   workflowPublic,
   type ComfyDraftSchema
-} from '@pi-im-bot/integrations/comfy/configuration'
-import type { Workflow } from '@pi-im-bot/integrations/comfy/resources'
-import type { z } from 'zod'
-import { readFile, rename, unlink, writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
-import type { Configuration } from '@pi-im-bot/config/load'
-import { ConfigurationMutations } from '@pi-im-bot/config/mutations'
-import { revision } from '@pi-im-bot/settings/resolve'
-import { SettingsEditError } from '@pi-im-bot/settings/editor'
-import { McpServerSchema } from './mcp/schema'
-import { ResourcesConfigSchema, type ResourcesConfig } from './schema'
-import { ResourceLibrary } from './library'
-import {
-  ResourceSecretPlaceholder,
-  type McpServerDraft,
-  type McpServerView,
-  type SkillView
-} from './contracts'
-import { inspectMcp } from './mcp/client'
-import { mcpCapabilityId, mcpToolName } from './mcp/identity'
-import { SkillConfigSchema, type SkillConfig } from './skills/schema'
-import { importSkill } from './skills/package'
-import { gsviPublic, gsviFromDraft, type GsviDraft } from '@pi-im-bot/integrations/gsvi/configuration'
-import { usesMcpTask, mcpToolAvailable } from './mcp/tasks'
+} from "@pi-im-bot/integrations/comfy/configuration"
+import type { Workflow } from "@pi-im-bot/integrations/comfy/resources"
+import type { z } from "zod"
+import { readFile, rename, unlink, writeFile } from "node:fs/promises"
+import { join } from "node:path"
+import type { Configuration } from "@pi-im-bot/config/load"
+import { ConfigurationMutations } from "@pi-im-bot/config/mutations"
+import { revision } from "@pi-im-bot/settings/resolve"
+import { SettingsEditError } from "@pi-im-bot/settings/editor"
+import { McpServerSchema } from "./mcp/schema"
+import { ResourcesConfigSchema, type ResourcesConfig } from "./schema"
+import { ResourceLibrary } from "./library"
+import { ResourceSecretPlaceholder, type McpServerDraft, type McpServerView, type SkillView } from "./contracts"
+import { inspectMcp } from "./mcp/client"
+import { mcpCapabilityId, mcpToolName } from "./mcp/identity"
+import { SkillConfigSchema, type SkillConfig } from "./skills/schema"
+import { importSkill } from "./skills/package"
+import { gsviPublic, gsviFromDraft, type GsviDraft } from "@pi-im-bot/integrations/gsvi/configuration"
+import { usesMcpTask, mcpToolAvailable } from "./mcp/tasks"
 
 export class ResourceEditor {
   constructor(
     private readonly configuration: () => Configuration,
     private readonly apply: (library: ResourceLibrary) => void,
     private readonly mutations: ConfigurationMutations,
-    private readonly usage: (kind: 'mcp' | 'skill', id: string) => string[]
+    private readonly usage: (kind: "mcp" | "skill", id: string) => string[]
   ) {}
 
   private async file() {
-    const raw = await readFile(join(this.configuration().configDir, 'resources.json'), 'utf8')
+    const raw = await readFile(join(this.configuration().configDir, "resources.json"), "utf8")
     return { revision: revision(raw), config: ResourcesConfigSchema.parse(JSON.parse(raw)) }
   }
 
@@ -53,11 +48,11 @@ export class ResourceEditor {
       const { url, headers, ...rest } = server
       const endpoint = new URL(url)
       const manifest = library.manifest(server.id)
-      let state: McpServerView['state'] = 'undiscovered'
+      let state: McpServerView["state"] = "undiscovered"
       if (!server.enabled) {
-        state = 'disabled'
+        state = "disabled"
       } else if (manifest) {
-        state = 'ready'
+        state = "ready"
       }
       return {
         ...rest,
@@ -83,11 +78,11 @@ export class ResourceEditor {
     })
     const skills: SkillView[] = file.config.skills.map((skill) => {
       const manifest = library.skillManifest(skill.id)
-      let state: SkillView['state'] = 'unimported'
+      let state: SkillView["state"] = "unimported"
       if (!skill.enabled) {
-        state = 'disabled'
+        state = "disabled"
       } else if (manifest) {
-        state = 'ready'
+        state = "ready"
       }
       return { ...skill, manifest, state }
     })
@@ -108,7 +103,7 @@ export class ResourceEditor {
         return entry.id === draft.id
       })
       if ((previousId && (!previous || previousId !== draft.id)) || (!previousId && previous)) {
-        throw new SettingsEditError('语音服务 ID 不存在、重复或已变化')
+        throw new SettingsEditError("语音服务 ID 不存在、重复或已变化")
       }
       const service = gsviFromDraft(draft, previous)
       config.services = [
@@ -126,7 +121,7 @@ export class ResourceEditor {
         return entry.id === draft.id
       })
       if ((previousId && (!previous || previousId !== draft.id)) || (!previousId && previous)) {
-        throw new SettingsEditError('Comfy服务ID重复或不存在')
+        throw new SettingsEditError("Comfy服务ID重复或不存在")
       }
       const service = comfyFromDraft(draft, previous)
       config.comfyServices = [
@@ -153,7 +148,7 @@ export class ResourceEditor {
       return entry.id === id
     })
     if (!workflow) {
-      throw new SettingsEditError('工作流不存在')
+      throw new SettingsEditError("工作流不存在")
     }
     return { revision: file.revision, workflow }
   }
@@ -164,7 +159,7 @@ export class ResourceEditor {
           return Object.values(entry.services).includes(id)
         })
       ) {
-        throw new SettingsEditError('服务仍被插件绑定')
+        throw new SettingsEditError("服务仍被插件绑定")
       }
       config.comfyServices = config.comfyServices.filter((entry) => {
         return entry.id !== id
@@ -178,7 +173,7 @@ export class ResourceEditor {
           return entry.workflows.includes(id)
         })
       ) {
-        throw new SettingsEditError('模板仍被服务绑定')
+        throw new SettingsEditError("模板仍被服务绑定")
       }
       config.workflows = config.workflows.filter((entry) => {
         return entry.id !== id
@@ -192,7 +187,7 @@ export class ResourceEditor {
           return Object.values(entry.services).includes(id)
         })
       ) {
-        throw new SettingsEditError('语音服务仍被插件绑定，请先解除绑定')
+        throw new SettingsEditError("语音服务仍被插件绑定，请先解除绑定")
       }
       config.services = config.services.filter((entry) => {
         return entry.id !== id
@@ -206,7 +201,7 @@ export class ResourceEditor {
         return item.id === previousId
       })
       if (previousId && (!previous || draft.id !== previousId)) {
-        throw new SettingsEditError('MCP 服务不存在或标识已变化')
+        throw new SettingsEditError("MCP 服务不存在或标识已变化")
       }
       if (
         !previousId &&
@@ -214,7 +209,7 @@ export class ResourceEditor {
           return item.id === draft.id
         })
       ) {
-        throw new SettingsEditError('MCP 服务 ID 已存在')
+        throw new SettingsEditError("MCP 服务 ID 已存在")
       }
       const headers = Object.fromEntries(
         Object.entries(draft.headers).map(([key, value]) => {
@@ -225,7 +220,7 @@ export class ResourceEditor {
             return name.toLowerCase() === key.toLowerCase()
           })?.[1]
           if (saved === undefined) {
-            throw new SettingsEditError('Header 占位没有可保留的值')
+            throw new SettingsEditError("Header 占位没有可保留的值")
           }
           return [key, saved]
         })
@@ -242,9 +237,9 @@ export class ResourceEditor {
 
   remove(expected: string, id: string) {
     return this.mutate(expected, (config) => {
-      const usage = this.usage('mcp', id)
+      const usage = this.usage("mcp", id)
       if (usage.length > 0) {
-        throw new SettingsEditError(`MCP 仍被配置引用：${usage.join('、')}。可先停用，或清除引用后删除。`)
+        throw new SettingsEditError(`MCP 仍被配置引用：${usage.join("、")}。可先停用，或清除引用后删除。`)
       }
       config.mcp = config.mcp.filter((item) => {
         return item.id !== id
@@ -255,18 +250,18 @@ export class ResourceEditor {
   async refresh(expected: string, id: string, signal: AbortSignal) {
     const file = await this.file()
     if (file.revision !== expected) {
-      throw new SettingsEditError('资源配置已变化，请刷新后重试', 409)
+      throw new SettingsEditError("资源配置已变化，请刷新后重试", 409)
     }
     const server = file.config.mcp.find((item) => {
       return item.id === id
     })
     if (!server) {
-      throw new SettingsEditError('MCP 服务不存在')
+      throw new SettingsEditError("MCP 服务不存在")
     }
     const manifest = await inspectMcp(server, signal)
     return this.mutations.exclusive(async () => {
       if ((await this.file()).revision !== expected) {
-        throw new SettingsEditError('连接期间配置已变化，未应用旧目录', 409)
+        throw new SettingsEditError("连接期间配置已变化，未应用旧目录", 409)
       }
       const current = new ResourceLibrary(
         file.config,
@@ -283,16 +278,16 @@ export class ResourceEditor {
     return this.mutations.exclusive(async () => {
       const file = await this.file()
       if (file.revision !== expected) {
-        throw new SettingsEditError('资源配置已变化，请刷新后重试', 409)
+        throw new SettingsEditError("资源配置已变化，请刷新后重试", 409)
       }
       change(file.config)
       const config = ResourcesConfigSchema.parse(file.config)
-      const path = join(this.configuration().configDir, 'resources.json')
+      const path = join(this.configuration().configDir, "resources.json")
       const temporary = `${path}.${crypto.randomUUID()}.tmp`
       try {
-        await writeFile(temporary, JSON.stringify(config, null, 2) + '\n', { mode: 0o600 })
+        await writeFile(temporary, JSON.stringify(config, null, 2) + "\n", { mode: 0o600 })
         if ((await this.file()).revision !== expected) {
-          throw new SettingsEditError('资源文件已变化，未覆盖当前内容', 409)
+          throw new SettingsEditError("资源文件已变化，未覆盖当前内容", 409)
         }
         await rename(temporary, path)
         this.apply(
@@ -317,10 +312,10 @@ export class ResourceEditor {
         return item.id === skill.id
       })
       if (previousId && (previousId !== skill.id || !existing)) {
-        throw new SettingsEditError('Skill 不存在或 ID 已变化')
+        throw new SettingsEditError("Skill 不存在或 ID 已变化")
       }
       if (!previousId && existing) {
-        throw new SettingsEditError('Skill ID 已存在')
+        throw new SettingsEditError("Skill ID 已存在")
       }
       config.skills = [
         ...config.skills.filter((item) => {
@@ -333,9 +328,9 @@ export class ResourceEditor {
 
   removeSkill(expected: string, id: string) {
     return this.mutate(expected, (config) => {
-      const usage = this.usage('skill', id)
+      const usage = this.usage("skill", id)
       if (usage.length > 0) {
-        throw new SettingsEditError(`Skill 仍被配置引用：${usage.join('、')}。可先停用或清除引用。`)
+        throw new SettingsEditError(`Skill 仍被配置引用：${usage.join("、")}。可先停用或清除引用。`)
       }
       config.skills = config.skills.filter((item) => {
         return item.id !== id
@@ -346,19 +341,19 @@ export class ResourceEditor {
   async importSkill(expected: string, id: string) {
     const file = await this.file()
     if (file.revision !== expected) {
-      throw new SettingsEditError('资源配置已变化，请刷新后重试', 409)
+      throw new SettingsEditError("资源配置已变化，请刷新后重试", 409)
     }
     const config = file.config.skills.find((item) => {
       return item.id === id
     })
     if (!config) {
-      throw new SettingsEditError('Skill 不存在')
+      throw new SettingsEditError("Skill 不存在")
     }
     const current = this.configuration()
     const manifest = await importSkill(config, current.projectDir, current.dataDir)
     return this.mutations.exclusive(async () => {
       if ((await this.file()).revision !== expected) {
-        throw new SettingsEditError('导入期间配置已变化，未应用旧快照', 409)
+        throw new SettingsEditError("导入期间配置已变化，未应用旧快照", 409)
       }
       const library = new ResourceLibrary(
         file.config,

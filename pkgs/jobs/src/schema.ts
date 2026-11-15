@@ -1,32 +1,28 @@
-import {
-  MessageFormatSchema,
-  BusinessStatusSchema,
-  BusinessItemSchema
-} from '@pi-im-bot/contracts/message-format'
-import { z } from 'zod'
-import { ExecutionContextSchema } from '@pi-im-bot/contracts/run'
-import { ScheduleOriginSchema } from '@pi-im-bot/scheduler/origin'
-import { ExternalStatusSchema } from './external/status'
+import { MessageFormatSchema, BusinessStatusSchema, BusinessItemSchema } from "@pi-im-bot/contracts/message-format"
+import { z } from "zod"
+import { ExecutionContextSchema } from "@pi-im-bot/contracts/run"
+import { ScheduleOriginSchema } from "@pi-im-bot/scheduler/origin"
+import { ExternalStatusSchema } from "./external/status"
 
-export const JobSpecSchema = z.discriminatedUnion('kind', [
-  z.object({ kind: z.literal('agent'), prompt: z.string().min(1).max(20000) }),
+export const JobSpecSchema = z.discriminatedUnion("kind", [
+  z.object({ kind: z.literal("agent"), prompt: z.string().min(1).max(20000) }),
   z.object({
-    kind: z.literal('tool'),
+    kind: z.literal("tool"),
     capability: z.string().min(1),
     arguments: z.record(z.string(), z.json())
   })
 ])
 export type JobSpec = z.infer<typeof JobSpecSchema>
 export const JobStateSchema = z.enum([
-  'queued',
-  'running',
-  'waiting_external',
-  'waiting_input',
-  'succeeded',
-  'failed',
-  'cancel_requested',
-  'cancelled',
-  'outcome_unknown'
+  "queued",
+  "running",
+  "waiting_external",
+  "waiting_input",
+  "succeeded",
+  "failed",
+  "cancel_requested",
+  "cancelled",
+  "outcome_unknown"
 ])
 export const JobResultSchema = z.object({
   summary: z.string(),
@@ -61,13 +57,11 @@ export const JobRevisionSchema = z.object({
     })
     .optional(),
   schedule: ScheduleOriginSchema.optional(),
-  mode: z.enum(['demo', 'live']),
+  mode: z.enum(["demo", "live"]),
   nativeTaskId: z.number().int().positive().optional(),
   childConversationId: z.string(),
   runId: z.string().optional(),
-  delivery: z
-    .enum(['pending', 'accepted', 'sent', 'unknown', 'suppressed', 'none', 'partial'])
-    .default('pending'),
+  delivery: z.enum(["pending", "accepted", "sent", "unknown", "suppressed", "none", "partial"]).default("pending"),
   cancelRequested: z.boolean().default(false),
   result: JobResultSchema.optional(),
   deliveryError: z.string().optional(),
@@ -83,7 +77,7 @@ export const JobSchema = z.object({
 })
 export type Job = z.infer<typeof JobSchema>
 export const JobSummarySchema = z.object({
-  kind: z.enum(['agent', 'tool']).optional(),
+  kind: z.enum(["agent", "tool"]).optional(),
   id: z.string(),
   roomId: z.string(),
   title: z.string(),
@@ -124,6 +118,6 @@ export function jobSummary(job: Job): JobSummary {
   }
 }
 
-export function jobTerminal(state: JobSummary['state']) {
-  return ['succeeded', 'failed', 'cancelled', 'outcome_unknown'].includes(state)
+export function jobTerminal(state: JobSummary["state"]) {
+  return ["succeeded", "failed", "cancelled", "outcome_unknown"].includes(state)
 }

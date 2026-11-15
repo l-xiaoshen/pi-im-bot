@@ -1,4 +1,4 @@
-type Lane = 'root' | 'background'
+type Lane = "root" | "background"
 interface Waiting {
   scope: string
   lane: Lane
@@ -30,11 +30,11 @@ export class ModelLimits {
           const index = this.waiting.indexOf(waiting)
           if (index >= 0) {
             this.waiting.splice(index, 1)
-            reject(signal?.reason ?? new Error('模型请求已取消'))
+            reject(signal?.reason ?? new Error("模型请求已取消"))
           }
         }
       }
-      signal?.addEventListener('abort', waiting.abort, { once: true })
+      signal?.addEventListener("abort", waiting.abort, { once: true })
       this.waiting.push(waiting)
       this.drain()
     })
@@ -45,13 +45,13 @@ export class ModelLimits {
     while (this.active < limit) {
       const eligible = (item: Waiting) => {
         const scope = this.scopes.get(item.scope)
-        if (item.lane === 'root') {
+        if (item.lane === "root") {
           return !scope?.root
         }
         return !scope?.background && this.background < Math.max(1, limit - 1)
       }
       let index = this.waiting.findIndex((item) => {
-        return item.lane === 'root' && eligible(item)
+        return item.lane === "root" && eligible(item)
       })
       if (index < 0) {
         index = this.waiting.findIndex(eligible)
@@ -60,12 +60,12 @@ export class ModelLimits {
         return
       }
       const item = this.waiting.splice(index, 1)[0]
-      item.signal?.removeEventListener('abort', item.abort)
+      item.signal?.removeEventListener("abort", item.abort)
       const scope = this.scopes.get(item.scope) ?? { root: 0, background: 0 }
       scope[item.lane] += 1
       this.scopes.set(item.scope, scope)
       this.active += 1
-      if (item.lane === 'background') {
+      if (item.lane === "background") {
         this.background += 1
       }
       let released = false
@@ -76,7 +76,7 @@ export class ModelLimits {
         released = true
         this.active -= 1
         scope[item.lane] -= 1
-        if (item.lane === 'background') {
+        if (item.lane === "background") {
           this.background -= 1
         }
         if (scope.root === 0 && scope.background === 0) {

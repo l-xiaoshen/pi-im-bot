@@ -27,7 +27,7 @@
   font-weight: 600;
 }
 .provider-tab.active::after {
-  content: '';
+  content: "";
   position: absolute;
   height: 2px;
   background: var(--accent);
@@ -272,7 +272,7 @@
   color: #6d8590;
   cursor: pointer;
 }
-.providers-page input[role='switch'] {
+.providers-page input[role="switch"] {
   appearance: none;
   position: relative;
   width: 31px;
@@ -284,8 +284,8 @@
   cursor: pointer;
   flex: none;
 }
-.providers-page input[role='switch']::after {
-  content: '';
+.providers-page input[role="switch"]::after {
+  content: "";
   position: absolute;
   width: 14px;
   height: 14px;
@@ -295,13 +295,13 @@
   background: white;
   transition: transform 0.15s;
 }
-.providers-page input[role='switch']:checked {
+.providers-page input[role="switch"]:checked {
   background: var(--accent);
 }
-.providers-page input[role='switch']:checked::after {
+.providers-page input[role="switch"]:checked::after {
   transform: translateX(13px);
 }
-.providers-page input[role='switch']:disabled {
+.providers-page input[role="switch"]:disabled {
   opacity: 0.5;
 }
 .provider-dialog {
@@ -430,7 +430,7 @@
   gap: 16px;
 }
 .json-input {
-  font-family: 'SFMono-Regular', Consolas, monospace;
+  font-family: "SFMono-Regular", Consolas, monospace;
   font-size: 12px;
   line-height: 1.6;
   resize: vertical;

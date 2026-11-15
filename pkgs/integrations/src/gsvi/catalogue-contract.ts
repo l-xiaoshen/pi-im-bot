@@ -1,24 +1,22 @@
-import { z } from 'zod'
+import { z } from "zod"
 export const GsviCatalogueSchema = z
   .object({
-    status: z.literal('catalogue'),
+    status: z.literal("catalogue"),
     reference: z.uuid(),
     listReference: z.uuid(),
     count: z.number().int().nonnegative(),
-    version: z.enum(['v1', 'v2', 'v4'])
+    version: z.enum(["v1", "v2", "v4"])
   })
   .strict()
-export const GsviCatalogueReadSchema = z.discriminatedUnion('action', [
+export const GsviCatalogueReadSchema = z.discriminatedUnion("action", [
   z
     .object({
-      action: z.literal('page'),
+      action: z.literal("page"),
       reference: z.uuid(),
       offset: z.number().int().nonnegative().default(0)
     })
     .strict(),
-  z
-    .object({ action: z.literal('match'), reference: z.uuid(), voice: z.string(), emotion: z.string() })
-    .strict()
+  z.object({ action: z.literal("match"), reference: z.uuid(), voice: z.string(), emotion: z.string() }).strict()
 ])
 export const GsviCataloguePageSchema = z
   .object({

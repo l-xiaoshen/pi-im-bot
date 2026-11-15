@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from "zod"
 
 const ObjectSchema = z.record(z.string(), z.unknown())
 

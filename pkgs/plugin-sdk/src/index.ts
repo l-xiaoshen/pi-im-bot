@@ -3,24 +3,15 @@ export {
   GraphSchema as ComfyGraphSchema,
   resourceRisks,
   type Workflow as ComfyWorkflowResource
-} from '@pi-im-bot/integrations/comfy/resources'
-export { ComfyInputSchema, ComfyItemSchema } from '@pi-im-bot/integrations/comfy/protocol'
-import type {
-  PluginInvocationView,
-  PluginOperationOutcome,
-  PluginResult
-} from '@pi-im-bot/plugins/rpc/protocol'
-export { gsvi, readMedia } from './services'
-export { gsviCatalogue, gsviCataloguePage, gsviCatalogueMatch } from './services'
-export {
-  pythonCasefold,
-  pythonCompare,
-  pythonDecimal,
-  pythonStrip
-} from '@pi-im-bot/integrations/gsvi/unicode'
-export { GsviInputSchema, GsviResultSchema } from '@pi-im-bot/integrations/gsvi/schema'
-export { MediaChunkSchema } from '@pi-im-bot/plugins/media-rpc'
-export { RuntimeStatusSchema, type RuntimeStatus } from '@pi-im-bot/runtime/status/schema'
+} from "@pi-im-bot/integrations/comfy/resources"
+export { ComfyInputSchema, ComfyItemSchema } from "@pi-im-bot/integrations/comfy/protocol"
+import type { PluginInvocationView, PluginOperationOutcome, PluginResult } from "@pi-im-bot/plugins/rpc/protocol"
+export { gsvi, readMedia } from "./services"
+export { gsviCatalogue, gsviCataloguePage, gsviCatalogueMatch } from "./services"
+export { pythonCasefold, pythonCompare, pythonDecimal, pythonStrip } from "@pi-im-bot/integrations/gsvi/unicode"
+export { GsviInputSchema, GsviResultSchema } from "@pi-im-bot/integrations/gsvi/schema"
+export { MediaChunkSchema } from "@pi-im-bot/plugins/media-rpc"
+export { RuntimeStatusSchema, type RuntimeStatus } from "@pi-im-bot/runtime/status/schema"
 
 export interface PluginContext {
   dataDir: string
@@ -50,21 +41,18 @@ export function textResult(text: string, artifactIds: string[] = [], suppressTex
   return { text, artifactIds }
 }
 export function artifactResult(artifactIds: string[]): PluginResult {
-  return textResult('', artifactIds, true)
+  return textResult("", artifactIds, true)
 }
 export function pendingResult(handle: unknown, pollAfterMs = 1000) {
-  return { status: 'pending' as const, handle, pollAfterMs }
+  return { status: "pending" as const, handle, pollAfterMs }
 }
-export async function sendMessages(
-  context: PluginContext,
-  messages: Array<{ text: string; artifactIds?: string[] }>
-) {
+export async function sendMessages(context: PluginContext, messages: Array<{ text: string; artifactIds?: string[] }>) {
   context.signal.throwIfAborted()
-  return context.host('delivery.send', { messages })
+  return context.host("delivery.send", { messages })
 }
 export function replaceText(context: PluginContext, text: string) {
   return {
     baseRevision: context.invocation.inputRevision,
-    patch: [{ op: 'set', path: '/text', value: text }]
+    patch: [{ op: "set", path: "/text", value: text }]
   }
 }

@@ -261,12 +261,12 @@
 .plugin-center .field-input {
   min-width: 0;
 }
-.plugin-center .field-input input:not([type='checkbox']),
+.plugin-center .field-input input:not([type="checkbox"]),
 .plugin-center .field-input select,
 .plugin-center .field-input textarea {
   width: 100%;
 }
-.plugin-center .field-input input[type='range'] {
+.plugin-center .field-input input[type="range"] {
   display: block;
   margin-top: 10px;
 }
@@ -448,7 +448,7 @@
   margin-top: 5px;
   overflow-wrap: anywhere;
 }
-.plugin-center .pipeline-handler input[type='number'] {
+.plugin-center .pipeline-handler input[type="number"] {
   width: 85px;
 }
 .plugin-center .pipeline-contract {
@@ -575,7 +575,7 @@
   .plugin-center .pipeline-handler > div {
     flex-basis: 60%;
   }
-  .plugin-center .pipeline-handler input[type='number'] {
+  .plugin-center .pipeline-handler input[type="number"] {
     flex: 1;
   }
   .plugin-center .dict-editor .inline-controls {

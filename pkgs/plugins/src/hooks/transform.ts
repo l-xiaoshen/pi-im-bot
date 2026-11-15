@@ -1,14 +1,14 @@
-import { z } from 'zod'
-import { BACKGROUND_CONTEXT, awaitWithContext, withAbortSignal } from '@earendil-works/chord/context'
-import { revision } from '@pi-im-bot/settings/resolve'
-import type { PluginRegistry } from '../registry'
-import type { OrderedHook } from './order'
-import { applyHookPatch } from './patch'
+import { z } from "zod"
+import { BACKGROUND_CONTEXT, awaitWithContext, withAbortSignal } from "@earendil-works/chord/context"
+import { revision } from "@pi-im-bot/settings/resolve"
+import type { PluginRegistry } from "../registry"
+import type { OrderedHook } from "./order"
+import { applyHookPatch } from "./patch"
 
 export interface PluginHookTrace {
   point: string
   handler: string
-  outcome: 'applied' | 'skipped' | 'failed'
+  outcome: "applied" | "skipped" | "failed"
   elapsedMs: number
   error?: string
 }
@@ -24,7 +24,7 @@ export type HookInvoker = (
 export async function transformPluginPoint<Schema extends z.ZodType>(input: {
   registry: PluginRegistry
   point: string
-  selector: Parameters<PluginRegistry['plan']>[1]
+  selector: Parameters<PluginRegistry["plan"]>[1]
   value: z.input<Schema>
   schema: Schema
   invoke: HookInvoker
@@ -33,8 +33,8 @@ export async function transformPluginPoint<Schema extends z.ZodType>(input: {
   handlers?: readonly OrderedHook[]
 }): Promise<z.output<Schema>> {
   const point = input.registry.points.get(input.point)
-  if (!point || point.mode !== 'transform') {
-    throw new Error('切入点不支持变换：' + input.point)
+  if (!point || point.mode !== "transform") {
+    throw new Error("切入点不支持变换：" + input.point)
   }
   let value = input.schema.parse(input.value)
   const successful = new Set<string>()
@@ -55,7 +55,7 @@ export async function transformPluginPoint<Schema extends z.ZodType>(input: {
           return !successful.has(key)
         })
       ) {
-        throw new Error('必需处理器未成功，跳过依赖结果的变换')
+        throw new Error("必需处理器未成功，跳过依赖结果的变换")
       }
       const pending = input.invoke(handler, structuredClone(value), revision(value), signal)
       const result = await awaitWithContext(pending, withAbortSignal(signal, BACKGROUND_CONTEXT))
@@ -68,14 +68,14 @@ export async function transformPluginPoint<Schema extends z.ZodType>(input: {
       report({
         point: input.point,
         handler: handler.key,
-        outcome: 'applied',
+        outcome: "applied",
         elapsedMs: performance.now() - startedAt
       })
     } catch (error) {
       input.signal.throwIfAborted()
-      let outcome: PluginHookTrace['outcome'] = 'skipped'
-      if (handler.hook.onError === 'fail') {
-        outcome = 'failed'
+      let outcome: PluginHookTrace["outcome"] = "skipped"
+      if (handler.hook.onError === "fail") {
+        outcome = "failed"
       }
       report({
         point: input.point,
@@ -84,7 +84,7 @@ export async function transformPluginPoint<Schema extends z.ZodType>(input: {
         elapsedMs: performance.now() - startedAt,
         error: String(error).slice(0, 500)
       })
-      if (handler.hook.onError === 'fail') {
+      if (handler.hook.onError === "fail") {
         throw error
       }
     }

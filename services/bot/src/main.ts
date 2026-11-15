@@ -1,53 +1,53 @@
-import { resolve, join } from 'node:path'
-import { mkdir } from 'node:fs/promises'
-import { loadConfiguration } from '@pi-im-bot/config/load'
-import { StateStore } from '@pi-im-bot/storage/state'
-import { EventHub } from '@pi-im-bot/contracts/events'
-import { ChannelRegistry } from '@pi-im-bot/channels/registry'
-import { createMockAdapter } from '@pi-im-bot/channels/mock'
-import { OneBotAdapter } from '@pi-im-bot/channels/onebot/adapter'
-import { DeliveryService } from '@pi-im-bot/runtime/delivery'
-import { Coordinator } from '@pi-im-bot/runtime/coordinator'
-import { Scheduler } from '@pi-im-bot/scheduler/service'
-import { createHttpApp } from './http/app'
-import { addressKey } from '@pi-im-bot/contracts/message'
-import { ProviderEditor } from '@pi-im-bot/providers/editor'
-import { OneBotSettings } from '@pi-im-bot/channels/onebot/settings'
-import { extractPrompt } from '@pi-im-bot/runtime/trigger'
-import { FrameworkEditor, providerReferences } from '@pi-im-bot/settings/editor'
-import { ConfigurationMutations } from '@pi-im-bot/config/mutations'
-import { ResourceEditor } from '@pi-im-bot/resources/editor'
-import { resourceReferences } from '@pi-im-bot/resources/references'
-import { RuntimeOwner } from '@pi-im-bot/storage/owner'
-import { DurableAgentRuntime } from '@pi-im-bot/agent/durable/runtime'
-import { BunSqliteDatabase } from '@pi-im-bot/agent/durable/bun-sqlite'
-import { SqliteStorage } from '@earendil-works/pi-durable/storage/sqlite'
-import { JobService } from '@pi-im-bot/jobs/service'
-import { ArtifactStore } from '@pi-im-bot/artifacts/store'
-import { MediaService } from '@pi-im-bot/media/service'
-import { PluginWorkerManager } from '@pi-im-bot/plugins/runtime/manager'
-import { PluginService } from '@pi-im-bot/plugins/service'
-import { PluginEditor } from '@pi-im-bot/plugins/editor'
-import { revision } from '@pi-im-bot/settings/resolve'
-import { configureArtifacts } from '@pi-im-bot/artifacts/quota'
-import { PluginInstaller } from '@pi-im-bot/plugins/install/service'
-import { PluginRuntimeEditor } from '@pi-im-bot/plugins/runtime/editor'
-import { parseWebOrigins, webOriginAllowed } from './web-origin'
+import { resolve, join } from "node:path"
+import { mkdir } from "node:fs/promises"
+import { loadConfiguration } from "@pi-im-bot/config/load"
+import { StateStore } from "@pi-im-bot/storage/state"
+import { EventHub } from "@pi-im-bot/contracts/events"
+import { ChannelRegistry } from "@pi-im-bot/channels/registry"
+import { createMockAdapter } from "@pi-im-bot/channels/mock"
+import { OneBotAdapter } from "@pi-im-bot/channels/onebot/adapter"
+import { DeliveryService } from "@pi-im-bot/runtime/delivery"
+import { Coordinator } from "@pi-im-bot/runtime/coordinator"
+import { Scheduler } from "@pi-im-bot/scheduler/service"
+import { createHttpApp } from "./http/app"
+import { addressKey } from "@pi-im-bot/contracts/message"
+import { ProviderEditor } from "@pi-im-bot/providers/editor"
+import { OneBotSettings } from "@pi-im-bot/channels/onebot/settings"
+import { extractPrompt } from "@pi-im-bot/runtime/trigger"
+import { FrameworkEditor, providerReferences } from "@pi-im-bot/settings/editor"
+import { ConfigurationMutations } from "@pi-im-bot/config/mutations"
+import { ResourceEditor } from "@pi-im-bot/resources/editor"
+import { resourceReferences } from "@pi-im-bot/resources/references"
+import { RuntimeOwner } from "@pi-im-bot/storage/owner"
+import { DurableAgentRuntime } from "@pi-im-bot/agent/durable/runtime"
+import { BunSqliteDatabase } from "@pi-im-bot/agent/durable/bun-sqlite"
+import { SqliteStorage } from "@earendil-works/pi-durable/storage/sqlite"
+import { JobService } from "@pi-im-bot/jobs/service"
+import { ArtifactStore } from "@pi-im-bot/artifacts/store"
+import { MediaService } from "@pi-im-bot/media/service"
+import { PluginWorkerManager } from "@pi-im-bot/plugins/runtime/manager"
+import { PluginService } from "@pi-im-bot/plugins/service"
+import { PluginEditor } from "@pi-im-bot/plugins/editor"
+import { revision } from "@pi-im-bot/settings/resolve"
+import { configureArtifacts } from "@pi-im-bot/artifacts/quota"
+import { PluginInstaller } from "@pi-im-bot/plugins/install/service"
+import { PluginRuntimeEditor } from "@pi-im-bot/plugins/runtime/editor"
+import { parseWebOrigins, webOriginAllowed } from "./web-origin"
 
 interface UiSocketData {
-  kind: 'ui'
+  kind: "ui"
   unsubscribe?: () => void
 }
 interface OneBotSocketData {
-  kind: 'onebot'
+  kind: "onebot"
   selfId: string
   revision: string
 }
 type SocketData = UiSocketData | OneBotSocketData
 
-const projectDir = resolve(import.meta.dir, '../../..')
+const projectDir = resolve(import.meta.dir, "../../..")
 const webOrigins = parseWebOrigins(process.env.BOT_WEB_ORIGINS)
-const dataDir = resolve(process.env.BOT_DATA_DIR ?? join(projectDir, 'data'))
+const dataDir = resolve(process.env.BOT_DATA_DIR ?? join(projectDir, "data"))
 await mkdir(dataDir, { recursive: true })
 const owner = new RuntimeOwner(dataDir)
 let configuration = await loadConfiguration(projectDir)
@@ -68,12 +68,7 @@ const coordinator = new Coordinator(
   delivery
 )
 const media = new MediaService(configuration.dataDir, store, channels)
-const pluginWorkers = new PluginWorkerManager(
-  projectDir,
-  configuration.bot.plugins,
-  undefined,
-  configuration.dataDir
-)
+const pluginWorkers = new PluginWorkerManager(projectDir, configuration.bot.plugins, undefined, configuration.dataDir)
 await pluginWorkers.start()
 coordinator.plugins = new PluginService(() => {
   return configuration
@@ -91,7 +86,7 @@ const onebot = new OneBotAdapter(
       return addressKey(candidate.address) === addressKey(message.address)
     })
     if (!room) {
-      return 'unmatched'
+      return "unmatched"
     }
     return coordinator.receiveIncoming(
       room.id,
@@ -111,16 +106,14 @@ const durable = new DurableAgentRuntime(
     return configuration.bot.agent.maxConcurrentRuns
   },
   (report) => {
-    console.error('[pi-durable]', report.kind, configuration.catalog.redact(String(report.error)))
+    console.error("[pi-durable]", report.kind, configuration.catalog.redact(String(report.error)))
   }
 )
 coordinator.attachDurable(durable)
 const jobs = new JobService(durable, coordinator)
 coordinator.attachJobs(jobs)
 await coordinator.prepareRecovery()
-await durable.open(
-  await SqliteStorage.open(new BunSqliteDatabase(join(configuration.dataDir, 'agent.sqlite')))
-)
+await durable.open(await SqliteStorage.open(new BunSqliteDatabase(join(configuration.dataDir, "agent.sqlite"))))
 coordinator.resumeRecovery()
 scheduler.start()
 const configMutations = new ConfigurationMutations()
@@ -168,7 +161,7 @@ const onebotSettings = new OneBotSettings(configuration.configDir, (bot) => {
   configureArtifacts(configuration.dataDir, bot.artifacts)
   onebot.reconfigure(previous)
   coordinator.syncOneBotRooms()
-  events.emit({ type: 'config' })
+  events.emit({ type: "config" })
 })
 const pluginEditor = new PluginEditor(
   () => {
@@ -183,11 +176,11 @@ const pluginEditor = new PluginEditor(
     frameworkEditor.validate(configuration.framework, undefined, undefined, configuration.catalog, resources)
   },
   (id) => {
-    return resourceReferences(configuration, store, 'plugin', id)
+    return resourceReferences(configuration, store, "plugin", id)
   }
 )
 const pluginInstaller = new PluginInstaller(pluginEditor, () => {
-  events.emit({ type: 'config' })
+  events.emit({ type: "config" })
 })
 await pluginEditor.initializeGsviConfiguration()
 const app = createHttpApp({
@@ -219,7 +212,7 @@ const app = createHttpApp({
         const previous = configuration.bot.onebot
         const next = await loadConfiguration(projectDir)
         if (revision(next.bot.plugins) !== revision(configuration.bot.plugins)) {
-          throw new Error('插件执行后端配置已变化，需要重启 Bot 后应用')
+          throw new Error("插件执行后端配置已变化，需要重启 Bot 后应用")
         }
         frameworkEditor.validate(next.framework, undefined, undefined, next.catalog, next.resources)
         configuration = next
@@ -238,38 +231,36 @@ const server = Bun.serve<SocketData>({
   idleTimeout: 120,
   fetch(request, server) {
     const path = new URL(request.url).pathname
-    if (path === '/api/events') {
+    if (path === "/api/events") {
       if (!uiOriginAllowed(request)) {
-        return new Response('Web origin is not allowed', { status: 403 })
+        return new Response("Web origin is not allowed", { status: 403 })
       }
-      if (server.upgrade(request, { data: { kind: 'ui' } })) {
+      if (server.upgrade(request, { data: { kind: "ui" } })) {
         return
       }
-      return new Response('WebSocket upgrade required', { status: 426 })
+      return new Response("WebSocket upgrade required", { status: 426 })
     }
     if (path === configuration.bot.onebot.path) {
       const auth = onebot.authorize(request)
       if (!auth.ok) {
         return new Response(auth.reason, { status: auth.status })
       }
-      if (
-        server.upgrade(request, { data: { kind: 'onebot', selfId: auth.selfId, revision: auth.revision } })
-      ) {
+      if (server.upgrade(request, { data: { kind: "onebot", selfId: auth.selfId, revision: auth.revision } })) {
         return
       }
-      return new Response('WebSocket upgrade required', { status: 426 })
+      return new Response("WebSocket upgrade required", { status: 426 })
     }
     return app.fetch(request)
   },
   websocket: {
     maxPayloadLength: 1024 * 1024,
     open(socket) {
-      if (socket.data.kind === 'onebot') {
+      if (socket.data.kind === "onebot") {
         onebot.connect(socket.data.selfId, socket, socket.data.revision)
       } else {
         socket.data.unsubscribe = events.subscribe((event) => {
           if (socket.getBufferedAmount() > 1024 * 1024) {
-            socket.close(1013, 'Client too slow')
+            socket.close(1013, "Client too slow")
             return
           }
           socket.send(JSON.stringify(event))
@@ -277,14 +268,14 @@ const server = Bun.serve<SocketData>({
       }
     },
     message(socket, data) {
-      if (socket.data.kind === 'onebot') {
+      if (socket.data.kind === "onebot") {
         void onebot.message(socket.data.selfId, String(data), socket).catch((error) => {
-          console.warn('OneBot event rejected:', configuration.catalog.redact(String(error)))
+          console.warn("OneBot event rejected:", configuration.catalog.redact(String(error)))
         })
       }
     },
     close(socket) {
-      if (socket.data.kind === 'onebot') {
+      if (socket.data.kind === "onebot") {
         onebot.disconnect(socket.data.selfId, socket)
       } else {
         socket.data.unsubscribe?.()
@@ -294,10 +285,10 @@ const server = Bun.serve<SocketData>({
 })
 console.log(`Pi IM Bot listening: ${configuration.bot.server.host}:${server.port}`)
 console.log(`Bot API: http://localhost:${server.port}`)
-console.log(`Provider configuration: ${join(configuration.configDir, 'providers.json')}`)
+console.log(`Provider configuration: ${join(configuration.configDir, "providers.json")}`)
 
 function uiOriginAllowed(request: Request) {
-  return webOriginAllowed(request.headers.get('Origin'), webOrigins)
+  return webOriginAllowed(request.headers.get("Origin"), webOrigins)
 }
 
 let closing = false
@@ -317,9 +308,9 @@ async function shutdown() {
   owner.close()
   process.exit(0)
 }
-process.on('SIGINT', () => {
+process.on("SIGINT", () => {
   void shutdown()
 })
-process.on('SIGTERM', () => {
+process.on("SIGTERM", () => {
   void shutdown()
 })

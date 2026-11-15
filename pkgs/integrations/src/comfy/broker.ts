@@ -1,19 +1,19 @@
-import { withComfyDownload } from './budgets'
-import { HistorySchema } from './outputs'
-import type { Tx } from '@earendil-works/pi-durable'
-import { BACKGROUND_CONTEXT } from '@earendil-works/chord/context'
-import { z } from 'zod'
-import type { DurableAgentRuntime } from '@pi-im-bot/agent/durable/runtime'
-import type { ArtifactStore } from '@pi-im-bot/artifacts/store'
-import type { JobRepository } from '@pi-im-bot/jobs/repository'
-import { revision } from '@pi-im-bot/settings/resolve'
-import { ComfyReceipts, ComfyActive, ReceiptSchema, type Receipt } from './documents'
-import { compileWorkflow, type Parameters } from './compile'
-import { comfyRevision, workflowDigest, type ComfyService, type Workflow } from './resources'
-import { ComfyTransportError, comfyRequest } from './http'
-import { ComfyOutputRefused } from './errors'
-import { outputFiles, validateImage } from './outputs'
-import type { ComfyItem } from './protocol'
+import { withComfyDownload } from "./budgets"
+import { HistorySchema } from "./outputs"
+import type { Tx } from "@earendil-works/pi-durable"
+import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context"
+import { z } from "zod"
+import type { DurableAgentRuntime } from "@pi-im-bot/agent/durable/runtime"
+import type { ArtifactStore } from "@pi-im-bot/artifacts/store"
+import type { JobRepository } from "@pi-im-bot/jobs/repository"
+import { revision } from "@pi-im-bot/settings/resolve"
+import { ComfyReceipts, ComfyActive, ReceiptSchema, type Receipt } from "./documents"
+import { compileWorkflow, type Parameters } from "./compile"
+import { comfyRevision, workflowDigest, type ComfyService, type Workflow } from "./resources"
+import { ComfyTransportError, comfyRequest } from "./http"
+import { ComfyOutputRefused } from "./errors"
+import { outputFiles, validateImage } from "./outputs"
+import type { ComfyItem } from "./protocol"
 
 export interface ComfyOwner {
   instance: string
@@ -55,8 +55,8 @@ export class ComfyBroker {
       doc.value = saved
       const activity = await tx.doc(ComfyActive)
       if (
-        ['submitted', 'running'].includes(receipt.status) ||
-        (receipt.status === 'outcome_unknown' && !receipt.error)
+        ["submitted", "running"].includes(receipt.status) ||
+        (receipt.status === "outcome_unknown" && !receipt.error)
       ) {
         activity.owners[receipt.key] = { room: receipt.room, instance: receipt.instance }
       } else {
@@ -66,7 +66,7 @@ export class ComfyBroker {
         await this.jobs.change(tx, receipt.job, receipt.revision, (job) => {
           job.external = {
             ...job.external,
-            status: 'working',
+            status: "working",
             hasReceipt: true,
             attempts: job.external?.attempts ?? 0
           }
@@ -128,20 +128,20 @@ export class ComfyBroker {
           previous.workflowDigest !== workflowDigest(workflow) ||
           previous.serviceRevision !== comfyRevision(service)
         ) {
-          throw new Error('提交键已绑定不同的原服务/模板/参数，未重发')
+          throw new Error("提交键已绑定不同的原服务/模板/参数，未重发")
         }
         return this.view(previous)
       }
       const graph = compileWorkflow(workflow, parameters)
       const payload = { prompt: graph, client_id: key }
-      const store = artifacts.forOwner('comfy:' + key + ':request')
-      const existing = await store.owned('comfy:' + key + ':request')
+      const store = artifacts.forOwner("comfy:" + key + ":request")
+      const existing = await store.owned("comfy:" + key + ":request")
       let request = existing[0]
       if (!request) {
         request = await store.save(
-          'comfy-request.json',
-          'application/json',
-          'comfy-request:' + key,
+          "comfy-request.json",
+          "application/json",
+          "comfy-request:" + key,
           JSON.stringify(payload)
         )
       }
@@ -155,7 +155,7 @@ export class ComfyBroker {
         workflowDigest: workflowDigest(workflow),
         parametersDigest: revision(parameters),
         outputs: workflow.outputs,
-        status: 'outcome_unknown',
+        status: "outcome_unknown",
         recorded: false,
         dispatched: false,
         requestArtifactId: request.id,
@@ -167,7 +167,7 @@ export class ComfyBroker {
         authorize()
         const doc = await tx.doc(ComfyReceipts, key, null)
         if (doc.value) {
-          throw new Error('提交已登记，未重复POST')
+          throw new Error("提交已登记，未重复POST")
         }
         const activity = await tx.doc(ComfyActive)
         const entries = Object.values(activity.owners)
@@ -177,7 +177,7 @@ export class ComfyBroker {
             return entry.room === owner.room
           }).length >= 32
         ) {
-          throw new Error('Comfy活动任务额度已满，未提交')
+          throw new Error("Comfy活动任务额度已满，未提交")
         }
         doc.value = receipt
         activity.owners[key] = { room: owner.room, instance: owner.instance }
@@ -185,12 +185,12 @@ export class ComfyBroker {
       try {
         signal.throwIfAborted()
         authorize()
-        const response = await comfyRequest(service, 'prompt', signal, 65536, payload, async () => {
+        const response = await comfyRequest(service, "prompt", signal, 65536, payload, async () => {
           receipt.dispatched = true
           await this.save(receipt)
         })
-        receipt.promptId = PromptSchema.parse(JSON.parse(response.bytes.toString('utf8'))).prompt_id
-        receipt.status = 'submitted'
+        receipt.promptId = PromptSchema.parse(JSON.parse(response.bytes.toString("utf8"))).prompt_id
+        receipt.status = "submitted"
         // Save the remote ID before returning across RPC or depending on a Worker checkpoint.
         await this.save(receipt)
         signal.throwIfAborted()
@@ -200,11 +200,11 @@ export class ComfyBroker {
         if (receipt.promptId) {
           throw error
         }
-        if (error instanceof ComfyTransportError && error.outcome === 'rejected') {
-          receipt.status = 'failed'
-          receipt.error = 'Comfy明确拒绝本次提交'
+        if (error instanceof ComfyTransportError && error.outcome === "rejected") {
+          receipt.status = "failed"
+          receipt.error = "Comfy明确拒绝本次提交"
         } else {
-          receipt.error = '提交结果未知，未自动重提'
+          receipt.error = "提交结果未知，未自动重提"
         }
         await this.save(receipt)
         signal.throwIfAborted()
@@ -216,7 +216,7 @@ export class ComfyBroker {
   async record(tx: Tx, owner: ComfyOwner, alias: string, item: number) {
     const doc = await tx.doc(ComfyReceipts, this.key(owner, alias, item), null)
     if (!doc.value || !doc.value.dispatched) {
-      throw new Error('没有实际派发尝试，不能登记提交JSON')
+      throw new Error("没有实际派发尝试，不能登记提交JSON")
     }
     if (doc.value.recorded) {
       return false
@@ -228,7 +228,7 @@ export class ComfyBroker {
     owner: ComfyOwner,
     alias: string,
     item: number,
-    action: 'recover' | 'poll' | 'cancel' | 'reconcile' | 'peek',
+    action: "recover" | "poll" | "cancel" | "reconcile" | "peek",
     artifacts: ArtifactStore,
     signal: AbortSignal,
     authorize: (receipt: Receipt) => void,
@@ -238,28 +238,28 @@ export class ComfyBroker {
     return this.exclusive(key, async () => {
       const receipt = await this.read(key)
       if (!receipt) {
-        return { item, status: 'not_started', attempted: false, hasReceipt: false, artifactIds: [] }
+        return { item, status: "not_started", attempted: false, hasReceipt: false, artifactIds: [] }
       }
       authorize(receipt)
-      if (action === 'peek') {
+      if (action === "peek") {
         return this.view(receipt)
       }
       if (
         !receipt.promptId ||
-        ['succeeded', 'failed', 'cancelled'].includes(receipt.status) ||
-        (receipt.status === 'abandoned' && !reconcile)
+        ["succeeded", "failed", "cancelled"].includes(receipt.status) ||
+        (receipt.status === "abandoned" && !reconcile)
       ) {
         return this.view(receipt)
       }
-      if (action === 'cancel') {
+      if (action === "cancel") {
         if (receipt.cancelDispatched) {
           return this.view(receipt)
         }
         const queue = QueueSchema.parse(
           JSON.parse(
-            (
-              await comfyRequest(receipt.service, 'queue', signal, receipt.service.maxHistoryBytes)
-            ).bytes.toString('utf8')
+            (await comfyRequest(receipt.service, "queue", signal, receipt.service.maxHistoryBytes)).bytes.toString(
+              "utf8"
+            )
           )
         )
         const pending = queue.queue_pending.some((row) => {
@@ -269,18 +269,18 @@ export class ComfyBroker {
           return row[1] === receipt.promptId
         })
         receipt.cancelDispatched = true
-        receipt.status = 'abandoned'
-        receipt.error = '已停止本地等待；远端运行结果未确认'
+        receipt.status = "abandoned"
+        receipt.error = "已停止本地等待；远端运行结果未确认"
         await this.save(receipt)
         if (pending && !running) {
           authorize(receipt)
           try {
-            await comfyRequest(receipt.service, 'queue', signal, 65536, { delete: [receipt.promptId] })
+            await comfyRequest(receipt.service, "queue", signal, 65536, { delete: [receipt.promptId] })
             const after = QueueSchema.parse(
               JSON.parse(
-                (
-                  await comfyRequest(receipt.service, 'queue', signal, receipt.service.maxHistoryBytes)
-                ).bytes.toString('utf8')
+                (await comfyRequest(receipt.service, "queue", signal, receipt.service.maxHistoryBytes)).bytes.toString(
+                  "utf8"
+                )
               )
             )
             const history = HistorySchema.parse(
@@ -288,21 +288,21 @@ export class ComfyBroker {
                 (
                   await comfyRequest(
                     receipt.service,
-                    'history/' + encodeURIComponent(receipt.promptId),
+                    "history/" + encodeURIComponent(receipt.promptId),
                     signal,
                     receipt.service.maxHistoryBytes
                   )
-                ).bytes.toString('utf8')
+                ).bytes.toString("utf8")
               )
             )
             const present = [...after.queue_pending, ...after.queue_running].some((row) => {
               return row[1] === receipt.promptId
             })
             if (!present && !history[receipt.promptId]) {
-              receipt.status = 'cancelled'
+              receipt.status = "cancelled"
               receipt.error = undefined
             } else {
-              receipt.error = '删除时任务已运行或完成；仅停止本地等待，保留事实核对'
+              receipt.error = "删除时任务已运行或完成；仅停止本地等待，保留事实核对"
             }
             await this.save(receipt)
           } catch {
@@ -314,35 +314,31 @@ export class ComfyBroker {
       try {
         const history = await comfyRequest(
           receipt.service,
-          'history/' + encodeURIComponent(receipt.promptId),
+          "history/" + encodeURIComponent(receipt.promptId),
           signal,
           receipt.service.maxHistoryBytes
         )
-        const output = outputFiles(
-          JSON.parse(history.bytes.toString('utf8')),
-          receipt.promptId,
-          receipt.outputs
-        )
+        const output = outputFiles(JSON.parse(history.bytes.toString("utf8")), receipt.promptId, receipt.outputs)
         authorize(receipt)
-        if (output.status === 'failed') {
-          receipt.status = 'failed'
-          receipt.error = '本任务远端执行失败'
-        } else if (output.status === 'running') {
-          receipt.status = 'running'
+        if (output.status === "failed") {
+          receipt.status = "failed"
+          receipt.error = "本任务远端执行失败"
+        } else if (output.status === "running") {
+          receipt.status = "running"
         } else {
           const ids: string[] = []
           for (const [index, file] of output.files.entries()) {
             signal.throwIfAborted()
             authorize(receipt)
-            const store = artifacts.forOwner('comfy:' + key + ':output:' + index)
-            const prior = await store.owned('comfy:' + key + ':output:' + index)
+            const store = artifacts.forOwner("comfy:" + key + ":output:" + index)
+            const prior = await store.owned("comfy:" + key + ":output:" + index)
             let artifact = prior[0]
             if (!artifact) {
               artifact = await withComfyDownload(receipt.service, signal, async (bounded) => {
                 const query = new URLSearchParams(file)
                 const image = await comfyRequest(
                   receipt.service,
-                  'view?' + query.toString(),
+                  "view?" + query.toString(),
                   bounded,
                   receipt.service.maxImageBytes
                 )
@@ -351,7 +347,7 @@ export class ComfyBroker {
                 const result = await store.save(
                   file.filename,
                   image.mimeType!,
-                  'comfy-output:' + key + ':' + index,
+                  "comfy-output:" + key + ":" + index,
                   image.bytes
                 )
                 bounded.throwIfAborted()
@@ -361,7 +357,7 @@ export class ComfyBroker {
             ids.push(artifact.id)
           }
           receipt.artifactIds = ids
-          receipt.status = 'succeeded'
+          receipt.status = "succeeded"
         }
         await this.save(receipt)
         signal.throwIfAborted()
@@ -373,13 +369,13 @@ export class ComfyBroker {
         if (
           error instanceof ComfyOutputRefused ||
           error instanceof z.ZodError ||
-          (error instanceof ComfyTransportError && error.outcome === 'refused')
+          (error instanceof ComfyTransportError && error.outcome === "refused")
         ) {
-          receipt.status = 'failed'
-          receipt.error = '指定输出未通过路径、格式或体积校验'
+          receipt.status = "failed"
+          receipt.error = "指定输出未通过路径、格式或体积校验"
         } else {
-          receipt.status = 'outcome_unknown'
-          receipt.error = '原prompt_id的结果暂不可核对；保留回执，不重提'
+          receipt.status = "outcome_unknown"
+          receipt.error = "原prompt_id的结果暂不可核对；保留回执，不重提"
         }
         await this.save(receipt)
         return this.view(receipt)

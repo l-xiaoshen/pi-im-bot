@@ -1,7 +1,7 @@
-import { z } from 'zod'
-import type { PluginHostServices } from './rpc/services'
-import type { PluginInvocation } from './invocation'
-import { reserveMediaSources } from '@pi-im-bot/media/dependencies'
+import { z } from "zod"
+import type { PluginHostServices } from "./rpc/services"
+import type { PluginInvocation } from "./invocation"
+import { reserveMediaSources } from "@pi-im-bot/media/dependencies"
 
 export const MediaReadSchema = z
   .object({
@@ -31,7 +31,7 @@ const MimeSchema = z
   .string()
   .max(200)
   .transform((value) => {
-    return value.split(';')[0].trim().toLowerCase()
+    return value.split(";")[0].trim().toLowerCase()
   })
   .pipe(z.string().regex(/^[a-z0-9!#$&^_.+-]+\/[a-z0-9!#$&^_.+-]+$/u))
 
@@ -43,21 +43,21 @@ export function registerPluginMedia(
 ) {
   let total = 0
   let reads = 0
-  host.register('media.read', 'media.read', MediaReadSchema, async (input, context) => {
+  host.register("media.read", "media.read", MediaReadSchema, async (input, context) => {
     authorize()
     reads += 1
     total += input.limit
     if (reads > 128 || total > 8 * 1024 * 1024) {
-      throw new Error('本次媒体读取额度已用完')
+      throw new Error("本次媒体读取额度已用完")
     }
     const media = invocation.services.media
     if (!media) {
-      throw new Error('入站媒体服务未配置')
+      throw new Error("入站媒体服务未配置")
     }
     reserveMediaSources(sources, [input.mediaId])
-    const { metadata, file } = await media.content({ source: 'media', id: input.mediaId }, context.signal)
+    const { metadata, file } = await media.content({ source: "media", id: input.mediaId }, context.signal)
     if (metadata.bytes > input.maxBytes || file.size !== metadata.bytes || file.size === 0) {
-      throw new Error('媒体超过本次读取预算或内容大小不匹配')
+      throw new Error("媒体超过本次读取预算或内容大小不匹配")
     }
     const bytes = await file.slice(input.offset, input.offset + input.limit).arrayBuffer()
     context.signal.throwIfAborted()
@@ -69,7 +69,7 @@ export function registerPluginMedia(
       mimeType: MimeSchema.parse(metadata.mimeType),
       bytes: metadata.bytes,
       offset: input.offset,
-      base64: Buffer.from(bytes).toString('base64'),
+      base64: Buffer.from(bytes).toString("base64"),
       hasMore: input.offset + bytes.byteLength < metadata.bytes
     })
   })

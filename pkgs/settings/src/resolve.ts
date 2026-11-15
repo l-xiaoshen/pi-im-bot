@@ -1,8 +1,8 @@
-import { createHash } from 'node:crypto'
-import type { BotConfig } from '@pi-im-bot/config/schema'
-import type { Address } from '@pi-im-bot/contracts/message'
-import type { ConfigDefinition } from '@pi-im-bot/plugins/configuration/schema'
-import { mergeConfig } from '@pi-im-bot/plugins/configuration/values'
+import { createHash } from "node:crypto"
+import type { BotConfig } from "@pi-im-bot/config/schema"
+import type { Address } from "@pi-im-bot/contracts/message"
+import type { ConfigDefinition } from "@pi-im-bot/plugins/configuration/schema"
+import { mergeConfig } from "@pi-im-bot/plugins/configuration/values"
 import {
   FrameworkConfigSchema,
   SettingsSchema,
@@ -10,10 +10,10 @@ import {
   type FrameworkConfig,
   type Settings,
   type SettingsPatch
-} from './schema'
+} from "./schema"
 
 export function revision(value: unknown) {
-  return createHash('sha256').update(JSON.stringify(value)).digest('hex')
+  return createHash("sha256").update(JSON.stringify(value)).digest("hex")
 }
 
 export function initialFramework(bot: BotConfig, providerGroup: string): FrameworkConfig {
@@ -22,7 +22,7 @@ export function initialFramework(bot: BotConfig, providerGroup: string): Framewo
       preferences: { providerGroup },
       behavior: { timeoutMs: bot.agent.timeoutMs, maxModelCalls: bot.agent.maxModelCalls }
     },
-    personas: [{ id: 'default', name: '默认人格', prompt: bot.agent.systemPrompt }]
+    personas: [{ id: "default", name: "默认人格", prompt: bot.agent.systemPrompt }]
   })
 }
 
@@ -40,22 +40,22 @@ export function resolveSettings(
   const sources: Record<string, string> = {}
   const settings = SettingsSchema.parse(framework.defaults)
   const layers = [
-    { source: '默认', patch: framework.defaults },
-    { source: '账号', patch: account?.settings ?? {} },
-    { source: '聊天范围', patch: scope },
-    { source: '当前对话', patch: conversation }
+    { source: "默认", patch: framework.defaults },
+    { source: "账号", patch: account?.settings ?? {} },
+    { source: "聊天范围", patch: scope },
+    { source: "当前对话", patch: conversation }
   ]
   if (child) {
-    layers.push({ source: '任务对话', patch: child })
+    layers.push({ source: "任务对话", patch: child })
   }
   for (const layer of layers) {
-    mergeSection(settings, layer.patch, 'data', layer.source, sources)
-    mergeSection(settings, layer.patch, 'preferences', layer.source, sources)
-    mergeSection(settings, layer.patch, 'behavior', layer.source, sources)
-    mergeSection(settings, layer.patch, 'output', layer.source, sources)
-    mergeSection(settings, layer.patch, 'resources', layer.source, sources)
+    mergeSection(settings, layer.patch, "data", layer.source, sources)
+    mergeSection(settings, layer.patch, "preferences", layer.source, sources)
+    mergeSection(settings, layer.patch, "behavior", layer.source, sources)
+    mergeSection(settings, layer.patch, "output", layer.source, sources)
+    mergeSection(settings, layer.patch, "resources", layer.source, sources)
     const previousExtensions = structuredClone(settings.extensions)
-    mergeSection(settings, layer.patch, 'extensions', layer.source, sources)
+    mergeSection(settings, layer.patch, "extensions", layer.source, sources)
     if (layer.patch.extensions) {
       settings.extensions.priorities = {
         ...previousExtensions.priorities,
@@ -91,7 +91,7 @@ export function resolveSettings(
   }
 }
 
-function mergeSection<K extends Exclude<keyof Settings, 'permissions'>>(
+function mergeSection<K extends Exclude<keyof Settings, "permissions">>(
   target: Settings,
   patch: SettingsPatch,
   key: K,

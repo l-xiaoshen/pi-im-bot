@@ -1,5 +1,5 @@
-import type { TaskRuntime, RunningTask } from '@earendil-works/pi-durable'
-import type { Observation } from './schema'
+import type { TaskRuntime, RunningTask } from "@earendil-works/pi-durable"
+import type { Observation } from "./schema"
 
 export interface DeferredRecall {
   messageId: string
@@ -13,7 +13,7 @@ export interface ObserverTaskInput {
   recall?: DeferredRecall
 }
 export interface ObserverCheckpoint {
-  phase: 'run' | 'dispatched'
+  phase: "run" | "dispatched"
 }
 export type ObserverTaskRuntime = TaskRuntime<ObserverTaskInput, ObserverCheckpoint, object, object>
 export type ActiveObserver = RunningTask<ObserverTaskInput, ObserverCheckpoint, object>

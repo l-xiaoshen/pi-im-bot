@@ -6,5 +6,5 @@ export { BunSqliteDatabase }
 
 /** Open durable storage that owns and closes the supplied Bun database. */
 export function openBunStorage(db: Database, options?: SqliteStorageOptions): Promise<SqliteStorage> {
-    return SqliteStorage.open(new BunSqliteDatabase(db), options)
+  return SqliteStorage.open(new BunSqliteDatabase(db), options)
 }

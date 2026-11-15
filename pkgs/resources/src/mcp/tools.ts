@@ -1,15 +1,15 @@
-import type { BotTool } from '@pi-im-bot/capabilities/tool'
-import { z } from 'zod'
-import { compile } from '@earendil-works/pi-schema'
-import type { ResourceLibrary } from '../library'
-import type { Settings } from '@pi-im-bot/settings/schema'
-import type { ArtifactStore } from '@pi-im-bot/artifacts/store'
-import { connectMcp, redactMcp, redactMcpText } from './client'
-import { McpToolSchema, type McpServer } from './schema'
-import { mcpToolRevision } from './identity'
-import { projectMcpResult } from './result'
-import { usesMcpTask } from './tasks'
-import type { JobToolServices } from '@pi-im-bot/jobs/tools'
+import type { BotTool } from "@pi-im-bot/capabilities/tool"
+import { z } from "zod"
+import { compile } from "@earendil-works/pi-schema"
+import type { ResourceLibrary } from "../library"
+import type { Settings } from "@pi-im-bot/settings/schema"
+import type { ArtifactStore } from "@pi-im-bot/artifacts/store"
+import { connectMcp, redactMcp, redactMcpText } from "./client"
+import { McpToolSchema, type McpServer } from "./schema"
+import { mcpToolRevision } from "./identity"
+import { projectMcpResult } from "./result"
+import { usesMcpTask } from "./tasks"
+import type { JobToolServices } from "@pi-im-bot/jobs/tools"
 
 const ArgumentsSchema = z.record(z.string(), z.unknown())
 
@@ -19,7 +19,7 @@ export function createMcpTools(
   allowed: readonly string[],
   artifacts: ArtifactStore,
   signal: AbortSignal,
-  jobs?: Pick<JobToolServices, 'operation'>,
+  jobs?: Pick<JobToolServices, "operation">,
   readOnly = false
 ) {
   const entries = library.mcpTools(settings).filter((entry) => {
@@ -35,17 +35,17 @@ export function createMcpTools(
     const parameters = entry.tool.inputSchema
     const validator = compile(parameters)
     const asynchronous = usesMcpTask(entry.server, entry.tool, library.manifest(entry.server.id))
-    let replay: 'safe' | 'unsafe' = 'unsafe'
+    let replay: "safe" | "unsafe" = "unsafe"
     if (asynchronous) {
-      replay = 'safe'
+      replay = "safe"
     }
-    let description = `${entry.tool.name}: ${entry.tool.description ?? 'MCP tool'}\nCapability ID: ${entry.id}`
+    let description = `${entry.tool.name}: ${entry.tool.description ?? "MCP tool"}\nCapability ID: ${entry.id}`
     if (asynchronous) {
       description +=
-        '\nRuns as a persistent background operation. Returns an accepted Job ID immediately, not the final result. The host reports completion; do not repeatedly poll from the root conversation.'
+        "\nRuns as a persistent background operation. Returns an accepted Job ID immediately, not the final result. The host reports completion; do not repeatedly poll from the root conversation."
     } else if (usesMcpTask(entry.server, entry.tool, library.manifest(entry.server.id), true)) {
       description +=
-        '\nFor a long operation, start_job can use this capability ID for persistent remote polling. A direct call waits for its result.'
+        "\nFor a long operation, start_job can use this capability ID for persistent remote polling. A direct call waits for its result."
     }
     return {
       name: entry.name,
@@ -53,18 +53,18 @@ export function createMcpTools(
       description,
       parameters,
       replay,
-      executionMode: 'sequential',
-      namespace: { name: 'mcp__' + entry.server.id, description: entry.server.name },
+      executionMode: "sequential",
+      namespace: { name: "mcp__" + entry.server.id, description: entry.server.name },
       async execute(callId, input, toolSignal, update) {
         const args = ArgumentsSchema.parse(input)
         if (!validator.check(args)) {
-          throw new Error('MCP 工具参数与登记的 schema 不匹配')
+          throw new Error("MCP 工具参数与登记的 schema 不匹配")
         }
         if (asynchronous) {
           signal.throwIfAborted()
           toolSignal?.throwIfAborted()
           if (!jobs) {
-            throw new Error('此工具需要已启用的持久后台任务运行时')
+            throw new Error("此工具需要已启用的持久后台任务运行时")
           }
           const job = await jobs.operation(
             (entry.tool.title ?? entry.tool.name).slice(0, 100),
@@ -75,12 +75,12 @@ export function createMcpTools(
           return {
             content: [
               {
-                type: 'text',
+                type: "text",
                 text: JSON.stringify({
                   accepted: true,
                   jobId: job.id,
                   state: job.state,
-                  message: '后台操作已受理；完成后由宿主交付，不是已生成结果。'
+                  message: "后台操作已受理；完成后由宿主交付，不是已生成结果。"
                 })
               }
             ],
@@ -94,7 +94,7 @@ export function createMcpTools(
         }
         const controller = new AbortController()
         const timer = setTimeout(() => {
-          controller.abort(new Error('MCP 工具超过执行期限；结果可能不确定，未自动重试'))
+          controller.abort(new Error("MCP 工具超过执行期限；结果可能不确定，未自动重试"))
         }, entry.server.timeoutMs)
         const signals = [signal, controller.signal]
         if (toolSignal) {
@@ -110,10 +110,10 @@ export function createMcpTools(
             return item.name === entry.tool.name
           })
           if (!tool || mcpToolRevision(tool) !== mcpToolRevision(entry.tool)) {
-            throw new Error('MCP 工具定义已变化，请刷新能力目录后重试')
+            throw new Error("MCP 工具定义已变化，请刷新能力目录后重试")
           }
           if (readOnly && tool.annotations?.readOnlyHint !== true) {
-            throw new Error('此切入点要求 MCP 工具仍声明为只读')
+            throw new Error("此切入点要求 MCP 工具仍声明为只读")
           }
           deadline.throwIfAborted()
           dispatched = true
@@ -124,7 +124,7 @@ export function createMcpTools(
               update?.({
                 content: [
                   {
-                    type: 'text',
+                    type: "text",
                     text: redactMcpText(progress.message ?? String(progress.progress), entry.server)
                   }
                 ],
@@ -151,7 +151,7 @@ export function createMcpTools(
           }
           let message = redactMcp(cause, entry.server)
           if (dispatched) {
-            message = 'MCP 调用结果可能不确定，未自动重试。' + message
+            message = "MCP 调用结果可能不确定，未自动重试。" + message
           }
           throw new Error(message)
         } finally {

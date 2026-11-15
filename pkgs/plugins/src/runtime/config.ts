@@ -1,15 +1,15 @@
-import { z } from 'zod'
-import { resolve, relative, isAbsolute, join } from 'node:path'
-import { PluginStorageSchema } from '../storage/config'
+import { z } from "zod"
+import { resolve, relative, isAbsolute, join } from "node:path"
+import { PluginStorageSchema } from "../storage/config"
 
 export const PluginRuntimeSchema = z
   .object({
     enabled: z.boolean().default(false),
-    socketPath: z.string().min(1).default('/var/run/docker.sock'),
-    image: z.string().min(1).max(300).default('oven/bun:1.4.4'),
-    packageDir: z.string().default('plugins'),
-    dataDir: z.string().default('plugin-data'),
-    runtimeDir: z.string().default('data/plugin-runtime'),
+    socketPath: z.string().min(1).default("/var/run/docker.sock"),
+    image: z.string().min(1).max(300).default("oven/bun:1.4.4"),
+    packageDir: z.string().default("plugins"),
+    dataDir: z.string().default("plugin-data"),
+    runtimeDir: z.string().default("data/plugin-runtime"),
     hostPackageDir: z.string().optional(),
     hostDataDir: z.string().optional(),
     hostRuntimeDir: z.string().optional(),
@@ -61,8 +61,8 @@ export function pluginPaths(projectDir: string, config: PluginRuntimeConfig) {
 export type PluginPaths = ReturnType<typeof pluginPaths>
 export function hostPluginPath(localRoot: string, hostRoot: string, path: string) {
   const suffix = relative(localRoot, path)
-  if (isAbsolute(suffix) || suffix === '..' || suffix.startsWith('../')) {
-    throw new Error('插件挂载路径越界')
+  if (isAbsolute(suffix) || suffix === ".." || suffix.startsWith("../")) {
+    throw new Error("插件挂载路径越界")
   }
   return join(hostRoot, suffix)
 }

@@ -1,6 +1,6 @@
-import { z } from 'zod'
-import { RoomSchema } from '@pi-im-bot/contracts/message'
-import { ConversationSchema } from './schema'
+import { z } from "zod"
+import { RoomSchema } from "@pi-im-bot/contracts/message"
+import { ConversationSchema } from "./schema"
 
 const LegacyRoomSchema = z.object({
   generation: z.number().int().nonnegative().default(0),
@@ -19,7 +19,7 @@ export function migrateRoom(value: unknown) {
   const conversation = ConversationSchema.parse({
     id: crypto.randomUUID(),
     roomId: room.id,
-    title: '已有对话',
+    title: "已有对话",
     // Keep Pi's existing on-disk session mapping; no history or workspace copy.
     sessionKey: `${room.id}:${legacy.generation}`,
     createdAt: room.createdAt,

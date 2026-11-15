@@ -1,8 +1,8 @@
-import { ArtifactStore } from '@pi-im-bot/artifacts/store'
-import type { RenderPlan } from '@pi-im-bot/contracts/rendering'
-import type { PluginInvocation } from '../invocation'
-import type { PluginService } from '../service'
-import { completedPluginResult } from '../result'
+import { ArtifactStore } from "@pi-im-bot/artifacts/store"
+import type { RenderPlan } from "@pi-im-bot/contracts/rendering"
+import type { PluginInvocation } from "../invocation"
+import type { PluginService } from "../service"
+import { completedPluginResult } from "../result"
 
 /** Core-owned short rendering for a synchronous Agent tool send, outside the selector Hook. */
 export async function inlinePresentation(

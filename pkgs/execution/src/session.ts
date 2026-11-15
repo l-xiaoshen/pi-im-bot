@@ -1,6 +1,6 @@
-import type { ShipyardConfig } from './config'
-import { ShipyardClient, type Sandbox } from './shipyard-client'
-import { openWorkspace } from './workspace'
+import type { ShipyardConfig } from "./config"
+import { ShipyardClient, type Sandbox } from "./shipyard-client"
+import { openWorkspace } from "./workspace"
 
 export class SandboxSession {
   private readonly client: ShipyardClient
@@ -28,7 +28,7 @@ export class SandboxSession {
       async (sandbox, operationSignal) => {
         const result = await this.client.shell(sandbox.id, command, operationSignal, seconds)
         if (result.exit_code === null || result.exit_code < 0) {
-          throw new Error('沙盒命令中断或超时，停止容器计算后持久工作区仍保留')
+          throw new Error("沙盒命令中断或超时，停止容器计算后持久工作区仍保留")
         }
         return result
       },
@@ -55,10 +55,10 @@ export class SandboxSession {
     this.signal.throwIfAborted()
     signal?.throwIfAborted()
     if (this.cancelled) {
-      throw new Error('本轮沙盒执行已停止')
+      throw new Error("本轮沙盒执行已停止")
     }
     if (!this.listening) {
-      this.signal.addEventListener('abort', this.onAbort, { once: true })
+      this.signal.addEventListener("abort", this.onAbort, { once: true })
       this.listening = true
     }
     const signals = [this.signal, AbortSignal.timeout(timeoutMs)]
@@ -66,7 +66,7 @@ export class SandboxSession {
       signals.push(signal)
     }
     const operationSignal = AbortSignal.any(signals)
-    operationSignal.addEventListener('abort', this.onAbort, { once: true })
+    operationSignal.addEventListener("abort", this.onAbort, { once: true })
     try {
       this.workspace ??= openWorkspace(this.client, this.dataDir, this.scope).then((sandbox) => {
         this.connected(sandbox)
@@ -80,7 +80,7 @@ export class SandboxSession {
       await this.stop()
       throw error
     } finally {
-      operationSignal.removeEventListener('abort', this.onAbort)
+      operationSignal.removeEventListener("abort", this.onAbort)
     }
   }
 
@@ -102,7 +102,7 @@ export class SandboxSession {
   }
 
   async close() {
-    this.signal.removeEventListener('abort', this.onAbort)
+    this.signal.removeEventListener("abort", this.onAbort)
     if (this.stopping) {
       await this.stopping
     }
