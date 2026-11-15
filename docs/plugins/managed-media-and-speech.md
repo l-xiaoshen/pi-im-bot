@@ -10,17 +10,15 @@ manifest 声明固定服务类型：
 
 ```json
 {
-  "connections": [
-    { "alias": "speech", "kind": "service", "service": "gsvi@1" }
-  ]
+  "connections": [{ "alias": "speech", "kind": "service", "service": "gsvi@1" }]
 }
 ```
 
 通过 `context.host('service:speech', input)` 调用：
 
-| action | 用途 | 附加要求 |
-| --- | --- | --- |
-| `voices` | 查询所选版本的声音目录 | `tts_voices` |
+| action       | 用途                        | 附加要求                           |
+| ------------ | --------------------------- | ---------------------------------- |
+| `voices`     | 查询所选版本的声音目录      | `tts_voices`                       |
 | `synthesize` | 合成文字并返回 WAV Artifact | `tts_synthesize`、`artifact.write` |
 
 operation/handler 与实例均需 `service:speech` grant。一次调用可包含有界的一组目录查询和一次合成；服务 HTTP 并发、RPC、Artifact 和调用期限共同构成预算。

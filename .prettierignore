@@ -1,6 +1,0 @@
-node_modules
-data
-**/dist
-config/bot.json
-config/providers.json
-bun.lock

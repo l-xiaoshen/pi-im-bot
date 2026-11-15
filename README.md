@@ -88,15 +88,15 @@ Pi 文件和 Shell 工具可委托给 Shipyard/Bay 容器，配置方法见 [执
 
 常用指令：
 
-| 指令 | 用途 |
-| --- | --- |
-| `/help`、`/status` | 查看帮助或状态 |
-| `/stop` | 停止当前范围的在途和排队任务 |
-| `/new` | 新建会话，保留 IM 记录和工作区 |
-| `/jobs`、`/job ID` | 查看后台任务 |
-| `/job cancel ID` | 停止任务 |
-| `/job update ID 版本号 补充说明` | 修订 Agent 任务 |
-| `/skills`、`/skill ID 内容` | 查看或选用 Skill |
+| 指令                             | 用途                           |
+| -------------------------------- | ------------------------------ |
+| `/help`、`/status`               | 查看帮助或状态                 |
+| `/stop`                          | 停止当前范围的在途和排队任务   |
+| `/new`                           | 新建会话，保留 IM 记录和工作区 |
+| `/jobs`、`/job ID`               | 查看后台任务                   |
+| `/job cancel ID`                 | 停止任务                       |
+| `/job update ID 版本号 补充说明` | 修订 Agent 任务                |
+| `/skills`、`/skill ID 内容`      | 查看或选用 Skill               |
 
 Cron 支持 IANA 时区、独立或共享上下文、防重叠、暂停和定向停止。持久运行状态位于 `data/agent.sqlite`，IM、任务、交付和计划状态位于 `data/bot.sqlite`。
 
@@ -116,14 +116,14 @@ bun run pack:plugin examples/plugins/echo /tmp/echo.zip
 
 ## 数据与安全
 
-| 路径 | 内容 |
-| --- | --- |
-| `config/` | Bot、Provider、资源及分层设置 |
-| `data/bot.sqlite` | 消息、Job、轨迹、交付账本和计划 |
-| `data/agent.sqlite` | Pi 对话、durable 执行记录和恢复状态 |
-| `data/artifacts/` | 会话产物 |
-| `data/shipyard-workspaces/` | Shipyard 工作区绑定 |
-| `data/configuration-snapshots/` | 私有运行配置快照，可能包含凭据 |
+| 路径                            | 内容                                |
+| ------------------------------- | ----------------------------------- |
+| `config/`                       | Bot、Provider、资源及分层设置       |
+| `data/bot.sqlite`               | 消息、Job、轨迹、交付账本和计划     |
+| `data/agent.sqlite`             | Pi 对话、durable 执行记录和恢复状态 |
+| `data/artifacts/`               | 会话产物                            |
+| `data/shipyard-workspaces/`     | Shipyard 工作区绑定                 |
+| `data/configuration-snapshots/` | 私有运行配置快照，可能包含凭据      |
 
 备份应包含配置、数据、插件快照和插件数据，并保护其中的凭据。外部操作或平台发送的回执未知时，系统保留未知状态，不盲目重放。
 

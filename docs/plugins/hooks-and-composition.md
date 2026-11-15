@@ -6,15 +6,15 @@ Hook 独立于模型工具，每个 handler 使用 `hook:plugin:<实例>/<id>` �
 
 ## 核心切入点
 
-| point / mode | 用途 |
-| --- | --- |
-| `context.collect@1` / collect | 为当前模型请求提供带来源、去重且有总预算的附加片段 |
-| `delivery.visibility@1` / policy | 决定是否隐藏本次交付，任一有效拒绝即隐藏 |
-| `delivery.text@1` / transform | 在呈现前按顺序变换 `/text` |
-| `delivery.presentation@1` / select | 选择第一个有效的文字、Artifact 或异步 render 呈现 |
-| `delivery.receipt@1` / observe | 消费持久交付事实，可安排本次回执撤回 |
-| `message.recorded@1` / observe | 观察当前范围的规范化消息，包括未触发模型的消息 |
-| `model.history@1` / collect | 为模型历史提供本实例工具参数的显示策略 |
+| point / mode                       | 用途                                               |
+| ---------------------------------- | -------------------------------------------------- |
+| `context.collect@1` / collect      | 为当前模型请求提供带来源、去重且有总预算的附加片段 |
+| `delivery.visibility@1` / policy   | 决定是否隐藏本次交付，任一有效拒绝即隐藏           |
+| `delivery.text@1` / transform      | 在呈现前按顺序变换 `/text`                         |
+| `delivery.presentation@1` / select | 选择第一个有效的文字、Artifact 或异步 render 呈现  |
+| `delivery.receipt@1` / observe     | 消费持久交付事实，可安排本次回执撤回               |
+| `message.recorded@1` / observe     | 观察当前范围的规范化消息，包括未触发模型的消息     |
+| `model.history@1` / collect        | 为模型历史提供本实例工具参数的显示策略             |
 
 DeliveryView 包含逻辑消息 ID、范围、conversation、origin、phase、text 和 artifactIds。Receipt 还提供 originalText、实际呈现文字和平台回执 ID；`sent`、`unknown`、`suppressed` 等状态不能混为成功发送。
 
@@ -33,12 +33,12 @@ DeliveryView 包含逻辑消息 ID、范围、conversation、origin、phase、te
 ```
 
 ```ts
-import { definePlugin, replaceText } from '@pi-im-bot/plugin-sdk'
+import { definePlugin, replaceText } from "@pi-im-bot/plugin-sdk"
 
 export default definePlugin({
   hooks: {
     tidy(input, context) {
-      return replaceText(context, input.text.replace(/\n{3,}/gu, '\n\n'))
+      return replaceText(context, input.text.replace(/\n{3,}/gu, "\n\n"))
     }
   }
 })
@@ -53,7 +53,7 @@ export default definePlugin({
 回执观察器只能在确认状态合适时安排本次逻辑消息的撤回：
 
 ```ts
-await context.host('delivery.recall', {
+await context.host("delivery.recall", {
   messageId: receipt.messageId,
   delayMs: 180000
 })
@@ -76,8 +76,8 @@ await context.host('delivery.recall', {
 拥有者在 `manifest.points` 声明 point 的 mode、schema 和 writable，通过 `point:plugin.self.<名称>@<版本>` 启动：
 
 ```ts
-const prepared = await context.host('point:plugin.self.prepare@1', {
-  value: { prompt: '业务输入' }
+const prepared = await context.host("point:plugin.self.prepare@1", {
+  value: { prompt: "业务输入" }
 })
 ```
 

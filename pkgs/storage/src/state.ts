@@ -25,7 +25,16 @@ type Table =
   | "recalls"
   | "observations"
 type StoredRecord =
-  Room | ChatMessage | Run | Trace | Schedule | Conversation | Outbound | MediaRecord | RecallRecord | Observation
+  | Room
+  | ChatMessage
+  | Run
+  | Trace
+  | Schedule
+  | Conversation
+  | Outbound
+  | MediaRecord
+  | RecallRecord
+  | Observation
 
 export class StateStore {
   private readonly db: Database

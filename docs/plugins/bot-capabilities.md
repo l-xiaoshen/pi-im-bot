@@ -5,24 +5,24 @@
 每次调用同时受 operation/handler grants、实例 grants、固定触发上限和调用时权限约束。参数不能改选群、身份或其他高权限主体。
 
 ```ts
-import { RuntimeStatusSchema } from '@pi-im-bot/plugin-sdk'
+import { RuntimeStatusSchema } from "@pi-im-bot/plugin-sdk"
 
-const status = RuntimeStatusSchema.parse(await context.host('system.status', {}))
+const status = RuntimeStatusSchema.parse(await context.host("system.status", {}))
 context.signal.throwIfAborted()
 ```
 
-| 方法 | grant | 参数与结果 |
-| --- | --- | --- |
-| `system.status` | `system.status` | `{}` → `RuntimeStatusSchema`；另需 `runtime_status` |
-| `history.read` | `history.read` | `limit` 1–100，默认 20 → 当前范围的投影消息；另需 `chat_history` |
-| `artifact.read` | `artifact.read` | `id`、offset、limit → 分段 Base64；另需 `artifact_read` |
-| `artifact.write` | `artifact.write` | name、mimeType、text/base64 data → 新 Artifact |
-| `artifact.publish` | `artifact.write` | 相对 path、可选 name/mimeType → 从私有卷流式发布普通文件 |
-| `delivery.send` | `delivery.send` | text、artifactIds → 当前范围额外通知；另需 `chat_send` |
-| `delivery.recall` | `delivery.recall` | messageId、delayMs → 本次已确认回执的持久撤回；另需 `message_recall` |
-| `connector:<别名>` | 同名 connector grant | tool、arguments → 调用绑定的 MCP，另需对应工具权限 |
-| `operation:<依赖>/<操作>` | 同名 operation grant | arguments、phase → 跨插件 execute/poll/cancel |
-| `point:plugin.self.<名称>@<版本>` | 同名 point grant | value → 启动本实例声明的 point |
+| 方法                              | grant                | 参数与结果                                                           |
+| --------------------------------- | -------------------- | -------------------------------------------------------------------- |
+| `system.status`                   | `system.status`      | `{}` → `RuntimeStatusSchema`；另需 `runtime_status`                  |
+| `history.read`                    | `history.read`       | `limit` 1–100，默认 20 → 当前范围的投影消息；另需 `chat_history`     |
+| `artifact.read`                   | `artifact.read`      | `id`、offset、limit → 分段 Base64；另需 `artifact_read`              |
+| `artifact.write`                  | `artifact.write`     | name、mimeType、text/base64 data → 新 Artifact                       |
+| `artifact.publish`                | `artifact.write`     | 相对 path、可选 name/mimeType → 从私有卷流式发布普通文件             |
+| `delivery.send`                   | `delivery.send`      | text、artifactIds → 当前范围额外通知；另需 `chat_send`               |
+| `delivery.recall`                 | `delivery.recall`    | messageId、delayMs → 本次已确认回执的持久撤回；另需 `message_recall` |
+| `connector:<别名>`                | 同名 connector grant | tool、arguments → 调用绑定的 MCP，另需对应工具权限                   |
+| `operation:<依赖>/<操作>`         | 同名 operation grant | arguments、phase → 跨插件 execute/poll/cancel                        |
+| `point:plugin.self.<名称>@<版本>` | 同名 point grant     | value → 启动本实例声明的 point                                       |
 
 具名 `media.read`、`service:<别名>` 和受管状态见 [语音与媒体](managed-media-and-speech.md)、[ComfyUI](managed-comfy.md)。
 
@@ -55,9 +55,9 @@ return { text: '已生成报告', artifactIds: [artifact.id] }
 ## MCP 与插件协作
 
 ```ts
-const result = await context.host('connector:images', {
-  tool: 'generate_image',
-  arguments: { prompt: '一张插画' }
+const result = await context.host("connector:images", {
+  tool: "generate_image",
+  arguments: { prompt: "一张插画" }
 })
 ```
 

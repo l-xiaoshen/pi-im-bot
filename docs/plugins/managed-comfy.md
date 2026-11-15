@@ -17,14 +17,14 @@
 
 manifest 使用 `{alias:'render', kind:'service', service:'comfy@1'}`，然后调用 `context.host('service:render', input)`。
 
-| action | 用途 |
-| --- | --- |
-| `catalog` | 分页读取 workflow、参数、模型和 LoRA 目录，不请求上游 |
-| `submit` | 在可信 execute 阶段提交一个 item |
-| `poll` / `recover` | 用 Core 保存的回执查询原服务，不创建新任务 |
-| `peek` | 查看本地回执元数据，区分未派发与未知提交 |
-| `cancel` | 只精确删除能够确认属于本任务且仍在排队的远端 ID |
-| `reconcile` | 显式只读核对，包括已停止自动等待的 item |
+| action             | 用途                                                  |
+| ------------------ | ----------------------------------------------------- |
+| `catalog`          | 分页读取 workflow、参数、模型和 LoRA 目录，不请求上游 |
+| `submit`           | 在可信 execute 阶段提交一个 item                      |
+| `poll` / `recover` | 用 Core 保存的回执查询原服务，不创建新任务            |
+| `peek`             | 查看本地回执元数据，区分未派发与未知提交              |
+| `cancel`           | 只精确删除能够确认属于本任务且仍在排队的远端 ID       |
+| `reconcile`        | 显式只读核对，包括已停止自动等待的 item               |
 
 每个 item 返回 recordId、attempted、hasReceipt、status、artifactIds，以及可选请求 Artifact、workflow 摘要和错误。`attempted` 只表示尝试过提交，不代表远端接纳。`not_started`、`submitted/running`、业务终态、`outcome_unknown`、`abandoned` 应分别处理。
 

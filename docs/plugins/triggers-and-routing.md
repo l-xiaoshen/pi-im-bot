@@ -2,14 +2,14 @@
 
 ## 入口
 
-| 形式 | 声明 | 执行方式 |
-| --- | --- | --- |
-| 模型工具 | `operation.tool=true` | Pi 选择已装载且获准的工具 |
-| 直接指令 | `commands` 绑定 operation | Bot 解析并调用，无需模型 |
-| Hook | `hooks` 绑定 point | Core 在固定阶段调用 |
-| 普通消息/回执观察 | observe handler | 持久 outbox 与独立任务 |
-| 后台操作 | `execution=background` | Job 管理提交、轮询、取消和结果 |
-| 计划任务 | Bot Cron 选择相应能力 | 复用 Agent/Job 生命周期 |
+| 形式              | 声明                      | 执行方式                       |
+| ----------------- | ------------------------- | ------------------------------ |
+| 模型工具          | `operation.tool=true`     | Pi 选择已装载且获准的工具      |
+| 直接指令          | `commands` 绑定 operation | Bot 解析并调用，无需模型       |
+| Hook              | `hooks` 绑定 point        | Core 在固定阶段调用            |
+| 普通消息/回执观察 | observe handler           | 持久 outbox 与独立任务         |
+| 后台操作          | `execution=background`    | Job 管理提交、轮询、取消和结果 |
+| 计划任务          | Bot Cron 选择相应能力     | 复用 Agent/Job 生命周期        |
 
 在已启用的 QQ 目标中，消息先记录；核心控制指令与已登记插件别名可直接匹配，无需 `!pi` 或 `@Bot`。其他 Agent 请求再按配置的前缀或 @ 触发。Mock 使用相同的指令路由。插件自注册 Cron 不在 manifest 能力中。
 
@@ -40,19 +40,19 @@
 manifest 在 command 中声明 `"parser": "status_args"`：
 
 ```ts
-import { definePlugin } from '@pi-im-bot/plugin-sdk'
-import { z } from 'zod'
+import { definePlugin } from "@pi-im-bot/plugin-sdk"
+import { z } from "zod"
 
-const InputSchema = z.object({ format: z.enum(['text', 'json']) })
+const InputSchema = z.object({ format: z.enum(["text", "json"]) })
 
 export default definePlugin({
   parsers: {
     status_args({ text }) {
       const value = text.trim()
-      if (value === '' || value === '--json') {
-        return { format: value === '' ? 'text' : 'json' }
+      if (value === "" || value === "--json") {
+        return { format: value === "" ? "text" : "json" }
       }
-      throw new Error('用法：/状态 [--json]')
+      throw new Error("用法：/状态 [--json]")
     }
   },
   operations: {

@@ -4,12 +4,12 @@
 
 ## 职责边界
 
-| 层 | 职责 |
-| --- | --- |
-| Pi | 模型请求、工具循环、会话与压缩、后台 Agent |
-| Bot | 消息入口、可信身份、配置、资源、权限、Job、产物与平台交付 |
-| 插件 | 业务操作、指令、Hook 和私有数据，通过公开 RPC 与 Bot 协作 |
-| MCP / Skill | 分别提供远程工具和按需加载的说明、脚本及资源 |
+| 层          | 职责                                                      |
+| ----------- | --------------------------------------------------------- |
+| Pi          | 模型请求、工具循环、会话与压缩、后台 Agent                |
+| Bot         | 消息入口、可信身份、配置、资源、权限、Job、产物与平台交付 |
+| 插件        | 业务操作、指令、Hook 和私有数据，通过公开 RPC 与 Bot 协作 |
+| MCP / Skill | 分别提供远程工具和按需加载的说明、脚本及资源              |
 
 Provider 管理连接和模型候选；Shipyard 管理 Agent 的文件与 Shell 工作区。它们与插件 Worker 是不同的执行域。
 
@@ -47,11 +47,11 @@ Agent 文件和 Shell 操作委托给配置的 Shipyard/Bay 后端，不在失�
 
 ## 专题文档
 
-| 文档 | 内容 |
-| --- | --- |
+| 文档                                    | 内容                                   |
+| --------------------------------------- | -------------------------------------- |
 | [会话范围与权限](conversation-scope.md) | Room、conversation、触发身份和多人权限 |
-| [媒体与引用](media.md) | 媒体缓存、视觉输入、引用和撤回 |
-| [外部任务与 Cron](external-tasks.md) | MCP Tasks、恢复、取消和计划语义 |
-| [插件中心](plugin-management.md) | 安装、配置、更新和分发 |
-| [插件存储](plugin-storage.md) | Worker 数据卷、Artifact 和部署要求 |
-| [插件开发手册](../plugins/README.md) | manifest、RPC、Hook、Job 和作者工作流 |
+| [媒体与引用](media.md)                  | 媒体缓存、视觉输入、引用和撤回         |
+| [外部任务与 Cron](external-tasks.md)    | MCP Tasks、恢复、取消和计划语义        |
+| [插件中心](plugin-management.md)        | 安装、配置、更新和分发                 |
+| [插件存储](plugin-storage.md)           | Worker 数据卷、Artifact 和部署要求     |
+| [插件开发手册](../plugins/README.md)    | manifest、RPC、Hook、Job 和作者工作流  |

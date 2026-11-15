@@ -17,12 +17,12 @@ Hook 只负责选择，不能在 Hook 内等待长合成或挂起后台 Promise�
 
 除常规 DeliveryView 字段外，呈现器可读取：
 
-| 字段 | 含义 |
-| --- | --- |
-| `producer` | `agent-final`、`scheduled-agent`、`background-agent`、`agent-tool`、`plugin`、`control`、`unknown` |
-| `deferred` | 当前入口是否支持异步呈现；为 `false` 时只能同步选择 |
-| `content` | `plain` 或 `mixed`；含 Artifact 或 typed forward 的内容为 mixed |
-| `capabilities` | 选择器声明且当前获准的能力子集，只用于选择诊断 |
+| 字段           | 含义                                                                                               |
+| -------------- | -------------------------------------------------------------------------------------------------- |
+| `producer`     | `agent-final`、`scheduled-agent`、`background-agent`、`agent-tool`、`plugin`、`control`、`unknown` |
+| `deferred`     | 当前入口是否支持异步呈现；为 `false` 时只能同步选择                                                |
+| `content`      | `plain` 或 `mixed`；含 Artifact 或 typed forward 的内容为 mixed                                    |
+| `capabilities` | 选择器声明且当前获准的能力子集，只用于选择诊断                                                     |
 
 来源由 Core 根据实际执行入口设置，不能从昵称、文本、run ID 或插件参数推断。输入消息中的引用不会把另一条纯文字输出变成 mixed。
 

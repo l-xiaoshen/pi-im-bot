@@ -6,16 +6,16 @@
 
 开发模式运行 `bun run dev`。生产模式先运行 `bun run build`，再分别运行 `bun run start:bot` 和 `bun run start:web`。
 
-| 设置 | 来源 | 应用方式 |
-| --- | --- | --- |
-| Bot 监听地址 | `config/bot.json` 的 `server` | 重启 Bot |
-| 配置、数据目录 | `BOT_CONFIG_DIR`、`BOT_DATA_DIR` | 启动时读取 |
-| 浏览器可访问的 Bot 基址 | `BOT_PUBLIC_ORIGIN` | 重启 Web |
-| 允许跨域的工作台来源 | 逗号分隔的 `BOT_WEB_ORIGINS` | 重启 Bot |
-| 工作台监听地址 | `WEB_HOST`、`WEB_PORT` | 重启 Web |
-| Provider | 模型与 Provider 页面或 `config/providers.json` | 页面保存，或手动重载 |
-| MCP、Skill、插件目录 | 对应资源页面，保存到 `config/resources.json` | 保存并刷新 |
-| OneBot 连接与目标 | QQ 接入页面，保存到 `config/bot.json` | 保存后立即应用 |
+| 设置                    | 来源                                           | 应用方式             |
+| ----------------------- | ---------------------------------------------- | -------------------- |
+| Bot 监听地址            | `config/bot.json` 的 `server`                  | 重启 Bot             |
+| 配置、数据目录          | `BOT_CONFIG_DIR`、`BOT_DATA_DIR`               | 启动时读取           |
+| 浏览器可访问的 Bot 基址 | `BOT_PUBLIC_ORIGIN`                            | 重启 Web             |
+| 允许跨域的工作台来源    | 逗号分隔的 `BOT_WEB_ORIGINS`                   | 重启 Bot             |
+| 工作台监听地址          | `WEB_HOST`、`WEB_PORT`                         | 重启 Web             |
+| Provider                | 模型与 Provider 页面或 `config/providers.json` | 页面保存，或手动重载 |
+| MCP、Skill、插件目录    | 对应资源页面，保存到 `config/resources.json`   | 保存并刷新           |
+| OneBot 连接与目标       | QQ 接入页面，保存到 `config/bot.json`          | 保存后立即应用       |
 
 API、事件流、产物链接和页面展示的 OneBot 地址使用 `BOT_PUBLIC_ORIGIN`。它必须是浏览器与 NapCat 实际可达的 Bot 基址，不能直接填写只有容器网络可解析的名称。跨域工作台必须显式加入 `BOT_WEB_ORIGINS`；OneBot 使用自身的 Token 鉴权。
 

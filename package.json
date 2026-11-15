@@ -21,20 +21,20 @@
     "pack:plugin": "bun scripts/pack-plugin.ts",
     "share:export": "bun scripts/export-source.ts",
     "check": "tsc --noEmit",
-    "format": "bunx --bun prettier --write apps pkgs services scripts config/*.example.json",
-    "format:check": "bunx --bun prettier --check apps pkgs services scripts config/*.example.json"
+    "format": "biome format --write .",
+    "format:check": "biome format ."
   },
   "devDependencies": {
-    "@types/bun": "1.4.4",
-    "bun": "1.4.4",
-    "hono": "4.13.18",
-    "prettier": "3.10.1",
-    "typescript": "7.0.2",
-    "zod": "4.6.7",
+    "@biomejs/biome": "2.6.8",
     "@pi-im-bot/jobs": "workspace:*",
     "@pi-im-bot/plugins": "workspace:*",
     "@pi-im-bot/storage": "workspace:*",
-    "@pi-im-bot/support": "workspace:*"
+    "@pi-im-bot/support": "workspace:*",
+    "@types/bun": "1.4.4",
+    "bun": "1.4.4",
+    "hono": "4.13.18",
+    "typescript": "7.0.2",
+    "zod": "4.6.7"
   },
   "trustedDependencies": [
     "bun"
