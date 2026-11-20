@@ -22,13 +22,13 @@ enum ResponseStatus {
 }
 
 /** API 响应信封。 */
-model ApiResponse {
+model ApiResponse<T = unknown> {
   /** 响应状态。 */
   status: ResponseStatus;
   /** 返回码。 */
   retcode: int32;
   /** 响应数据。 */
-  data?: unknown;
+  data?: T;
   /** 错误信息。 */
   message?: string;
   /** 错误描述。 */
@@ -38,7 +38,7 @@ model ApiResponse {
 }
 
 /** HTTP API 成功响应。 */
-model HttpApiResponse extends ApiResponse {
+model HttpApiResponse is ApiResponse<unknown> {
   /** HTTP 状态码。 */
   @statusCode statusCode: 200;
 }
@@ -84,7 +84,7 @@ interface HttpApi {
    * 使用 query 参数调用 API。具体 API 的参数作为额外的 query 参数传入。
    */
   @get callGet(
-    @path action: string,
+    @path action: ActionName,
     /** `Bearer <access token>`。 */
     @header authorization?: string,
     /** 也可以通过 query 参数传入 access token。 */
@@ -95,7 +95,7 @@ interface HttpApi {
    * 使用 JSON 或 urlencoded 表单请求体调用 API。
    */
   @post callPost(
-    @path action: string,
+    @path action: ActionName,
     /** `Bearer <access token>`。 */
     @header authorization?: string,
     /** 也可以通过 query 参数传入 access token。 */

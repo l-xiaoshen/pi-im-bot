@@ -5,8 +5,7 @@
   "type": "module",
   "module": "src/index.ts",
   "scripts": {
-    "generate": "bun --filter onebot-spec compile && openapi-ts",
-    "generate:watch": "openapi-ts --watch",
+    "generate": "bun --filter onebot-spec compile && openapi-ts && bun scripts/patch-generated.ts",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

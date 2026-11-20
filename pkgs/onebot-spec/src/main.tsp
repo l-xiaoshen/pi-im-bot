@@ -7,6 +7,7 @@ import "./message.tsp";
 import "./event.tsp";
 import "./api.tsp";
 import "./communication.tsp";
+import "./http.tsp";
 
 using TypeSpec.Http;
 using TypeSpec.OpenAPI;
